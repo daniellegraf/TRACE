@@ -13,31 +13,22 @@ const app = express();
 // Multer: spara fil i minne först
 const upload = multer({ storage: multer.memoryStorage() });
 
-// CORS – tillåt Neocities + localhost (för test)
+// 🔓 CORS – tillåt allt (enkelt läge för att slippa "Failed to fetch")
 app.use(
   cors({
-    origin: [
-      "https://signai.neocities.org",
-      "https://www.signai.neocities.org",
-      "http://localhost:3000",
-      "http://localhost:5173",
-      "http://localhost:5500",
-      "http://localhost"
-    ],
+    origin: true,          // spegla origin automatiskt
     methods: ["GET", "POST", "OPTIONS"],
-    allowedHeaders: ["Content-Type"]
+    allowedHeaders: ["Content-Type"],
   })
 );
 
-// Preflight för /detect-image
+// Preflight (OPTIONS) för /detect-image
 app.options("/detect-image", cors());
 
 app.use(express.json());
 
-// Winston API-nyckel (Render → Environment → WINSTON_API_KEY)
+// Winston API-nyckel
 const WINSTON_API_KEY = process.env.WINSTON_API_KEY;
-
-// MCP JSON-RPC endpoint
 const WINSTON_MCP_URL = "https://api.gowinston.ai/mcp/v1";
 
 // Katalog för temporära bilder på Render
@@ -46,25 +37,20 @@ if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-// Gör /uploads publikt (så Winston kan hämta bilden via URL)
+// Serva bilder publikt så Winston kan nå dem
 app.use("/uploads", express.static(uploadDir));
 
-// Health-check för Render
+// Health-check
 app.get("/healthz", (req, res) => {
   res.json({ status: "ok", service: "signai-backend", path: "/healthz" });
 });
 
-// Enkel root-check
+// Root
 app.get("/", (req, res) => {
   res.json({ status: "ok", service: "signai-backend" });
 });
 
-/**
- * POST /detect-image
- * Tar emot `image` (FormData-fil), sparar den, gör en publik URL,
- * skickar URL:en till Winston MCP (ai-image-detection) och returnerar
- * ett förenklat svar till din SignAi-front.
- */
+// ===== HUVUD-ROUTE: /detect-image =====
 app.post("/detect-image", upload.single("image"), async (req, res) => {
   try {
     if (!req.file) {
@@ -72,19 +58,20 @@ app.post("/detect-image", upload.single("image"), async (req, res) => {
         ai_score: 0.5,
         label: "Error: no image uploaded",
         version: "signai-backend",
-        raw: { error: "No image uploaded" }
+        raw: { error: "No image uploaded" },
       });
     }
+
     if (!WINSTON_API_KEY) {
       return res.json({
         ai_score: 0.5,
         label: "Error: WINSTON_API_KEY missing",
         version: "signai-backend",
-        raw: { error: "WINSTON_API_KEY not set in environment" }
+        raw: { error: "WINSTON_API_KEY not set in environment" },
       });
     }
 
-    // 1) Spara bild till /tmp/uploads
+    // 1) Spara bilden till /tmp/uploads
     const originalName = req.file.originalname || "image.png";
     const ext = path.extname(originalName) || ".png";
     const filename =
@@ -93,13 +80,13 @@ app.post("/detect-image", upload.single("image"), async (req, res) => {
 
     fs.writeFileSync(filePath, req.file.buffer);
 
-    // 2) Bygg publik URL som Winston kan läsa
+    // 2) Publik URL som Winston kan hämta
     const baseUrl = `${req.protocol}://${req.get("host")}`;
     const imageUrl = `${baseUrl}/uploads/${filename}`;
 
     console.log("🔗 Using image URL for Winston:", imageUrl);
 
-    // 3) JSON-RPC request till Winston MCP – ai-image-detection
+    // 3) JSON-RPC anrop till Winston MCP – ai-image-detection
     const rpcBody = {
       jsonrpc: "2.0",
       id: 2,
@@ -108,39 +95,36 @@ app.post("/detect-image", upload.single("image"), async (req, res) => {
         name: "ai-image-detection",
         arguments: {
           url: imageUrl,
-          apiKey: WINSTON_API_KEY
-        }
-      }
+          apiKey: WINSTON_API_KEY,
+        },
+      },
     };
 
     const winstonRes = await axios.post(WINSTON_MCP_URL, rpcBody, {
       headers: {
         "content-type": "application/json",
         accept: "application/json",
-        // viktigt enligt docs:
-        jsonrpc: "2.0"
+        jsonrpc: "2.0",
       },
-      timeout: 20000
+      timeout: 20000,
     });
 
     const data = winstonRes.data;
     console.log("🧠 Winston MCP raw response:", JSON.stringify(data, null, 2));
 
-    // 4) Plocka ut relevant data ur JSON-RPC-svaret
     if (data.error) {
-      // JSON-RPC-fel från Winston
       return res.json({
         ai_score: 0.5,
         label: "Error from Winston: " + data.error.message,
         version: "winston-ai-image-mcp",
-        raw: data
+        raw: data,
       });
     }
 
     const result = data.result || data;
     const payload =
-      (result && result.content) ||
-      (result && result.output) ||
+      result?.content ||
+      result?.output ||
       result ||
       data;
 
@@ -151,7 +135,7 @@ app.post("/detect-image", upload.single("image"), async (req, res) => {
       null;
 
     if (aiScore !== null && aiScore > 1) {
-      aiScore = aiScore / 100; // 0–100 -> 0–1
+      aiScore = aiScore / 100;
     }
 
     let label = payload.label;
@@ -172,7 +156,7 @@ app.post("/detect-image", upload.single("image"), async (req, res) => {
       ai_score: aiScore,
       label,
       version,
-      raw: data
+      raw: data,
     });
   } catch (err) {
     console.error(
@@ -181,12 +165,14 @@ app.post("/detect-image", upload.single("image"), async (req, res) => {
       err.response?.data || err.message
     );
 
-    // Viktigt: skicka 200 även vid fel, så frontenden ser vad som hänt
+    // OBS: vi skickar 200 med feltext – så frontenden alltid får svar
     return res.json({
       ai_score: 0.5,
-      label: "Error contacting Winston: " + (err.response?.status || err.code || "unknown"),
+      label:
+        "Error contacting Winston: " +
+        (err.response?.status || err.code || "unknown"),
       version: "winston-ai-image-mcp",
-      raw: err.response?.data || { message: err.message }
+      raw: err.response?.data || { message: err.message },
     });
   }
 });
