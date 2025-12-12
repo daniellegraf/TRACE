@@ -1687,8 +1687,46 @@ async function analyzeContent(txt, imgFeatures, imgHash){
 
 
 async function callOnlineAIDetector(file){
+  // 1) Läs filen och rita den på en canvas (konverterar WEBP/HEIC osv till JPEG)
+  const img = new Image();
+  img.crossOrigin = "anonymous";
+
+  const dataUrl = await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+
+  await new Promise((resolve, reject) => {
+    img.onload = resolve;
+    img.onerror = reject;
+    img.src = dataUrl;
+  });
+
+  // 2) Winston kräver minst 256x256 – se till att vi har det
+  const min = 256;
+  const w0 = img.naturalWidth || img.width;
+  const h0 = img.naturalHeight || img.height;
+  const scale = Math.max(min / w0, min / h0, 1);
+
+  const w = Math.round(w0 * scale);
+  const h = Math.round(h0 * scale);
+
+  const canvas = document.createElement("canvas");
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(img, 0, 0, w, h);
+
+  // 3) Konvertera till JPEG (Winston tar PNG/JPEG)
+  const jpegBlob = await new Promise((resolve) => {
+    canvas.toBlob((b) => resolve(b), "image/jpeg", 0.92);
+  });
+
+  // 4) Skicka som “image” till din backend
   const form = new FormData();
-  form.append("image", file);
+  form.append("image", jpegBlob, "upload.jpg");
 
   try{
     const res = await fetch("https://signai-tamy.onrender.com/detect-image", {
@@ -1696,64 +1734,29 @@ async function callOnlineAIDetector(file){
       body: form
     });
 
-    let data = null;
-    try {
-      data = await res.json();
-    } catch(e) {
-      console.error("Backend responded with non-JSON:", e);
-      return {
-        ai_score: 0.5,
-        label: "Backend returned non-JSON (status " + res.status + ")",
-        version: "signai-backend",
-        raw: null
-      };
-    }
+    const data = await res.json().catch(() => null);
 
-    console.log("🔍 Winston backend raw response:", data)
     if (!res.ok) {
-      const lbl = data && data.label
-        ? "Backend error: " + data.label
-        : "Backend HTTP error: " + res.status;
-
       return {
         ai_score: 0.5,
-        label: lbl,
-        version: data.version || "signai-backend",
+        label: data?.label ? ("Backend error: " + data.label) : ("Backend HTTP error: " + res.status),
+        version: data?.version || "signai-backend",
         raw: data
       };
     }
 
-    let aiScore =
-      (typeof data.ai_score === "number" && data.ai_score) ??
-      (typeof data.score === "number" && data.score) ??
-      (typeof data.probability === "number" && data.probability) ??
-      null;
+    // Plocka score säkert (0 ska vara ok)
+    const aiScoreCandidate = data?.ai_score;
+    const aiScore =
+      (typeof aiScoreCandidate === "number" && Number.isFinite(aiScoreCandidate))
+        ? (aiScoreCandidate > 1 ? aiScoreCandidate/100 : aiScoreCandidate)
+        : 0.5;
 
-    if (aiScore !== null && aiScore > 1) {
-      aiScore = aiScore / 100;
-    }
+    const label = (typeof data?.label === "string" && data.label) ? data.label : "Unknown";
+    const version = data?.version || "winston-ai";
 
-    let label = data.label;
-    if (!label && typeof data.is_ai === "boolean") {
-      label = data.is_ai ? "AI" : "Human";
-    }
-    if (!label && typeof data.is_human === "boolean") {
-      label = data.is_human ? "Human" : "AI";
-    }
-
-    const version = data.version || data.model || data.engine || "winston-ai";
-
-    if (aiScore === null) aiScore = 0.5;
-    if (!label)          label   = "Unknown";
-
-    return {
-      ai_score: aiScore,
-      label,
-      version,
-      raw: data
-    };
+    return { ai_score: aiScore, label, version, raw: data };
   }catch(err){
-    console.error("fetch() to backend failed:", err);
     return {
       ai_score: 0.5,
       label: "Network error contacting backend: " + err.message,
@@ -1762,6 +1765,7 @@ async function callOnlineAIDetector(file){
     };
   }
 }
+
 
 
 /* BIO-ID glyph */
@@ -2460,32 +2464,7 @@ renderTraceNetStatus();
 updateKeyDisplay();
 loadVault();
 resetChecks();
-renderCreatorDashboard()
-async function testBackend() {
-  const form = new FormData();
-  form.append("image", new Blob(["test"], { type: "text/plain" }), "test.txt");
-
-  const res = await fetch("https://signai-tamy.onrender.com/detect-image", {
-    method: "POST",
-    body: form
-  });
-
-  const data = await res.json();
-  console.log("BACKEND TEST:", data);
-}
-;
-window.testBackend = async function testBackend() {
-  const form = new FormData();
-  form.append("image", new Blob(["test"], { type: "text/plain" }), "test.txt");
-
-  const res = await fetch("https://signai-tamy.onrender.com/detect-image", {
-    method: "POST",
-    body: form
-  });
-
-  const data = await res.json();
-  console.log("BACKEND TEST:", data);
-};
+renderCreatorDashboard();
 </script>
 </body>
 </html>
