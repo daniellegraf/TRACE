@@ -179,7 +179,8 @@ app.post("/detect-image", upload.single("image"), async (req, res) => {
     if (realType !== "jpeg" && realType !== "png") {
       return res.json({
         ai_score: 0.5,
-        label: "Error: uploaded file is not a PNG/JPEG image (detected: " + realType + ")",
+        label:
+          "Error: uploaded file is not a PNG/JPEG image (detected: " + realType + ")",
         version: "signai-backend",
         raw: { error: "NOT_PNG_JPEG", detected: realType, size },
       });
@@ -195,16 +196,23 @@ app.post("/detect-image", upload.single("image"), async (req, res) => {
     }
 
     const originalName = req.file.originalname || "image.jpg";
-    const ext = path.extname(originalName) || (realType === "png" ? ".png" : ".jpg");
-    const filename = Date.now() + "-" + Math.random().toString(36).slice(2) + ext;
+    const ext =
+      path.extname(originalName) || (realType === "png" ? ".png" : ".jpg");
+    const filename =
+      Date.now() + "-" + Math.random().toString(36).slice(2) + ext;
     const filePath = path.join(uploadDir, filename);
     fs.writeFileSync(filePath, req.file.buffer);
 
-    const proto = (req.headers["x-forwarded-proto"] || "https").toString().split(",")[0].trim();
+    const proto = (req.headers["x-forwarded-proto"] || "https")
+      .toString()
+      .split(",")[0]
+      .trim();
     const baseUrl = `${proto}://${req.get("host")}`;
 
     // cache-bust så Winston inte riskerar 304/cached fetch
-    const imageUrl = `${baseUrl}/uploads/${encodeURIComponent(filename)}?v=${Date.now()}`;
+    const imageUrl = `${baseUrl}/uploads/${encodeURIComponent(
+      filename
+    )}?v=${Date.now()}`;
 
     const selfFetch = await selfFetchCheck(imageUrl);
 
@@ -216,16 +224,17 @@ app.post("/detect-image", upload.single("image"), async (req, res) => {
         name: "ai-image-detection",
         arguments: {
           url: imageUrl,
-          apiKey: WINSTON_API_KEY,
+          // OBS: apiKey ska INTE ligga här
         },
       },
     };
 
+    // ✅ FIX: skicka API-nyckeln i headern
     const winstonRes = await axios.post(WINSTON_MCP_URL, rpcBody, {
       headers: {
         "content-type": "application/json",
         accept: "application/json",
-        jsonrpc: "2.0",
+        "x-api-key": WINSTON_API_KEY, // ← DETTA ÄR FIXEN
       },
       timeout: 30000,
       validateStatus: () => true,
