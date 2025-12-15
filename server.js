@@ -42,6 +42,9 @@ app.use(
   })
 );
 
+// ✅ NY – root route
+app.get("/", (req, res) => res.send("SignAi backend running"));
+
 app.get("/healthz", (req, res) => res.json({ status: "ok" }));
 
 function makePublicUrl(req, filename) {
@@ -51,7 +54,6 @@ function makePublicUrl(req, filename) {
 }
 
 async function callWinstonMcpImage(url) {
-  // MCP JSON-RPC tools/call -> ai-image-detection
   const body = {
     jsonrpc: "2.0",
     id: 1,
@@ -94,14 +96,11 @@ app.post("/detect-image", upload.single("image"), async (req, res) => {
       });
     }
 
-    // 1) Spara filen så den får en publik URL
     const filename = crypto.randomBytes(16).toString("hex") + ".jpg";
     const filePath = path.join(uploadDir, filename);
     fs.writeFileSync(filePath, req.file.buffer);
 
     const imageUrl = makePublicUrl(req, filename);
-
-    // 2) Kalla Winston MCP med URL
     const w = await callWinstonMcpImage(imageUrl);
 
     if (!w.ok) {
@@ -113,7 +112,6 @@ app.post("/detect-image", upload.single("image"), async (req, res) => {
       });
     }
 
-    // 3) Plocka ut payload robust (varierar lite)
     const result = w.data?.result ?? w.data;
     const payload = result?.output ?? result?.content ?? result;
 
