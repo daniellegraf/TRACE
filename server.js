@@ -5,75 +5,48 @@ import dotenv from "dotenv";
 import fs from "fs";
 import path from "path";
 import crypto from "crypto";
+import fetch from "node-fetch";
 
 dotenv.config();
 
 const app = express();
-app.set("trust proxy", 1);
-app.disable("etag");
-
-app.use(cors({ origin: true }));
-app.options("*", cors());
+app.use(cors());
 app.use(express.json());
 
 const upload = multer({ storage: multer.memoryStorage() });
 
-// ✅ Lägg nyckeln i ENV (Render -> Environment -> WINSTONAI_API_KEY)
 const WINSTON_API_KEY = process.env.WINSTONAI_API_KEY;
 
-// Winston MCP (JSON-RPC)
-const WINSTON_MCP_URL = "https://api.gowinston.ai/mcp/v1";
+// 🔴 REST endpoint (det som webappen använder)
+const WINSTON_IMAGE_URL = "https://api.gowinston.ai/v2/image-detection";
 
-// Temp uploads (Render funkar med /tmp)
+// temp uploads
 const uploadDir = "/tmp/uploads";
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
-// Gör bilderna publikt nåbara via URL (Winston MCP behöver URL)
-app.use(
-  "/uploads",
-  express.static(uploadDir, {
-    etag: false,
-    lastModified: false,
-    setHeaders(res) {
-      res.setHeader("Access-Control-Allow-Origin", "*");
-      res.setHeader("Cache-Control", "no-store");
-      res.setHeader("Pragma", "no-cache");
-    },
-  })
-);
+// public images
+app.use("/uploads", express.static(uploadDir));
 
-// ✅ NY – root route
-app.get("/", (req, res) => res.send("SignAi backend running"));
-
-app.get("/healthz", (req, res) => res.json({ status: "ok" }));
+app.get("/", (req, res) => {
+  res.send("SignAi backend running");
+});
 
 function makePublicUrl(req, filename) {
   const proto = req.headers["x-forwarded-proto"] || req.protocol || "https";
-  const host = req.headers["x-forwarded-host"] || req.get("host");
+  const host = req.get("host");
   return `${proto}://${host}/uploads/${filename}`;
 }
 
-async function callWinstonMcpImage(url) {
-  const body = {
-    jsonrpc: "2.0",
-    id: 1,
-    method: "tools/call",
-    params: {
-      name: "ai-image-detection",
-      arguments: {
-        url,
-        apiKey: WINSTON_API_KEY,
-      },
-    },
-  };
-
-  const resp = await fetch(WINSTON_MCP_URL, {
+async function callWinstonImageREST(imageUrl) {
+  const resp = await fetch(WINSTON_IMAGE_URL, {
     method: "POST",
     headers: {
-      "content-type": "application/json",
-      accept: "application/json",
+      "Authorization": `Bearer ${WINSTON_API_KEY}`,
+      "Content-Type": "application/json",
     },
-    body: JSON.stringify(body),
+    body: JSON.stringify({
+      image_url: imageUrl,
+    }),
   });
 
   const data = await resp.json().catch(() => null);
@@ -82,17 +55,10 @@ async function callWinstonMcpImage(url) {
 
 app.post("/detect-image", upload.single("image"), async (req, res) => {
   try {
-    if (!WINSTON_API_KEY) {
-      return res.status(500).json({
-        ai_score: 0.5,
-        label: "Server misconfigured: missing WINSTON_API_KEY",
-      });
-    }
-
     if (!req.file) {
       return res.status(400).json({
         ai_score: 0.5,
-        label: "Error: no image uploaded",
+        label: "No image uploaded",
       });
     }
 
@@ -101,45 +67,28 @@ app.post("/detect-image", upload.single("image"), async (req, res) => {
     fs.writeFileSync(filePath, req.file.buffer);
 
     const imageUrl = makePublicUrl(req, filename);
-    const w = await callWinstonMcpImage(imageUrl);
+
+    const w = await callWinstonImageREST(imageUrl);
 
     if (!w.ok) {
       return res.status(502).json({
         ai_score: 0.5,
-        label: `Winston MCP HTTP error: ${w.status}`,
+        label: `Winston REST error: ${w.status}`,
         raw: w.data,
-        image_url: imageUrl,
       });
     }
 
-    const result = w.data?.result ?? w.data;
-    const payload = result?.output ?? result?.content ?? result;
-
-    let aiScore =
-      typeof payload?.ai_score === "number"
-        ? payload.ai_score
-        : typeof payload?.ai_probability === "number"
-        ? payload.ai_probability
-        : typeof payload?.score === "number"
-        ? payload.score
-        : null;
-
-    if (aiScore !== null && aiScore > 1) aiScore = aiScore / 100;
-    if (aiScore === null || !Number.isFinite(aiScore)) aiScore = 0.5;
+    const aiScore =
+      typeof w.data?.ai_probability === "number"
+        ? w.data.ai_probability
+        : 0.5;
 
     const label =
-      payload?.label ??
-      (typeof payload?.is_ai === "boolean"
-        ? payload.is_ai
-          ? "AI"
-          : "Human"
-        : null) ??
-      "Unknown";
+      aiScore >= 0.5 ? "AI" : "Human";
 
     return res.json({
       ai_score: aiScore,
       label,
-      version: "winston-mcp",
       image_url: imageUrl,
       raw: w.data,
     });
@@ -153,4 +102,6 @@ app.post("/detect-image", upload.single("image"), async (req, res) => {
 });
 
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => console.log("Backend running on port", PORT));
+app.listen(PORT, () => {
+  console.log("Backend running on port", PORT);
+});
