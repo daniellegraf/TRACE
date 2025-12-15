@@ -17,8 +17,8 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 const WINSTON_API_KEY = process.env.WINSTONAI_API_KEY;
 
-// ✅ REST endpoint (samma som webappen)
-const WINSTON_IMAGE_URL = "https://api.gowinston.ai/v2/image-detection";
+// ✅ Winston MCP endpoint (det som docs visar)
+const WINSTON_MCP_URL = "https://api.gowinston.ai/mcp/v1";
 
 // temp uploads
 const uploadDir = "/tmp/uploads";
@@ -37,20 +37,45 @@ function makePublicUrl(req, filename) {
   return `${proto}://${host}/uploads/${filename}`;
 }
 
-async function callWinstonImageREST(imageUrl) {
-  const resp = await fetch(WINSTON_IMAGE_URL, {
+// ✅ Kallar Winston via MCP (JSON-RPC) istället för REST
+async function callWinstonImage(imageUrl) {
+  if (!WINSTON_API_KEY) {
+    return {
+      ok: false,
+      status: 500,
+      data: { error: "Missing WINSTONAI_API_KEY in Render Environment" },
+    };
+  }
+
+  const resp = await fetch(WINSTON_MCP_URL, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${WINSTON_API_KEY}`,
-      "Content-Type": "application/json",
+      "content-type": "application/json",
+      accept: "application/json",
     },
     body: JSON.stringify({
-      url: imageUrl,
+      jsonrpc: "2.0",
+      id: 1,
+      method: "tools/call",
+      params: {
+        name: "ai-image-detection",
+        arguments: {
+          url: imageUrl,
+          apiKey: WINSTON_API_KEY,
+        },
+      },
     }),
   });
 
   const data = await resp.json().catch(() => null);
-  return { ok: resp.ok, status: resp.status, data };
+
+  // Winston kan returnera error i JSON-RPC även om HTTP är 200
+  if (!resp.ok || data?.error) {
+    return { ok: false, status: resp.status, data };
+  }
+
+  // MCP-resultatet ligger i data.result
+  return { ok: true, status: 200, data: data.result };
 }
 
 app.post("/detect-image", upload.single("image"), async (req, res) => {
@@ -62,25 +87,38 @@ app.post("/detect-image", upload.single("image"), async (req, res) => {
       });
     }
 
+    // spara filen på /tmp och exponera via /uploads så Winston kan nå url:en
     const filename = crypto.randomBytes(16).toString("hex") + ".jpg";
     const filePath = path.join(uploadDir, filename);
     fs.writeFileSync(filePath, req.file.buffer);
 
     const imageUrl = makePublicUrl(req, filename);
 
-    const w = await callWinstonImageREST(imageUrl);
+    const w = await callWinstonImage(imageUrl);
+
+    // logga för att se exakt svar i Render Logs
+    console.log("Winston response:", JSON.stringify(w, null, 2));
 
     if (!w.ok) {
       return res.status(502).json({
         ai_score: 0.5,
-        label: `Winston REST error: ${w.status}`,
+        label: `Winston error`,
+        status: w.status,
         raw: w.data,
+        image_url: imageUrl,
       });
     }
 
+    // Försök plocka score från olika möjliga fält (MCP kan skilja sig)
+    const candidate =
+      w.data?.ai_probability ??
+      w.data?.aiProbability ??
+      w.data?.score ??
+      w.data?.probability;
+
     const aiScore =
-      typeof w.data?.ai_probability === "number"
-        ? w.data.ai_probability
+      typeof candidate === "number" && Number.isFinite(candidate)
+        ? (candidate > 1 ? candidate / 100 : candidate)
         : 0.5;
 
     const label = aiScore >= 0.5 ? "AI" : "Human";
@@ -92,6 +130,7 @@ app.post("/detect-image", upload.single("image"), async (req, res) => {
       raw: w.data,
     });
   } catch (err) {
+    console.error("Server error:", err);
     return res.status(500).json({
       ai_score: 0.5,
       label: "Server error",
