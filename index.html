@@ -1735,10 +1735,10 @@ async function callOnlineAIDetector(file){
 
   try{
     const res = await fetch("https://signai-tamy.onrender.com/detect-image", {
-      method: "POST",
-      headers: { "Accept": "application/json" },
-      body: form
-    });
+  method: "POST",
+  body: form
+});
+
 
     // Försök JSON först, annars text (så du ser backend/winston-felet)
     const rawText = await res.text();
