@@ -1729,7 +1729,7 @@ async function callOnlineAIDetector(file){
   form.append("image", jpegBlob, "upload.jpg");
 
   try{
-    const res = await fetch("https://signai-tamy.onrender.com/detect-image", {
+    const res = await fetch("https://signai.daniel-legraf.workers.dev/detect-image", {
       method: "POST",
       body: form
     });
