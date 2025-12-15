@@ -1726,7 +1726,7 @@ async function callOnlineAIDetector(file){
 
   // 4) Skicka som “image” till din backend
   const form = new FormData();
-  form.append("image", jpegBlob, "upload.jpg");
+  form.append("file", jpegBlob, "upload.jpg");
 
   try{
     const res = await fetch("https://signai-tamy.onrender.com/detect-image", {
