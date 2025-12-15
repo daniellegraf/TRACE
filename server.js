@@ -17,7 +17,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 const WINSTON_API_KEY = process.env.WINSTONAI_API_KEY;
 
-// ✅ Winston MCP endpoint (det som docs visar)
+// ✅ Winston MCP endpoint
 const WINSTON_MCP_URL = "https://api.gowinston.ai/mcp/v1";
 
 // temp uploads
@@ -37,7 +37,68 @@ function makePublicUrl(req, filename) {
   return `${proto}://${host}/uploads/${filename}`;
 }
 
-// ✅ Kallar Winston via MCP (JSON-RPC) istället för REST
+/** Gör om Winston-värden till 0..1 eller null */
+function normalizeScore(x) {
+  if (x === null || x === undefined) return null;
+
+  // String -> number, t.ex. "0.87", "87", "87%"
+  if (typeof x === "string") {
+    const cleaned = x.replace("%", "").trim();
+    const n = parseFloat(cleaned);
+    if (!Number.isFinite(n)) return null;
+    x = n;
+  }
+
+  if (typeof x !== "number" || !Number.isFinite(x)) return null;
+
+  // 0..100 -> 0..1
+  if (x > 1 && x <= 100) return x / 100;
+
+  // 0..1 ok
+  if (x >= 0 && x <= 1) return x;
+
+  return null;
+}
+
+/** Försök hitta en score i Winston-svaret (MCP kan variera) */
+function extractScore(obj) {
+  if (!obj || typeof obj !== "object") return null;
+
+  // vanliga nycklar
+  const candidates = [
+    obj.ai_probability,
+    obj.aiProbability,
+    obj.probability,
+    obj.score,
+    obj.aiScore,
+    obj.ai_score,
+    obj.ai,
+    obj.human_probability ? (1 - obj.human_probability) : null, // om de råkar ge "human_probability"
+  ];
+
+  for (const c of candidates) {
+    const s = normalizeScore(c);
+    if (s !== null) return s;
+  }
+
+  // ibland ligger resultatet nested
+  if (obj.data) {
+    const s = extractScore(obj.data);
+    if (s !== null) return s;
+  }
+  if (obj.result) {
+    const s = extractScore(obj.result);
+    if (s !== null) return s;
+  }
+  if (obj.output) {
+    const s = extractScore(obj.output);
+    if (s !== null) return s;
+  }
+
+  return null;
+}
+
+// ✅ Kallar Winston via MCP (JSON-RPC)
 async function callWinstonImage(imageUrl) {
   if (!WINSTON_API_KEY) {
     return {
@@ -69,12 +130,10 @@ async function callWinstonImage(imageUrl) {
 
   const data = await resp.json().catch(() => null);
 
-  // Winston kan returnera error i JSON-RPC även om HTTP är 200
   if (!resp.ok || data?.error) {
     return { ok: false, status: resp.status, data };
   }
 
-  // MCP-resultatet ligger i data.result
   return { ok: true, status: 200, data: data.result };
 }
 
@@ -87,7 +146,6 @@ app.post("/detect-image", upload.single("image"), async (req, res) => {
       });
     }
 
-    // spara filen på /tmp och exponera via /uploads så Winston kan nå url:en
     const filename = crypto.randomBytes(16).toString("hex") + ".jpg";
     const filePath = path.join(uploadDir, filename);
     fs.writeFileSync(filePath, req.file.buffer);
@@ -96,32 +154,39 @@ app.post("/detect-image", upload.single("image"), async (req, res) => {
 
     const w = await callWinstonImage(imageUrl);
 
-    // logga för att se exakt svar i Render Logs
+    // logga exakt vad Winston svarar
     console.log("Winston response:", JSON.stringify(w, null, 2));
 
     if (!w.ok) {
       return res.status(502).json({
         ai_score: 0.5,
-        label: `Winston error`,
+        label: "Winston error",
         status: w.status,
         raw: w.data,
         image_url: imageUrl,
       });
     }
 
-    // Försök plocka score från olika möjliga fält (MCP kan skilja sig)
-    const candidate =
-      w.data?.ai_probability ??
-      w.data?.aiProbability ??
-      w.data?.score ??
-      w.data?.probability;
+    // ✅ plocka ut score robust
+    const extracted = extractScore(w.data);
 
-    const aiScore =
-      typeof candidate === "number" && Number.isFinite(candidate)
-        ? (candidate > 1 ? candidate / 100 : candidate)
-        : 0.5;
+    // Om vi inte hittar score → var ärlig: Unknown (inte fejka 50%)
+    if (extracted === null) {
+      return res.json({
+        ai_score: 0.5,
+        label: "Unknown",
+        image_url: imageUrl,
+        raw: w.data,
+        note: "Could not extract a numeric score from Winston response.",
+      });
+    }
 
-    const label = aiScore >= 0.5 ? "AI" : "Human";
+    const aiScore = extracted;
+
+    // bättre trösklar än “>=0.5 är AI”
+    let label = "Mixed";
+    if (aiScore >= 0.65) label = "AI";
+    else if (aiScore <= 0.35) label = "Human";
 
     return res.json({
       ai_score: aiScore,
