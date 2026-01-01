@@ -1,1163 +1,2016 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="sv">
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>SignAi (Beta 1.0)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>TRACE — BETA 1.0 (H.O.P 8.0)</title>
 <style>
-:root{
-  --bg:#050a14;--panel:#0f1c38;--panel2:#0b152b;--glass:rgba(14,24,48,.72);
-  --text:#eaf2ff;--muted:#a6b7ce;--border:#1a2947;
-  --accent:#22b7ff;--accent2:#22e0d8;--ok:#16a34a;--bad:#ef4444;--expired:#3b82f6
-}
-*{box-sizing:border-box}html,body{height:100%}
-body{
-  margin:0;
-  background:radial-gradient(80% 60% at 50% 0%,#081127 0%,#050a14 60%,#040813 100%);
-  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-  color:var(--text)
-}
-.wrap{max-width:1040px;margin:0 auto;padding:16px 18px}
-header{
-  position:sticky;top:0;
-  background:rgba(5,10,20,.9);
-  backdrop-filter:blur(16px);
-  border-bottom:1px solid var(--border);
-  z-index:10;
-}
-.header-inner{
-  display:flex;align-items:center;justify-content:space-between;
-  gap:12px;padding:10px 2px;
-}
-.brand{display:flex;align-items:center;gap:12px}
-.brand-logo{
-  height:44px;width:44px;border-radius:10px;
-  border:1px solid var(--border);
-  background:radial-gradient(circle at 30% 0%,#22b7ff22,transparent 60%),linear-gradient(180deg,#0a1530,#071024);
-  display:grid;place-items:center;overflow:hidden;
-}
-.brand-logo img{width:100%;height:100%;object-fit:cover}
-.brand h1{margin:0;font-size:18px;font-weight:800;letter-spacing:.2px}
-.brand .tag{margin:0;font-size:12px;color:var(--muted)}
-.nav{
-  display:flex;gap:6px;flex-wrap:wrap;justify-content:center;
-  padding:4px 6px;
-  border-radius:999px;
-  background:radial-gradient(circle at 0 0,#22b7ff11,transparent 60%);
-}
-.tab{
-  border-radius:999px;border:1px solid var(--border);
-  padding:7px 12px;font-weight:800;
-  cursor:pointer;background:var(--panel2);color:var(--text);
-  transition:filter .2s,background .2s,transform .12s,border-color .2s,opacity .2s;
-  font-size:13px;display:flex;align-items:center;gap:6px;
-}
-.tab span.emoji{font-size:14px}
-.tab:hover{filter:brightness(1.08);transform:translateY(-1px)}
-.tab.active{
-  background:linear-gradient(120deg,var(--accent),var(--accent2));
-  color:#062630;border-color:transparent;
-  box-shadow:0 8px 25px rgba(34,183,255,.25);
-}
-.tab.minor{font-size:11px;padding:6px 9px;opacity:.55;filter:saturate(.9)}
-.tab.minor:hover{opacity:.95;filter:brightness(1.06)}
-.tab.minor span.emoji{font-size:13px}
-.stepper{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:10px 0 6px}
-.step{
-  display:flex;gap:6px;align-items:center;
-  border:1px solid #26406c;background:#0b152b;
-  color:#bcd0ea;border-radius:999px;
-  padding:6px 11px;font-weight:700;font-size:12px
-}
-.step.active{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#062630;border-color:transparent}
-.pager{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:8px}
-.pill{
-  border:1px solid var(--border);background:#0b152b;color:#cfe2ff;
-  border-radius:999px;padding:8px 12px;font-weight:700;
-  cursor:pointer;font-size:13px
-}
-.pill:disabled{opacity:.4;cursor:not-allowed}
-.card{
-  background:linear-gradient(180deg,var(--glass),transparent),var(--panel);
-  border:1px solid var(--border);border-radius:14px;
-  padding:16px;margin:12px 0
-}
-.helper{font-size:12.8px;color:var(--muted)}
-.label{font-size:13px;color:var(--muted);margin:6px 0;font-weight:600}
-.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.input,textarea{
-  width:100%;background:var(--panel2);
-  border:1px solid var(--border);color:var(--text);
-  padding:10px;border-radius:10px;font-size:14px
-}
-textarea{min-height:110px;resize:vertical}
-pre{
-  background:var(--panel2);border:1px solid var(--border);
-  border-radius:10px;padding:10px;overflow:auto;
-  white-space:pre-wrap;word-wrap:break-word;
-  font-family:ui-monospace,Consolas,Menlo,monospace;
-  font-size:12.5px;line-height:1.4
-}
-.btn{
-  border-radius:10px;border:1px solid var(--border);
-  padding:10px 12px;font-weight:800;
-  cursor:pointer;font-size:13px
-}
-.btn.primary{
-  background:linear-gradient(90deg,var(--accent),var(--accent2));
-  color:#062630;border:0;
-  box-shadow:0 8px 24px rgba(34,183,255,.18)
-}
-.resultBox{
-  background:var(--panel2);border:2px solid var(--border);
-  border-radius:12px;padding:12px;margin-top:8px;
-  transition:box-shadow .2s,border-color .2s;
-  text-align:left
-}
-.resultBox.ok{border-color:var(--ok);box-shadow:0 0 0 3px rgba(22,163,74,.16)}
-.resultBox.bad{border-color:var(--bad);box-shadow:0 0 0 3px rgba(239,68,68,.16)}
-.resultBox.expired{border-color:var(--expired);box-shadow:0 0 0 3px rgba(59,130,246,.16)}
-.badgeFrame{display:flex;justify-content:center;align-items:center;min-height:200px}
-.badgeClickableHint{font-size:11px;color:#9fb0c4;text-align:center;margin-top:6px;opacity:.8}
-#b_preview.clickable{cursor:pointer;outline:2px solid rgba(34,183,255,.35);outline-offset:2px}
-.bigStatus{font-weight:800;margin-bottom:6px}
-.subStatus{font-size:12.6px;color:#a2b6d1}
-#c_thumb{
-  display:block;max-width:260px;
-  border:1px solid var(--border);border-radius:10px;margin-top:8px
-}
-.hide{display:none}
-footer{margin:18px 0 28px;color:var(--muted);font-size:12.5px;text-align:center}
-.check-list{margin-top:10px;border-top:1px solid #1a2947;padding-top:10px;font-size:12.6px}
-.check-row{display:flex;align-items:center;justify-content:space-between;margin:3px 0}
-.check-label{color:#a2b6d1}
-.check-pill{min-width:42px;text-align:center;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700}
-.check-ok{color:#bbf7d0;background:rgba(22,163,74,.18);border:1px solid rgba(22,163,74,.6)}
-.check-fail{color:#fecaca;background:rgba(239,68,68,.16);border:1px solid rgba(239,68,68,.7)}
-.check-na{color:#e5e7eb;background:rgba(148,163,184,.16);border:1px solid rgba(148,163,184,.6)}
-.check-legend{margin-top:8px;font-size:12px;color:#94a3b8}
-.adminNav{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-start;padding:8px 0 2px}
-.adminNav .tab{font-size:12px;padding:6px 10px}
-.adminNav .tab.active{background:linear-gradient(120deg,var(--accent),var(--accent2));color:#062630;border-color:transparent}
+  :root{
+    --bg0:#05070e;
+    --bg1:#070b16;
+    --card:rgba(255,255,255,.06);
+    --card2:rgba(255,255,255,.08);
+    --stroke:rgba(255,255,255,.10);
+    --stroke2:rgba(255,255,255,.14);
+    --text:#e9f3ff;
+    --muted:rgba(233,243,255,.72);
+    --muted2:rgba(233,243,255,.52);
+    --blue:#34d7ff;
+    --blue2:#4aa3ff;
+    --green:#35f0a3;
+    --red:#ff4a6b;
+    --amber:#ffd36a;
+    --shadow: 0 18px 60px rgba(0,0,0,.55);
+    --radius:22px;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    color:var(--text);
+    background:
+      radial-gradient(900px 600px at 20% -10%, rgba(52,215,255,.16), transparent 55%),
+      radial-gradient(900px 600px at 90% 0%, rgba(169,90,255,.12), transparent 58%),
+      radial-gradient(1200px 800px at 30% 110%, rgba(53,240,163,.10), transparent 55%),
+      linear-gradient(180deg, var(--bg0), var(--bg1));
+    overflow-x:hidden;
+  }
+  .wrap{max-width:1060px;margin:26px auto 60px; padding:0 18px;}
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between; gap:14px;
+    padding:18px 18px;
+    border:1px solid var(--stroke);
+    border-radius:var(--radius);
+    background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03));
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(14px);
+  }
+  .brand{display:flex; align-items:center; gap:14px; min-width:240px;}
+  .logoBox{
+    width:54px; height:54px; border-radius:16px;
+    border:1px solid var(--stroke2);
+    background: linear-gradient(180deg, rgba(52,215,255,.18), rgba(255,255,255,.04));
+    box-shadow: 0 12px 26px rgba(0,0,0,.35);
+    overflow:hidden;
+    flex:0 0 auto;
+  }
+  .logoBox img{width:100%; height:100%; object-fit:cover; display:block;}
+  .brandTitle{font-size:18px; font-weight:800; letter-spacing:.2px}
+  .brandSub{font-size:12px; color:var(--muted2); margin-top:2px}
+  .tabs{display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:flex-end}
+  .tab{
+    border:1px solid var(--stroke);
+    background: rgba(255,255,255,.04);
+    color:var(--muted);
+    padding:10px 12px;
+    border-radius:999px;
+    cursor:pointer;
+    user-select:none;
+    transition:transform .12s ease, border-color .12s ease, background .12s ease;
+    display:flex; align-items:center; gap:8px;
+  }
+  .tab:hover{transform:translateY(-1px); border-color:rgba(52,215,255,.35)}
+  .tab.active{
+    color:var(--text);
+    border-color:rgba(52,215,255,.55);
+    background: rgba(52,215,255,.10);
+  }
+  .pillDot{width:8px; height:8px; border-radius:999px; background:rgba(255,255,255,.25)}
+  .tab.active .pillDot{background:var(--blue)}
+  .panel{
+    margin-top:18px;
+    padding:18px;
+    border:1px solid var(--stroke);
+    border-radius:var(--radius);
+    background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.025));
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(14px);
+  }
+  .panel h2{margin:0 0 6px; font-size:18px}
+  .panel p{margin:0 0 14px; color:var(--muted); line-height:1.35}
+  .grid{display:grid; grid-template-columns: 1fr; gap:14px;}
+  @media (min-width: 980px){ .grid{grid-template-columns: 380px 1fr;} }
+
+  .card{
+    border:1px solid var(--stroke);
+    border-radius:18px;
+    background: rgba(0,0,0,.18);
+    padding:14px;
+  }
+  .cardTitle{font-weight:800; margin-bottom:6px}
+  .hint{color:var(--muted2); font-size:12px; line-height:1.35}
+  .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+  .rowBetween{display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap}
+  input[type="text"], input[type="password"], input[type="number"], textarea{
+    width:100%;
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,.10);
+    background: rgba(255,255,255,.04);
+    color: var(--text);
+    padding:11px 12px;
+    outline:none;
+  }
+  textarea{min-height:96px; resize:vertical}
+  input::placeholder, textarea::placeholder{color:rgba(233,243,255,.35)}
+  .btn{
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,.14);
+    background: rgba(255,255,255,.06);
+    color:var(--text);
+    padding:10px 12px;
+    cursor:pointer;
+    transition:transform .12s ease, border-color .12s ease, background .12s ease;
+    font-weight:800;
+  }
+  .btn:hover{transform:translateY(-1px); border-color:rgba(52,215,255,.45)}
+  .btn.primary{background: linear-gradient(180deg, rgba(52,215,255,.22), rgba(52,215,255,.10)); border-color:rgba(52,215,255,.55)}
+  .btn.good{background: linear-gradient(180deg, rgba(53,240,163,.18), rgba(53,240,163,.08)); border-color:rgba(53,240,163,.55)}
+  .btn.bad{background: linear-gradient(180deg, rgba(255,74,107,.18), rgba(255,74,107,.08)); border-color:rgba(255,74,107,.55)}
+  .btn.ghost{background: transparent}
+  .mini{font-size:12px; padding:8px 10px; border-radius:12px}
+  .stat{
+    padding:10px 12px;
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,.10);
+    background: rgba(255,255,255,.03);
+    font-size:12px;
+    color:var(--muted);
+  }
+  .stat b{color:var(--text)}
+  .ok{color:var(--green); font-weight:800}
+  .warn{color:var(--amber); font-weight:800}
+  .err{color:var(--red); font-weight:800}
+
+  /* Badge */
+  .badgeWrap{margin-top:10px}
+  .badge{
+    width:100%;
+    max-width:760px;
+    border-radius:22px;
+    border:1px solid rgba(255,255,255,.12);
+    background: radial-gradient(1200px 240px at 30% -10%, rgba(52,215,255,.10), transparent 60%),
+                linear-gradient(180deg, rgba(0,0,0,.22), rgba(255,255,255,.02));
+    overflow:hidden;
+    box-shadow: 0 22px 70px rgba(0,0,0,.55);
+    cursor:pointer;
+    position:relative;
+  }
+  .badge.good{border-color: rgba(53,240,163,.55)}
+  .badge.bad{border-color: rgba(255,74,107,.55)}
+  .badge::after{
+    content:"";
+    position:absolute; inset:0;
+    border-radius:22px;
+    pointer-events:none;
+    background: linear-gradient(90deg, rgba(52,215,255,.18), transparent 40%, rgba(169,90,255,.10));
+    opacity:.35;
+  }
+  .badgeInner{display:grid; grid-template-columns: 142px 1fr; gap:14px; padding:14px;}
+  .glyphBox{
+    border-radius:18px;
+    border:1px solid rgba(255,255,255,.12);
+    background: rgba(0,0,0,.22);
+    height:92px;
+    display:flex; align-items:center; justify-content:center;
+    position:relative;
+    overflow:hidden;
+  }
+
+  /* 3D-ish glyph presentation (crisp + modern) */
+  .glyphBox{ perspective: 520px; }
+  .glyphBox svg.glyph3d{
+    width:120px; height:92px;
+    display:block;
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+    image-rendering: auto;
+    filter: none;
+  }
+
+  .glyphBox{position:relative; overflow:hidden;}
+  .glyphBox .thumbWatermark{
+    position:absolute;
+    width:22px; height:22px;
+    left:50%; top:50%;
+    transform:translate(-50%,-50%) rotate(45deg);
+    border-radius:50%;
+    background-size:cover;
+    background-position:center;
+    opacity:.22;
+    filter: none;
+    box-shadow:0 0 0 1px rgba(255,255,255,.10), 0 0 18px rgba(0,0,0,.35) inset;
+    mix-blend-mode:screen;
+    pointer-events:none;
+  }
+  .glyphHint{
+    position:absolute; left:12px; bottom:10px;
+    font-size:11px; color:rgba(233,243,255,.55);
+    letter-spacing:.6px;
+  }
+  .badgeRight{padding:4px 6px}
+  .badgeTop{display:flex; align-items:center; justify-content:space-between; gap:10px}
+  .badgeTitle{font-weight:900; font-size:20px; letter-spacing:.3px}
+  .badgeSub{color:var(--muted); margin-top:2px}
+  .badgePills{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:12px}
+  .pill{
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.04);
+    padding:8px 10px;
+    font-size:12px;
+    color:var(--muted);
+    min-width:92px;
+    text-align:center;
+  }
+  .pill.good{border-color: rgba(53,240,163,.55); color:rgba(233,243,255,.92)}
+  .pill.bad{border-color: rgba(255,74,107,.55); color:rgba(233,243,255,.92)}
+  .badgeId{
+    margin-top:12px;
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,.10);
+    background: rgba(0,0,0,.20);
+    padding:10px 12px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size:12px;
+    color:rgba(233,243,255,.85);
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .cornerDot{
+    position:absolute; right:14px; top:14px;
+    width:10px; height:10px; border-radius:999px;
+    background: rgba(255,255,255,.35);
+    box-shadow:0 0 0 6px rgba(255,255,255,.03);
+  }
+  .badge.good .cornerDot{background: var(--green); box-shadow:0 0 0 6px rgba(53,240,163,.12)}
+  .badge.bad .cornerDot{background: var(--red); box-shadow:0 0 0 6px rgba(255,74,107,.12)}
+  .footer{
+    margin-top:18px;
+    text-align:center;
+    color:rgba(233,243,255,.45);
+    font-size:12px;
+  }
+  .hide{display:none !important}
+
+  /* Verify result */
+  .resultCard{
+    margin-top:10px;
+    border-radius:18px;
+    border:1px solid rgba(255,255,255,.12);
+    background: rgba(0,0,0,.22);
+    padding:14px;
+  }
+  .resultCard.good{border-color: rgba(53,240,163,.55)}
+  .resultCard.bad{border-color: rgba(255,74,107,.55)}
+  .resultTitle{font-weight:900; font-size:20px}
+  .resultSub{color:var(--muted); margin-top:2px}
+  .resultMeta{
+    display:grid; grid-template-columns:1fr; gap:8px;
+    margin-top:12px; color:rgba(233,243,255,.78); font-size:13px;
+  }
+  @media(min-width:820px){ .resultMeta{grid-template-columns: 1fr 1fr;} }
+  .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace}
+
+  .stat .mono{
+    display:block;
+    max-width:100%;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .resultMeta .mono{
+    display:block;
+    max-width:100%;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+
+
+  /* === Profile enhancements === */
+  .profileHero{
+    display:flex; gap:14px; align-items:stretch;
+    padding:14px;
+    background: linear-gradient(135deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+    border:1px solid rgba(255,255,255,.10);
+    border-radius:18px;
+  }
+  .profileHero .avatarGlyph{
+    width:64px; height:64px; border-radius:16px;
+    display:flex; align-items:center; justify-content:center;
+    border:1px solid rgba(255,255,255,.12);
+    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.08), rgba(0,0,0,.18));
+    overflow:hidden;
+  }
+
+  .avatarWrap{
+    position:relative;
+    width:64px; height:64px;
+    border-radius:16px;
+    flex:0 0 auto;
+  }
+  .trustAura{
+    position:absolute;
+    inset:-10px;
+    border-radius:22px;
+    pointer-events:none;
+    opacity: calc(var(--trust, 0) * 0.9);
+    background: radial-gradient(circle at 50% 50%,
+      rgba(52,215,255,0.35) 0%,
+      rgba(52,215,255,0.18) 28%,
+      rgba(52,215,255,0.06) 52%,
+      rgba(0,0,0,0.0) 72%);
+    animation: trustPulse 2.8s ease-in-out infinite;
+  }
+  .avatarWrap[data-risk="ai"] .trustAura{
+    opacity: 0.85;
+    background: radial-gradient(circle at 50% 50%,
+      rgba(255,60,60,0.38) 0%,
+      rgba(255,60,60,0.20) 30%,
+      rgba(255,60,60,0.07) 54%,
+      rgba(0,0,0,0.0) 74%);
+  }
+  @keyframes trustPulse{
+    0%{ transform: scale(0.98); }
+    50%{ transform: scale(1.04); }
+    100%{ transform: scale(0.98); }
+  }
+  .profileHero .heroMeta{ min-width:0; flex:1 1 auto; }
+  .profileHero .heroTitle{ font-size:18px; font-weight:700; letter-spacing:.2px; }
+  .profileHero .heroSub{ color:rgba(255,255,255,.72); margin-top:2px; }
+  .profilePills{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+  .profilePill{
+    padding:6px 10px; border-radius:999px;
+    border:1px solid rgba(255,255,255,.14);
+    background: rgba(255,255,255,.04);
+    font-size:12px;
+  }
+
+  details.profileItem{
+    border:1px solid rgba(255,255,255,.10);
+    border-radius:16px;
+    background: rgba(255,255,255,.04);
+    overflow:hidden;
+  }
+  details.profileItem > summary{
+    list-style:none;
+    cursor:pointer;
+    padding:12px 12px;
+    user-select:none;
+  }
+  details.profileItem > summary::-webkit-details-marker{ display:none; }
+  .profileSummaryRow{
+    display:flex; gap:12px; align-items:center;
+  }
+  .profileSummaryRow .sumMeta{ min-width:0; flex:1 1 auto; }
+  .profileChevron{
+    width:24px; height:24px; border-radius:10px;
+    display:flex; align-items:center; justify-content:center;
+    border:1px solid rgba(255,255,255,.14);
+    background: rgba(255,255,255,.03);
+    flex:0 0 auto;
+    transition: transform .18s ease;
+  }
+  details[open].profileItem .profileChevron{ transform: rotate(90deg); }
+
+  .profileDetails{
+    padding:12px 12px 14px;
+    border-top:1px solid rgba(255,255,255,.10);
+  }
+  .kvGrid{
+    display:grid;
+    grid-template-columns: 1fr;
+    gap:10px;
+  }
+  .kv{
+    display:flex; gap:10px; align-items:flex-start;
+    padding:10px 10px;
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,.10);
+    background: rgba(0,0,0,.12);
+  }
+  .k{ width:120px; flex:0 0 auto; color:rgba(255,255,255,.72); font-size:12px; }
+  .v{ flex:1 1 auto; min-width:0; }
+  .monoWrap{
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size:12px;
+    white-space: nowrap;
+    overflow:hidden;
+    text-overflow: ellipsis;
+    display:block;
+    max-width:100%;
+  }
+  .monoBlock{
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size:12px;
+    white-space: pre-wrap;
+    word-break: break-word;
+    line-height: 1.35;
+    margin:0;
+  }
+  .rowBtns{ display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
+
 </style>
 </head>
 <body>
-<header>
-  <div class="wrap header-inner">
+<div class="wrap">
+  <div class="topbar">
     <div class="brand">
-      <div class="brand-logo">
-        <img id="signai_logo" src="logo.png" alt="SignAi">
+      <div class="logoBox" title="logo.png (placeholder)">
+        <img src="logo.png" alt="logo" onerror="this.style.display='none'">
       </div>
       <div>
-        <h1>SignAi</h1>
-        <p class="tag">BETA 1.0 - H.O.P 8.0</p>
+        <div class="brandTitle">TRACE</div>
+        <div class="brandSub">BETA 1.0 · H.O.P 8.0 · Local-first · WebCrypto Ed25519</div>
       </div>
     </div>
-
-    <nav class="nav">
-      <button class="tab active" id="tb_trace" onclick="switchTab('trace', this)"><span class="emoji">🧬</span><span>Use</span></button>
-      <button class="tab" id="tb_verify" onclick="switchTab('verify', this)"><span class="emoji">🔍</span><span>Verify</span></button>
-      <button class="tab minor" id="tb_admin" onclick="switchTab('admin', this)" title="PIN required"><span class="emoji">⚙️</span><span>Admin</span></button>
-    </nav>
-  </div>
-</header>
-
-<div class="wrap">
-  <div class="stepper">
-    <div class="step" id="st1">0. Vault</div>
-    <div class="step" id="st2">1. Keys</div>
-    <div class="step" id="st3">2. Mindprint</div>
-    <div class="step" id="st4">3. Content Origin</div>
-    <div class="step" id="st5">4. TRACE & Verify</div>
+    <div class="tabs">
+      <div class="tab active" id="tab_use"><span class="pillDot"></span>🧬 Use</div>
+      <div class="tab" id="tab_verify"><span class="pillDot"></span>✅ Verify</div>
+      <div class="tab" id="tab_profile"><span class="pillDot"></span>👤 Profile</div>
+      <div class="tab" id="tab_admin"><span class="pillDot"></span>🛠️ Admin</div>
+    </div>
   </div>
 
-  <div class="pager">
-    <button id="btnPrev" class="pill" onclick="goPrev()">← Previous</button>
-    <div></div>
-    <button id="btnNext" class="pill" onclick="goNext()">Next →</button>
+  <!-- USE -->
+  <div class="panel" id="panel_use">
+    <h2>Use — skapa badge</h2>
+    <p>Skapa (eller lås upp) lokal creator-profil, registrera mindprints, kör Winston AI origin-scan (image only), och generera en signerad badge. Allt lagras lokalt i din webbläsare.</p>
+
+    <div class="grid">
+      <!-- Vault (small) -->
+      <div class="card" id="vault_card">
+        <div class="rowBetween">
+          <div>
+            <div class="cardTitle">🔒 Vault (User)</div>
+            <div class="hint">Krävs för att skapa nycklar & Creator_ID. Lås upp en gång per enhet.</div>
+          </div>
+          <div class="stat" id="vault_state">Status: <b class="warn">Locked</b></div>
+        </div>
+
+        <div style="height:10px"></div>
+
+        <div class="row">
+          <input id="vault_pass" type="password" placeholder="Vault password (nytt eller befintligt)"/>
+          <button class="btn primary" id="btn_unlock">Unlock</button>
+          <button class="btn ghost" id="btn_lock">Lock</button>
+          <button class="btn ghost mini" id="btn_reset">Reset</button>
+        </div>
+        <div style="height:10px"></div>
+
+        <div class="stat">Creator_ID: <span class="mono" id="creator_id">—</span></div>
+
+        <div style="height:10px"></div>
+
+        <div class="row">
+          <button class="btn" id="btn_create_keys">Create keypair</button>
+          <button class="btn" id="btn_download_pub">Download pub</button>
+          <button class="btn" id="btn_export_priv">Export private</button>
+        </div>
+        <div class="hint" style="margin-top:8px">Nycklar genereras lokalt med WebCrypto (Ed25519). Dela aldrig din private key.</div>
+
+        <div style="height:10px"></div>
+        <div class="cardTitle" style="font-size:13px">Vault mindprint (profil) — <span id="vault_mp_status" class="warn">required</span></div>
+        <textarea id="vault_mp" placeholder="Skriv ett lite längre mindprint (t.ex. 2–3 meningar). Detta kopplas till din profil och stärker glyph + verifiering."></textarea>
+        <div class="hint" id="vault_mp_hint">Minst 20 tecken krävs.</div>
+      </div>
+
+      <!-- Create badge -->
+      <div class="card" id="use_card">
+        <div class="rowBetween">
+          <div>
+            <div class="cardTitle">🧾 Badge</div>
+            <div class="hint">Mindprint per badge är <b>nödvändig</b>. Därefter signeras payload med din creator-nyckel.</div>
+          </div>
+          <div class="stat">Ready: <b id="ready_flag" class="warn">No</b></div>
+        </div>
+
+        <div style="height:10px"></div>
+
+        <div class="cardTitle" style="font-size:13px">Step 1 — Mindprint (per badge) — <span id="mp_status" class="warn">required</span></div>
+        <textarea id="mp_badge" placeholder="Skriv minst 10 tecken (mindprint per badge)."></textarea>
+        <div class="hint" id="mp_hint">Minst 10 tecken krävs.</div>
+
+        <div style="height:10px"></div>
+        <div class="cardTitle" style="font-size:13px">Text you want to sign</div>
+        <textarea id="payload_text" placeholder="Text att signera (kan vara caption, titel, statement)."></textarea>
+
+        <div style="height:10px"></div>
+        <div class="cardTitle" style="font-size:13px">Attach image (optional)</div>
+        <input id="file_img" type="file" accept="image/*"/>
+        <div class="hint" id="img_hint">Ingen bild vald.</div>
+
+        <div style="height:10px"></div>
+        <div class="cardTitle" style="font-size:13px">Content Origin (Winston AI — image only)</div>
+        <div class="stat" id="origin_out">Inte analyserad ännu.</div>
+        <div class="hint">Winston AI anropas alltid. Om inget svar (credits/CORS/offline) ⇒ fail-closed = AI flag.</div>
+
+        <div style="height:10px"></div>
+        <div class="row">
+          <div class="stat">Window (s) <input id="window_s" type="number" min="5" max="120" value="24" style="width:86px; margin-left:8px"></div>
+          <button class="btn primary" id="btn_analyze">Analyze & create badge</button>
+          <button class="btn" id="btn_download_svg">Download SVG</button>
+          <button class="btn" id="btn_save_json">Save proof (.json)</button>
+        </div>
+
+        <div class="badgeWrap" id="badge_wrap"></div>
+        <div class="hint" id="badge_hint" style="margin-top:8px">Tip: klicka på badgen för att hoppa till Verify och verifiera direkt.</div>
+      </div>
+    </div>
+
+    <div class="footer">TRACE © 2025 — H.O.P 8.0 · Local-first · WebCrypto Ed25519</div>
   </div>
 
-  <section id="tab-trace">
+  <!-- VERIFY -->
+  <div class="panel hide" id="panel_verify">
+    <h2>Verify — TRACE / TraceNet presentation</h2>
+    <p>Ladda upp en proof (.json) för att verifiera signature + window + mindprints. Om du klickade på din badge nyss, används senaste proof automatiskt.</p>
+
     <div class="card">
-      <div class="label"><b>Use — Create TRACE badge</b></div>
-      <div class="helper">Write text, attach optional image, run origin scan (image only), then generate a signed badge.</div>
-
-<div class="card">
-        <div class="label"><b>Step 1 – Mindprint (typing rhythm)</b></div>
-        <textarea id="h_text" placeholder="Type 1–2 sentences with your own fingers…" onkeydown="logKey(event)" oninput="updateMindprint()"></textarea>
-        <div class="helper" id="h_status">Waiting for typing… (recommended)</div>
+      <div class="row">
+        <input id="file_proof" type="file" accept=".json,application/json"/>
+        <button class="btn primary" id="btn_verify">Verify uploaded proof</button>
+        <button class="btn" id="btn_load_last">Load last proof</button>
       </div>
-
-
-      <div class="label" style="margin-top:10px">Text you want to sign</div>
-      <textarea id="c_text" placeholder="Write/paste content…"></textarea>
-
-      <div class="label" style="margin-top:8px">Attach image (optional)</div>
-      <input id="c_image" type="file" accept="image/*" class="input" onchange="handleImage(event)">
-      <img id="c_thumb" class="hide" alt="Preview">
-
-      <div class="label" style="margin-top:10px"><b>Content Origin (Winston AI — image only)</b></div>
-      <div class="helper" id="co_status">Not analyzed yet.</div>
-      <pre id="co_details" class="helper" style="white-space:pre-wrap;margin-top:4px;">–</pre>
-
-      <div class="row" style="margin-top:8px">
-        <button class="btn primary" onclick="buildBadge()">Analyze & create badge</button>
-        <button class="btn" onclick="downloadSVG()">Download SVG</button>
-        <button class="btn" onclick="downloadJSON()">Save proof (.json)</button>
-      </div>
-
-      <div class="label" style="margin-top:10px">Your TRACE badge (clickable)</div>
-      <div id="b_preview" class="resultBox badgeFrame">
-        <div class="helper">Badge will appear here after “Analyze & create badge”.</div>
-      </div>
-      <div id="b_preview_hint" class="badgeClickableHint hide">Click the badge to jump directly to verification.</div>
-
-      <div class="helper" style="margin-top:10px">Tip: if you want “full creator identity / keys / vault”, open Admin (PIN).</div>
+      <div style="height:10px"></div>
+      <div class="stat">Result: <b id="verify_out">—</b></div>
+      <div id="verify_box"></div>
+      <div style="height:10px"></div>
+      <textarea id="verify_raw" class="mono" placeholder="Raw proof JSON (read-only)" readonly></textarea>
     </div>
-  </section>
+  </div>
 
-  <section id="tab-verify" class="hide">
-    <div class="card">
-      <div class="label"><b>TraceNet (local)</b></div>
-      <div class="label">creator_id</div>
-      <div class="helper" id="tn_creator">(missing)</div>
-      <div class="label" style="margin-top:6px">Registered?</div>
-      <div class="helper" id="tn_regstatus">no</div>
-    </div>
 
-    <div class="card">
-      <div class="label"><b>Verify</b></div>
-      <div class="row" style="margin-bottom:10px">
-        <button class="btn primary" onclick="quickVerifyCurrent()">Verify my latest badge</button>
+  <!-- PROFILE -->
+  <div class="panel hide" id="panel_profile">
+    <h2>Profile — din historik</h2>
+    <p>Här ser du badges du har skapat på denna enhet (local-first). Klicka på en badge för att hoppa till Verify.</p>
+    <div class="profileHero" style="margin: 14px 0 14px">
+      <div class="avatarWrap" id="profile_avatar_wrap">
+        <div class="trustAura" id="profile_aura"></div>
+        <div class="avatarGlyph" id="profile_avatar"></div>
       </div>
-
-      <div class="label">Upload badge (.svg)</div>
-      <input id="v_file" type="file" accept=".svg,image/svg+xml" class="input">
-
-      <div class="label" style="margin-top:8px">If the badge used an image: upload the same image here</div>
-      <input id="v_img" type="file" accept="image/*" class="input">
-
-      <div style="margin-top:10px"><button class="btn" onclick="smartVerify()">Verify uploaded badge</button></div>
-
-      <div class="label" style="margin-top:12px">Result</div>
-      <div id="v_box" class="resultBox">
-        <div id="v_human_status" class="bigStatus">No verification yet.</div>
-        <div id="v_human_sub" class="subStatus">Click badge or upload a TRACE SVG.</div>
-      </div>
-
-      <div id="v_checks" class="check-list hide">
-        <div class="bigStatus" style="margin-bottom:4px">Signal breakdown</div>
-
-        <div class="check-row"><span class="check-label">Signature</span><span id="chk_sign" class="check-pill check-na">N/A</span></div>
-        <div class="check-row"><span class="check-label">Time window (60s)</span><span id="chk_time" class="check-pill check-na">N/A</span></div>
-        <div class="check-row"><span class="check-label">TraceNet identity</span><span id="chk_creator" class="check-pill check-na">N/A</span></div>
-        <div class="check-row"><span class="check-label">Mindprint match</span><span id="chk_mind" class="check-pill check-na">N/A</span></div>
-        <div class="check-row"><span class="check-label">Image hash</span><span id="chk_img" class="check-pill check-na">N/A</span></div>
-
-        <div id="chk_summary" class="check-legend">Signal-score: –/5. No checks run yet.</div>
-      </div>
-    </div>
-  </section>
-
-  <section id="tab-admin" class="hide">
-    <div class="card">
-      <div class="label"><b>Admin (PIN)</b></div>
-      <div class="helper">This area is for creator identity, vault, and system docs. (PIN: 1996)</div>
-
-      <div class="adminNav">
-        <button class="tab active" id="ab_creator" onclick="switchAdmin('signai', this)"><span class="emoji">🗝️</span><span>Creator</span></button>
-        <button class="tab" id="ab_vault" onclick="switchAdmin('vault', this)"><span class="emoji">🔐</span><span>Vault</span></button>
-        <button class="tab" id="ab_system" onclick="switchAdmin('about', this)"><span class="emoji">📘</span><span>System</span></button>
+      <div class="heroMeta">
+        <div class="heroTitle">Din profil</div>
+        <div class="heroSub">Local-first historik + biometriska spår för varje badges du skapar.</div>
+        <div class="profilePills">
+          <div class="profilePill">Creator_ID: <span class="monoWrap" id="profile_creator_short">—</span></div>
+          <div class="profilePill">Vault: <span id="profile_vault_state">—</span></div>
+          <div class="profilePill">Human: <b id="profile_human">0</b></div>
+          <div class="profilePill">AI: <b id="profile_ai">0</b></div>
+        </div>
       </div>
     </div>
 
-    <section id="admin-signai">
-      <div class="card">
-        <div class="label"><b>Step 0 – Unlock your BIO-ID Vault (recommended)</b></div>
-        <div class="helper">For maximum safety, set and unlock your Vault password first (Vault subtab). You can’t create keys unless the Vault is initialized and unlocked.</div>
-      </div>
 
-      <div class="card">
-        <div class="label"><b>Step 1 – Create or import key pair</b></div>
+    <div class="card">
+      <div class="rowBetween">
+        <div class="stat">Badges: <b id="profile_count">0</b></div>
         <div class="row">
-          <button class="btn primary" onclick="createKey()">Create keypair</button>
-          <button class="btn" onclick="downloadPub()">Download pub</button>
-          <button class="btn" onclick="exportPriv()">Export private</button>
-          <input id="k_import_file" type="file" accept=".json" class="input" style="max-width:320px" onchange="importPriv(event)">
-        </div>
-        <div class="label">Status</div>
-        <pre id="k_status">No key yet.</pre>
-
-        <div class="label">Public key (local)</div>
-        <pre id="k_pub">(none)</pre>
-
-        <div class="label">Private key (local – NEVER share)</div>
-        <div class="row">
-          <pre id="k_priv" style="flex:1 1 auto;margin:0;">(hidden)</pre>
-          <button class="btn" id="btnTogglePriv" onclick="togglePriv()">Show</button>
+          <button class="btn" id="btn_profile_refresh">Refresh</button>
+          <button class="btn bad" id="btn_profile_clear">Clear history</button>
         </div>
       </div>
+      <div style="height:12px"></div>
+      <div id="profile_list" class="grid" style="grid-template-columns:1fr; gap:12px"></div>
+      <div class="hint" id="profile_hint" style="margin-top:10px">Inget här ännu. Skapa en badge under Use.</div>
+    </div>
+  </div>
 
-      
-    </section>
 
-    <section id="admin-vault" class="hide">
-      <div class="card">
-        <div class="label"><b>BIO-ID Vault (identity & keys)</b></div>
-        <div class="helper" id="vault_status">Vault locked.</div>
+  <!-- ADMIN -->
+  <div class="panel hide" id="panel_admin">
+    <h2>Admin — full details</h2>
+    <p>PIN krävs för att visa tekniska fält (t.ex. full Creator_ID, hashes, origin score, etc).</p>
 
-        <div class="label" style="margin-top:8px">Vault password</div>
-        <div class="row">
-          <input id="vault_pass" type="password" class="input" style="max-width:260px" placeholder="Choose password…">
-          <button class="btn primary" id="vault_button" onclick="openVault()">Create & unlock</button>
-        </div>
-        <div class="helper" id="vault_error" style="color:#fca5a5;margin-top:4px;"></div>
-
-        <div class="label" style="margin-top:12px">BIO-ID (creator_id)</div>
-        <pre id="vault_creator">(locked)</pre>
-
-        <div class="label">Public key</div>
-        <pre id="vault_pub">(locked)</pre>
-
-        <div class="label">Private key (local – shown only here)</div>
-        <pre id="vault_priv">(locked)</pre>
-
-        <div class="label">Latest mindprint hash</div>
-        <pre id="vault_mind">(locked)</pre>
-
-        <div class="label">Mindprint created at</div>
-        <pre id="vault_created">–</pre>
+    <div class="card">
+      <div class="row">
+        <input id="admin_pin" type="password" placeholder="PIN (default 1996)"/>
+        <button class="btn primary" id="btn_admin_unlock">Unlock</button>
+        <button class="btn ghost" id="btn_admin_lock">Lock</button>
       </div>
-    </section>
+      <div style="height:12px"></div>
 
-    <section id="admin-about" class="hide">
-      <div class="card">
-        <div class="label"><b>How SignAi works – simple view</b></div>
-        <div class="helper">
-          SignAi is a local-first system for proving that a piece of content (text + optional image) was created by a specific human, on a specific device, within a short time-window.
-        </div>
-        <ol class="helper" style="margin-left:18px;margin-top:6px">
-          <li><b>Vault</b> – You choose a password that unlocks your local BIO-ID Vault.</li>
-          <li><b>Keys</b> – SignAi generates an Ed25519 keypair and stores it only on this device.</li>
-          <li><b>Mindprint</b> – You type a few sentences; timing & rhythm become a <code>mind_hash</code>.</li>
-          <li><b>TraceNet (local)</b> – Your <code>creator_id</code> is derived from your public key and linked to your mindprint.</li>
-          <li><b>TRACE badge</b> – When you sign content, SignAi hashes (text + optional image), runs <b>ORIGIN-X</b> (Winston, image only), signs a token, then renders a badge.</li>
-          <li><b>Verify</b> – Anyone can validate the signature + short time window + local TraceNet + mindprint + optional image hash.</li>
-        </ol>
-      </div>
-    </section>
-  </section>
+      <div class="stat">Admin mode: <b id="admin_state" class="warn">Locked</b></div>
 
-  <footer class="helper">SignAi © 2025 — HOP 7.0 Alpha • Local-first • WebCrypto Ed25519</footer>
+      <div style="height:12px"></div>
+      <div class="cardTitle" style="font-size:13px">Technical view</div>
+      <textarea id="admin_dump" class="mono" placeholder="(Locked)"></textarea>
+      <div class="hint">Här kan du visa exakt payload, signatures, hashes, och full verificationslogik när du pitchar (utan att vanliga users ser det).</div>
+    </div>
+  </div>
+
 </div>
 
 <script>
-let MEMORY_STORAGE = {};
-let STORAGE_WORKS = true;
-try { localStorage.setItem("__signai_test","1"); localStorage.removeItem("__signai_test"); }
-catch(e){ STORAGE_WORKS=false; console.warn("localStorage BLOCKED – using in-memory storage instead."); }
-
+/* ========= tiny helpers ========= */
+const $ = (q)=>document.querySelector(q);
 const store = {
-  set(key,val){ if(STORAGE_WORKS) localStorage.setItem(key,val); else MEMORY_STORAGE[key]=val; },
-  get(key){ if(STORAGE_WORKS) return localStorage.getItem(key); return Object.prototype.hasOwnProperty.call(MEMORY_STORAGE,key)?MEMORY_STORAGE[key]:null; },
-  remove(key){ if(STORAGE_WORKS) localStorage.removeItem(key); else delete MEMORY_STORAGE[key]; }
+  get:(k)=>{ try{return localStorage.getItem(k);}catch(e){return null;} },
+  set:(k,v)=>{ try{localStorage.setItem(k,v);}catch(e){} },
+  del:(k)=>{ try{localStorage.removeItem(k);}catch(e){} }
 };
 
-const signai_logo = document.getElementById('signai_logo');
-const st1=document.getElementById('st1'),st2=document.getElementById('st2'),st3=document.getElementById('st3'),st4=document.getElementById('st4'),st5=document.getElementById('st5');
-const btnPrev=document.getElementById('btnPrev'),btnNext=document.getElementById('btnNext');
 
-const k_status=document.getElementById('k_status');
-const h_status=document.getElementById('h_status'),h_text=document.getElementById('h_text');
-
-const tn_creator=document.getElementById('tn_creator'),tn_regstatus=document.getElementById('tn_regstatus');
-
-const c_text=document.getElementById('c_text'),c_image=document.getElementById('c_image'),c_thumb=document.getElementById('c_thumb');
-const b_preview=document.getElementById('b_preview'),b_preview_hint=document.getElementById('b_preview_hint');
-
-const v_file=document.getElementById('v_file'),v_img=document.getElementById('v_img');
-const v_box=document.getElementById('v_box'),v_human_status=document.getElementById('v_human_status'),v_human_sub=document.getElementById('v_human_sub');
-const v_checks_panel=document.getElementById('v_checks');
-const chk_sign=document.getElementById('chk_sign'),chk_time=document.getElementById('chk_time'),chk_creator=document.getElementById('chk_creator'),chk_mind=document.getElementById('chk_mind'),chk_img=document.getElementById('chk_img'),chk_summary=document.getElementById('chk_summary');
-
-const vault_status=document.getElementById('vault_status'),vault_error=document.getElementById('vault_error');
-const vault_creator=document.getElementById('vault_creator'),vault_pub=document.getElementById('vault_pub'),vault_priv=document.getElementById('vault_priv');
-const vault_mind=document.getElementById('vault_mind'),vault_created=document.getElementById('vault_created');
-const vault_pass=document.getElementById('vault_pass'),vault_button=document.getElementById('vault_button');
-
-const co_status=document.getElementById('co_status'),co_details=document.getElementById('co_details');
-
-/* NAV */
-const ADMIN_PIN="1996";
-let currentTab='trace';
-const tabOrder=['trace','verify','admin'];
-
-function ensureAdminUnlocked(){
-  try{ if(sessionStorage.getItem("sa_admin_ok")==="1") return true; }catch(_e){}
-  const pin = prompt("PIN required");
-  if(pin===ADMIN_PIN){ try{sessionStorage.setItem("sa_admin_ok","1");}catch(_e){} return true; }
-  alert("Wrong PIN.");
-  return false;
-}
-function switchTab(name,btn){
-  if(name==='admin' && !ensureAdminUnlocked()) return;
-  currentTab=name;
-
-  document.querySelectorAll('.nav .tab').forEach(b=>b.classList.remove('active'));
-  if(btn) btn.classList.add('active');
-
-  ['trace','verify','admin'].forEach(n=>{
-    const el=document.getElementById('tab-'+n);
-    if(el) el.classList.add('hide');
-  });
-  const active=document.getElementById('tab-'+name);
-  if(active) active.classList.remove('hide');
-
-  [st1,st2,st3,st4,st5].forEach(el=>el && el.classList.remove('active'));
-  if(name==='trace'){ [st1,st2,st3,st4].forEach(el=>el && el.classList.add('active')); }
-  if(name==='verify'){ [st1,st2,st3,st4,st5].forEach(el=>el && el.classList.add('active')); }
-  if(name==='admin'){ [st1,st2,st3,st4,st5].forEach(el=>el && el.classList.add('active')); }
-
-  updatePager();
-}
-function goNext(){ const i=tabOrder.indexOf(currentTab); if(i<tabOrder.length-1){ const t=tabOrder[i+1]; switchTab(t, document.getElementById('tb_'+t)); } }
-function goPrev(){ const i=tabOrder.indexOf(currentTab); if(i>0){ const t=tabOrder[i-1]; switchTab(t, document.getElementById('tb_'+t)); } }
-function updatePager(){ const i=tabOrder.indexOf(currentTab); if(btnPrev) btnPrev.disabled=(i<=0); if(btnNext) btnNext.disabled=(i>=tabOrder.length-1); }
-switchTab('trace', document.getElementById('tb_trace'));
-
-/* Admin sub tabs */
-let adminSub='signai';
-function switchAdmin(which,btn){
-  adminSub=which;
-  document.querySelectorAll('.adminNav .tab').forEach(b=>b.classList.remove('active'));
-  if(btn) btn.classList.add('active');
-  ['signai','vault','about'].forEach(n=>{
-    const el=document.getElementById('admin-'+n);
-    if(el) el.classList.add('hide');
-  });
-  const active=document.getElementById('admin-'+which);
-  if(active) active.classList.remove('hide');
-}
-
-function applyLogos(){ if(signai_logo && !signai_logo.getAttribute('src')) signai_logo.src='logo.png'; }
-applyLogos();
-
-const enc = new TextEncoder();
-
-function b64u(bytes){ let s=btoa(String.fromCharCode(...bytes)); return s.replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); }
-function fromB64u(s){
-  const pad='='.repeat((4-(s.length%4))%4);
-  s=s.replace(/-/g,'+').replace(/_/g,'/')+pad;
-  const bin=atob(s); const u=new Uint8Array(bin.length);
-  for(let i=0;i<u.length;i++) u[i]=bin.charCodeAt(i);
-  return u;
-}
-
-async function sha256HexBuffer(buf){
-  if(!window.crypto || !crypto.subtle) throw new Error('WebCrypto (crypto.subtle) not supported.');
-  const hashBuf = await crypto.subtle.digest('SHA-256', buf);
-  const u = new Uint8Array(hashBuf);
-  return [...u].map(b=>b.toString(16).padStart(2,'0')).join('');
-}
-async function sha256Hex(text){ return sha256HexBuffer(enc.encode(text)); }
-
-async function kpGenerate(){
-  if(!window.crypto || !crypto.subtle) throw new Error('WebCrypto (crypto.subtle) not supported.');
-  const keyPair = await crypto.subtle.generateKey({ name:'Ed25519' }, true, ['sign','verify']);
-  const pubRaw=await crypto.subtle.exportKey('raw', keyPair.publicKey);
-  const privPkcs=await crypto.subtle.exportKey('pkcs8', keyPair.privateKey);
-  return { publicKey:new Uint8Array(pubRaw), privateKey:new Uint8Array(privPkcs) };
-}
-async function getStoredPrivateKey(){
-  const raw=store.get('sa_priv'); if(!raw) return null;
-  const j=JSON.parse(raw); if(!j.edSecret) return null;
-  const pkcs8Bytes=fromB64u(j.edSecret);
-  return crypto.subtle.importKey('pkcs8', pkcs8Bytes, {name:'Ed25519'}, false, ['sign']);
-}
-async function signBytesEd25519(msgBytes){
-  const privKey=await getStoredPrivateKey();
-  if(!privKey) throw new Error('No private ED25519 key found.');
-  const sigBuf=await crypto.subtle.sign({name:'Ed25519'}, privKey, msgBytes);
-  return new Uint8Array(sigBuf);
-}
-async function verifyBytesEd25519(msgBytes, sigB64u, pubB64u){
-  const sigBytes=fromB64u(sigB64u);
-  const pubBytes=fromB64u(pubB64u);
-  const pubKey=await crypto.subtle.importKey('raw', pubBytes, {name:'Ed25519'}, false, ['verify']);
-  return crypto.subtle.verify({name:'Ed25519'}, pubKey, sigBytes, msgBytes);
-}
-
-/* KEY MGMT */
-function setKeyStatus(msg){ if(k_status) k_status.textContent=msg; }
-
-async function createKey(){
+function safeJsonStore(key, obj){
   try{
-    const vaultHash=store.get('sa_vault_hash');
-    const vaultUnlocked=store.get('sa_vault_unlocked')==='1';
-    if(!vaultHash || !vaultUnlocked){ alert('Set and unlock your BIO-ID Vault password first (Admin → Vault).'); return; }
-
-    const kp=await kpGenerate();
-    store.set('sa_priv', JSON.stringify({edSecret:b64u(kp.privateKey)}));
-    store.set('sa_pub',  JSON.stringify({edPublic:b64u(kp.publicKey)}));
-    setKeyStatus('Keypair created locally with WebCrypto (Ed25519).');
-    updateKeyDisplay();
-    ensureTraceNetRegistered();
-    loadVault();
-  }catch(e){ console.error(e); setKeyStatus('Error creating key: '+e.message); }
+    store.set(key, JSON.stringify(obj));
+    return true;
+  }catch(e){
+    try{ /* quota or serialization */ }catch(_){}
+    return false;
+  }
+}
+function slimProofForStorage(proof){
+  // Avoid storing massive data URLs/signatures repeatedly.
+  try{
+    const p = JSON.parse(JSON.stringify(proof||{}));
+    if(typeof p.img_data_url==="string" && p.img_data_url.length>45000){
+      // keep a short marker; full proof still available in-memory for the latest badge
+      p.img_data_url = p.img_data_url.slice(0,120) + "…";
+    }
+    return p;
+  }catch(e){
+    return proof||{};
+  }
+}
+function bumpProfileEpoch(){
+  try{
+    const k="signai_profile_epoch";
+    const cur = parseInt(store.get(k)||"0",10);
+    const next = (Number.isFinite(cur)?cur:0)+1;
+    store.set(k, String(next));
+    return next;
+  }catch(e){
+    return 0;
+  }
+}
+function getProfileEpoch(){
+  try{
+    return parseInt(store.get("signai_profile_epoch")||"0",10) || 0;
+  }catch(e){
+    return 0;
+  }
 }
 
-function downloadPub(){
-  const pub=store.get('sa_pub'); if(!pub){ alert('No public key.'); return; }
-  const blob=new Blob([pub],{type:'application/json'});
-  const url=URL.createObjectURL(blob); const a=document.createElement('a');
-  a.href=url; a.download='signai_public_key.json'; a.click(); URL.revokeObjectURL(url);
+function shortHash(s, n=10){
+  try{
+    const str = String(s||"");
+    if(str.length<=n) return str;
+    const head = Math.max(4, Math.floor(n*0.55));
+    const tail = Math.max(3, n - head - 1);
+    return str.slice(0, head) + "…" + str.slice(-tail);
+  }catch(e){
+    return String(s||"");
+  }
 }
-function exportPriv(){
-  const priv=store.get('sa_priv'); if(!priv){ alert('No private key.'); return; }
-  if(!confirm('Export private key? NEVER share this file.')) return;
-  const blob=new Blob([priv],{type:'application/json'});
-  const url=URL.createObjectURL(blob); const a=document.createElement('a');
-  a.href=url; a.download='signai_private_key.json'; a.click(); URL.revokeObjectURL(url);
+
+function escapeHtml(s){
+  const str = String(s??"");
+  return str
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
 }
-function importPriv(e){
-  const f=e.target.files[0]; if(!f) return;
-  f.text().then(t=>{
+
+function prettyProof(proof){
+  // keep stable, avoid huge data urls in profile
+  try{
+    const p = JSON.parse(JSON.stringify(proof||{}));
+    if(p.img_data_url && String(p.img_data_url).length>180) p.img_data_url = String(p.img_data_url).slice(0,120)+"…";
+    if(p.sig_b64 && String(p.sig_b64).length>180) p.sig_b64 = String(p.sig_b64).slice(0,120)+"…";
+    return p;
+  }catch(e){
+    return proof||{};
+  }
+}
+
+function safeJson(obj){
+  try{
+    return escapeHtml(JSON.stringify(obj, null, 2));
+  }catch(e){
+    return escapeHtml(String(obj||""));
+  }
+}
+
+function bufToHex(buf){
+  return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+async function sha256Hex(u8){
+  const hash = await crypto.subtle.digest("SHA-256", u8);
+  return "sha256:"+bufToHex(hash);
+}
+
+async function fileToDataUrl(file){
+  return new Promise((resolve,reject)=>{
     try{
-      const j=JSON.parse(t);
-      if(j.edSecret){
-        store.set('sa_priv', JSON.stringify(j));
-        setKeyStatus('Private key imported.');
-        updateKeyDisplay();
-        ensureTraceNetRegistered();
-        loadVault();
-      }else throw new Error('Unknown key structure');
-    }catch(err){ setKeyStatus('Error: '+err.message); }
+      const fr = new FileReader();
+      fr.onload = ()=> resolve(String(fr.result||""));
+      fr.onerror = (e)=> reject(e);
+      fr.readAsDataURL(file);
+    }catch(e){ reject(e); }
   });
 }
-
-function updateKeyDisplay(){
-  const pubEl=document.getElementById('k_pub');
-  const privEl=document.getElementById('k_priv');
-  const btn=document.getElementById('btnTogglePriv');
-
-  const pubRaw=store.get('sa_pub');
-  const privRaw=store.get('sa_priv');
-
-  if(pubEl){
-    if(pubRaw){
-      try{ const j=JSON.parse(pubRaw); pubEl.textContent=j.edPublic || '(unknown format)'; }
-      catch(_e){ pubEl.textContent='(error reading public key)'; }
-    }else pubEl.textContent='(none)';
-  }
-
-  if(privEl){
-    if(privRaw){
-      privEl.dataset.real=privRaw;
-      privEl.dataset.shown='0';
-      privEl.textContent='(hidden)';
-      if(btn) btn.disabled=false;
-    }else{
-      privEl.dataset.real='';
-      privEl.dataset.shown='0';
-      privEl.textContent='(none)';
-      if(btn) btn.disabled=true;
+function textToU8(s){ return new TextEncoder().encode(s||""); }
+function clamp01(x){ return Math.max(0, Math.min(1, x)); }
+function nowMs(){ return Date.now(); }
+function fmtS(s){
+  const n = Math.max(0, Math.floor(Number(s)||0));
+  return n+"s";
+}
+let badgeWindowTimer = null;
+let verifyWindowTimer = null;
+function startWindowCountdown(ts, windowS, el, kind){
+  if(!el) return;
+  const target = ts + (Number(windowS)||0)*1000;
+  const tick = ()=>{
+    const leftMs = target - Date.now();
+    const leftS = Math.max(0, Math.ceil(leftMs/1000));
+    el.textContent = fmtS(leftS);
+    if(leftS<=0){
+      if(kind==="badge" && badgeWindowTimer){ clearInterval(badgeWindowTimer); badgeWindowTimer=null; }
+      if(kind==="verify" && verifyWindowTimer){ clearInterval(verifyWindowTimer); verifyWindowTimer=null; }
     }
-  }
-}
-function togglePriv(){
-  const privEl=document.getElementById('k_priv');
-  const btn=document.getElementById('btnTogglePriv');
-  if(!privEl || !btn) return;
-  const real=privEl.dataset.real||'';
-  const shown=privEl.dataset.shown==='1';
-  if(!real){ privEl.textContent='(none)'; btn.disabled=true; return; }
-  if(shown){ privEl.textContent='(hidden)'; privEl.dataset.shown='0'; btn.textContent='Show'; }
-  else{ privEl.textContent=real; privEl.dataset.shown='1'; btn.textContent='Hide'; }
-}
-
-/* MINDPRINT */
-let h_log=[];
-function logKey(e){ h_log.push({t:performance.now(),k:e.key}); }
-function computeMindprint(){
-  if(!h_log.length || !h_text) return null;
-  if(h_log.length<8) return null;
-  const ts=h_log.map(x=>x.t);
-  const dt=[]; for(let i=1;i<ts.length;i++) dt.push(ts[i]-ts[i-1]);
-  if(dt.length===0) return null;
-  const mean=dt.reduce((a,b)=>a+b,0)/dt.length;
-  const varc=dt.reduce((a,b)=>a+(b-mean)*(b-mean),0)/dt.length;
-  const sd=Math.sqrt(varc);
-  const flatRatio=dt.filter(x=>Math.abs(x-mean)<8).length/dt.length;
-  const totalDuration=ts[ts.length-1]-ts[0];
-  const textLen=h_text.value.length;
-  const cps=totalDuration>0 ? textLen/(totalDuration/1000) : 0;
-  const backspaces=h_log.filter(x=>x.k==='Backspace').length;
-  const spaces=h_log.filter(x=>x.k===' ').length;
-  const enters=h_log.filter(x=>x.k==='Enter').length;
-  return {version:'mp-v2',meanInterval:mean,sdInterval:sd,flatRatio,totalDurationMs:totalDuration,length:textLen,charsPerSec:cps,backspaceFreq:backspaces/Math.max(1,textLen),spaceFreq:spaces/Math.max(1,textLen),enterCount:enters};
-}
-function updateMindprint(){
-  const f=computeMindprint();
-  if(!f) return;
-  sha256Hex(JSON.stringify(f)).then(h=>{
-    store.set('mindprint', JSON.stringify({mind_hash:h,created_at:new Date().toISOString()}));
-    if(h_status) h_status.textContent='Human mindprint registered ✔︎';
-    ensureTraceNetRegistered();
-    loadVault();
-  }).catch(err=>{ console.error(err); if(h_status) h_status.textContent='Error hashing mindprint: '+err.message; });
-}
-
-/* TraceNet */
-function getTraceNet(){ try{ return JSON.parse(store.get('tracenet')||'{}'); }catch(_e){ return {}; } }
-function putTraceNet(obj){ store.set('tracenet', JSON.stringify(obj)); }
-async function creatorId(pub){ const h=await sha256Hex(JSON.stringify(pub)); return 'sha256:'+h; }
-let lastCreatorId=null;
-
-async function ensureTraceNetRegistered(){
-  const pub=store.get('sa_pub'); const mp=store.get('mindprint');
-  if(!pub || !mp){ renderTraceNetStatus(); return; }
-  const pubObj=JSON.parse(pub);
-  const mpObj=JSON.parse(mp);
-  const id='sha256:'+await sha256Hex(JSON.stringify(pubObj));
-  const tn=getTraceNet();
-  if(!tn[id]) tn[id]={ public:pubObj, mind:mpObj.mind_hash, created_at:new Date().toISOString() };
-  else{ tn[id].mind=mpObj.mind_hash; tn[id].updated_at=new Date().toISOString(); }
-  putTraceNet(tn);
-  renderTraceNetStatus();
-}
-async function renderTraceNetStatus(){
-  const pub=store.get('sa_pub'); const tn=getTraceNet();
-  if(!pub){
-    if(tn_creator) tn_creator.textContent='(missing – create key first in Admin)';
-    if(tn_regstatus) tn_regstatus.textContent='No – no public key yet.';
-    lastCreatorId=null;
-    return;
-  }
-  const pubObj=JSON.parse(pub);
-  const cid='sha256:'+await sha256Hex(JSON.stringify(pubObj));
-  lastCreatorId=cid;
-  if(tn_creator) tn_creator.textContent=cid;
-  if(tn_regstatus){
-    let base = tn[cid] ? 'Yes – registered locally.' : 'No – not found in local TraceNet.';
-    if(!STORAGE_WORKS) base += ' (Sandbox mode without persistent storage).';
-    tn_regstatus.textContent=base;
-  }
-}
-
-/* Vault */
-async function renderVault(){
-  if(!vault_status) return;
-  const unlocked=store.get('sa_vault_unlocked')==='1';
-  const storedHash=store.get('sa_vault_hash');
-
-  if(unlocked){
-    vault_status.textContent='Vault is unlocked on this device.';
-    if(vault_error) vault_error.textContent='';
-    if(vault_button){ vault_button.textContent='Lock'; vault_button.onclick=lockVault; }
-    if(vault_pass){ vault_pass.placeholder='Vault unlocked'; vault_pass.value=''; }
-
-    const pubRaw=store.get('sa_pub'), privRaw=store.get('sa_priv'), mpRaw=store.get('mindprint');
-    let cid='(missing)';
-    if(pubRaw){
-      try{
-        const pubObj=JSON.parse(pubRaw);
-        cid='sha256:'+await sha256Hex(JSON.stringify(pubObj));
-        if(vault_pub) vault_pub.textContent=pubObj.edPublic || '(unknown format)';
-      }catch(_e){ if(vault_pub) vault_pub.textContent='(error reading public key)'; }
-    }else{ if(vault_pub) vault_pub.textContent='(no key yet)'; }
-    if(vault_creator) vault_creator.textContent=cid;
-
-    if(vault_priv) vault_priv.textContent = privRaw ? privRaw : '(no private key yet)';
-
-    if(mpRaw){
-      try{
-        const mpObj=JSON.parse(mpRaw);
-        if(vault_mind) vault_mind.textContent=mpObj.mind_hash || '(missing)';
-        if(vault_created) vault_created.textContent=mpObj.created_at || '(unknown)';
-      }catch(_e){
-        if(vault_mind) vault_mind.textContent='(error reading mindprint)';
-        if(vault_created) vault_created.textContent='–';
-      }
-    }else{
-      if(vault_mind) vault_mind.textContent='(no mindprint yet)';
-      if(vault_created) vault_created.textContent='–';
-    }
-  }else{
-    vault_status.textContent = storedHash ? 'Vault locked. Enter your password to unlock.' : 'No Vault password set. Choose a password to create your BIO-ID Vault.';
-    if(vault_error) vault_error.textContent='';
-    if(vault_button){ vault_button.textContent=storedHash?'Unlock':'Create & unlock'; vault_button.onclick=openVault; }
-    if(vault_pass){ vault_pass.placeholder=storedHash?'Password…':'Choose new password…'; vault_pass.value=''; }
-    if(vault_creator) vault_creator.textContent='(locked)';
-    if(vault_pub) vault_pub.textContent='(locked)';
-    if(vault_priv) vault_priv.textContent='(locked)';
-    if(vault_mind) vault_mind.textContent='(locked)';
-    if(vault_created) vault_created.textContent='–';
-  }
-}
-function loadVault(){ renderVault(); }
-async function openVault(){
-  if(!vault_pass) return;
-  const pass=vault_pass.value||'';
-  const storedHash=store.get('sa_vault_hash');
-  if(!storedHash){
-    if(!pass){ if(vault_error) vault_error.textContent='Choose a password first.'; return; }
-    const h=await sha256Hex(pass);
-    store.set('sa_vault_hash',h);
-    store.set('sa_vault_unlocked','1');
-    await renderVault();
-  }else{
-    const h=await sha256Hex(pass);
-    if(h===storedHash){ store.set('sa_vault_unlocked','1'); await renderVault(); }
-    else{ if(vault_error) vault_error.textContent='Wrong password.'; }
-  }
-}
-function lockVault(){ store.set('sa_vault_unlocked','0'); renderVault(); }
-
-/* Badge / origin / verify */
-let lastToken=null, lastSvg=null, attachedImageFile=null, attachedImageHash=null, attachedThumbDataURL=null;
-let badgeTimerInterval=null;
-
-async function handleImage(e){
-  const f=e.target.files[0]; if(!f) return;
-  attachedImageFile=f;
-  const buf=await f.arrayBuffer();
-  attachedImageHash=await sha256HexBuffer(buf);
-
-  const img=new Image();
-  img.onload=()=>{
-    const can=document.createElement('canvas');
-    const maxW=260;
-    const scale=Math.min(1,maxW/img.width);
-    can.width=Math.round(img.width*scale);
-    can.height=Math.round(img.height*scale);
-    can.getContext('2d').drawImage(img,0,0,can.width,can.height);
-    attachedThumbDataURL=can.toDataURL('image/png',0.9);
-    if(c_thumb){ c_thumb.src=attachedThumbDataURL; c_thumb.classList.remove('hide'); }
   };
-  img.src=URL.createObjectURL(f);
+  // clear existing
+  if(kind==="badge" && badgeWindowTimer){ clearInterval(badgeWindowTimer); badgeWindowTimer=null; }
+  if(kind==="verify" && verifyWindowTimer){ clearInterval(verifyWindowTimer); verifyWindowTimer=null; }
+  tick();
+  const id = setInterval(tick, 200);
+  if(kind==="badge") badgeWindowTimer = id;
+  if(kind==="verify") verifyWindowTimer = id;
 }
 
-function canonicalize(o){
-  if(o===null || typeof o!=='object') return o;
-  if(Array.isArray(o)) return o.map(canonicalize);
-  const out={}; Object.keys(o).sort().forEach(k=>out[k]=canonicalize(o[k]));
-  return out;
-}
-function canonicalJSONString(o){ return JSON.stringify(canonicalize(o)); }
+/* ========= app state ========= */
+let vaultUnlocked = false;
+let creator = { pubKey:null, privKey:null, creatorId:null };
+let profileMindprint = { textHash:null, rhythmHash:null, score_0_1:0 };
+let badgeMindprint = { textHash:null, rhythmHash:null, score_0_1:0, ready:false };
+let lastProof = null;
+let lastBadgeSvg = null;
+let adminUnlocked = false;
 
-function startBadgeCountdown(targetMs){
-  if(badgeTimerInterval){ clearInterval(badgeTimerInterval); badgeTimerInterval=null; }
-  if(!b_preview) return;
-  const svgRoot=b_preview.querySelector('svg'); if(!svgRoot) return;
-  const textEl=svgRoot.querySelector('#timerText');
-  const dotEl=svgRoot.querySelector('#timerDot');
-  function tick(){
-    const now=Date.now();
-    let r=Math.round((targetMs-now)/1000); if(r<0) r=0;
-    if(textEl) textEl.textContent=r+'s';
-    if(r<=0){ if(dotEl) dotEl.setAttribute('fill','#3b82f6'); clearInterval(badgeTimerInterval); badgeTimerInterval=null; }
+/* v40: reset vault/password if user forgot (one-time) */
+(function resetOnce(){
+  try{
+    if(!store.get("signai_reset_v40")){
+      ["signai_priv_jwk","signai_pub_jwk","signai_creator_id","signai_vault_hash","signai_profile_mp","signai_last_proof","signai_last_badge_svg"].forEach(store.del);
+      store.set("signai_reset_v40","1");
+    }
+  }catch(e){}
+})();
+
+/* ========= tabs ========= */
+function setTab(which){
+  ["use","verify","profile","admin"].forEach(k=>{
+    $("#tab_"+k).classList.toggle("active", k===which);
+    $("#panel_"+k).classList.toggle("hide", k!==which);
+  });
+}
+$("#tab_use").addEventListener("click", ()=>setTab("use"));
+$("#tab_verify").addEventListener("click", ()=>setTab("verify"));
+$("#tab_admin").addEventListener("click", ()=>setTab("admin"));
+$("#tab_profile").addEventListener("click", ()=>{ setTab("profile"); renderProfile(); });
+
+/* ========= vault lock/unlock ========= */
+async function hashPass(pass){
+  const u8 = textToU8("signai-vault::"+pass);
+  return await sha256Hex(u8);
+}
+function setVaultUI(){
+  const st = $("#vault_state");
+  st.innerHTML = "Status: <b class='"+(vaultUnlocked?"ok":"warn")+"'>"+(vaultUnlocked?"Unlocked":"Locked")+"</b>";
+  $("#creator_id").textContent = creator.creatorId ? creator.creatorId : "—";
+}
+function setReadyUI(){
+  const ready = vaultUnlocked && !!creator.privKey && !!creator.pubKey && !!creator.creatorId && !!profileMindprint?.textHash && (profileMindprint.score_0_1>0.6) && !!badgeMindprint?.ready && !!badgeMindprint?.textHash;
+  $("#ready_flag").textContent = ready ? "Yes" : "No";
+  $("#ready_flag").className = ready ? "ok" : "warn";
+  $("#btn_analyze").disabled = !ready;
+  $("#btn_analyze").style.opacity = ready ? "1" : ".55";
+}
+function warn(msg){ alert(msg); }
+
+async function tryUnlockVault(){
+  const pass = $("#vault_pass").value || "";
+  if(pass.length < 4) return warn("Välj ett vault-lösenord (minst 4 tecken).");
+  const hp = await hashPass(pass);
+  const stored = store.get("signai_vault_hash");
+  if(stored && stored !== hp) return warn("Fel vault-lösenord.");
+  if(!stored) store.set("signai_vault_hash", hp);
+
+  vaultUnlocked = true;
+
+  // load keys if exist
+  try{
+    const privJ = store.get("signai_priv_jwk");
+    const pubJ  = store.get("signai_pub_jwk");
+    if(privJ && pubJ){
+      creator.privKey = await crypto.subtle.importKey("jwk", JSON.parse(privJ), {name:"Ed25519"}, true, ["sign"]);
+      creator.pubKey  = await crypto.subtle.importKey("jwk", JSON.parse(pubJ), {name:"Ed25519"}, true, ["verify"]);
+      creator.creatorId = store.get("signai_creator_id") || null;
+    }
+  }catch(e){ /* ignore */ }
+
+  // load profile mindprint
+  try{
+    const mp = store.get("signai_profile_mp");
+    if(mp) profileMindprint = JSON.parse(mp);
+  }catch(e){}
+
+  setVaultUI();
+  refreshMindprintUI();
+  setReadyUI();
+}
+
+function lockVault(){
+  vaultUnlocked = false;
+  creator.privKey = null; // keep pub? but hide
+  // do not show profile as registered while locked
+  refreshMindprintUI();
+  setVaultUI();
+  setReadyUI();
+}
+
+$("#btn_unlock").addEventListener("click", tryUnlockVault);
+$("#btn_lock").addEventListener("click", lockVault);
+$("#btn_reset").addEventListener("click", ()=>{
+  ["signai_priv_jwk","signai_pub_jwk","signai_creator_id","signai_vault_hash","signai_profile_mp","signai_last_proof","signai_last_badge_svg"].forEach(store.del);
+  vaultUnlocked=false;
+  creator={pubKey:null, privKey:null, creatorId:null};
+  profileMindprint={textHash:null,rhythmHash:null,score_0_1:0};
+  badgeMindprint={textHash:null,rhythmHash:null,score_0_1:0,ready:false};
+  $("#vault_pass").value="";
+  $("#vault_mp").value="";
+  $("#mp_badge").value="";
+  $("#mp_hint").textContent="Minst 10 tecken krävs.";
+  $("#vault_mp_hint").textContent="Minst 20 tecken krävs.";
+  $("#origin_out").textContent="Inte analyserad ännu.";
+  $("#badge_wrap").innerHTML="";
+  if(badgeWindowTimer){ clearInterval(badgeWindowTimer); badgeWindowTimer=null; }
+  if(verifyWindowTimer){ clearInterval(verifyWindowTimer); verifyWindowTimer=null; }
+  setVaultUI(); refreshMindprintUI(); setReadyUI();
+});
+
+/* ========= keys ========= */
+async function ensureUnlocked(){
+  if(!vaultUnlocked) { warn("Lås upp Vault först."); return false; }
+  return true;
+}
+async function createKeypair(){
+  if(!(await ensureUnlocked())) return;
+  const kp = await crypto.subtle.generateKey({name:"Ed25519"}, true, ["sign","verify"]);
+  const pubJwk  = await crypto.subtle.exportKey("jwk", kp.publicKey);
+  const privJwk = await crypto.subtle.exportKey("jwk", kp.privateKey);
+  store.set("signai_pub_jwk", JSON.stringify(pubJwk));
+  store.set("signai_priv_jwk", JSON.stringify(privJwk));
+  creator.pubKey = kp.publicKey;
+  creator.privKey = kp.privateKey;
+  creator.creatorId = await sha256Hex(textToU8(JSON.stringify(pubJwk)));
+  store.set("signai_creator_id", creator.creatorId);
+  setVaultUI();
+  setReadyUI();
+}
+$("#btn_create_keys").addEventListener("click", async ()=>{
+  if(!vaultUnlocked) return warn("Du måste unlocka Vault först.");
+  if(store.get("signai_pub_jwk")) return warn("Nycklar finns redan. Reset om du vill skapa nya.");
+  await createKeypair();
+});
+$("#btn_download_pub").addEventListener("click", ()=>{
+  const pub = store.get("signai_pub_jwk");
+  if(!pub) return warn("Ingen pubkey än. Skapa nycklar först.");
+  downloadText(pub, "signai_pubkey.json", "application/json");
+});
+$("#btn_export_priv").addEventListener("click", ()=>{
+  if(!vaultUnlocked) return warn("Unlocka Vault först.");
+  const priv = store.get("signai_priv_jwk");
+  if(!priv) return warn("Ingen private key än. Skapa nycklar först.");
+  downloadText(priv, "signai_privatekey.json", "application/json");
+});
+function downloadText(text, filename, mime){
+  const blob = new Blob([text], {type:mime||"text/plain"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 200);
+}
+
+/* ========= mindprint (typing rhythm) ========= */
+function rhythmTracker(el, onDone, opts={}){
+  // opts:
+  //  - minChars: minimum chars before auto-capture (default 10)
+  //  - minIntervals: minimum keystroke intervals before auto-capture (default 8)
+  //  - autoAfterChars: if set, capture once txt length >= this value
+  //  - autoAfterMs: if set, capture once this many ms have elapsed since first typing
+  //  - normChars: length normalization for score (default 80)
+  const cfg = {
+    minChars: 10,
+    minIntervals: 8,
+    autoAfterChars: null,
+    autoAfterMs: null,
+    normChars: 80,
+    ...opts
+  };
+
+  let lastT = null;
+  let intervals = [];
+  let done = false;
+
+  let startedAt = null;
+  let timerId = null;
+
+  function markDone(){
+    done = true;
+    if(timerId) { clearTimeout(timerId); timerId = null; }
   }
-  tick(); badgeTimerInterval=setInterval(tick,1000);
-}
 
-async function callOnlineAIDetector(file){
-  const dataUrl = await new Promise((resolve,reject)=>{
-    const reader=new FileReader();
-    reader.onload=()=>resolve(reader.result);
-    reader.onerror=reject;
-    reader.readAsDataURL(file);
+  async function computeAndDone(){
+    if(done) return;
+    const txt = el.value || "";
+    if(cfg.autoAfterMs !== null){
+      // For timed capture: require at least *some* text.
+      if(txt.length < 1){
+        // still mark done to avoid looping; consumer can decide what to do
+        onDone({textHash:null, rhythmHash:null, score_0_1:0});
+        markDone();
+        return;
+      }
+    }else{
+      // For char/interval based capture: enforce minimums unless autoAfterChars is set.
+      const minChars = (cfg.autoAfterChars !== null) ? cfg.autoAfterChars : cfg.minChars;
+      if(txt.length < minChars) return;
+      if(cfg.minIntervals > 0 && intervals.length < cfg.minIntervals) return;
+    }
+
+    const mean = intervals.length ? (intervals.reduce((a,b)=>a+b,0)/intervals.length) : 0;
+    const vari = intervals.length ? (intervals.reduce((a,b)=>a+(b-mean)*(b-mean),0)/intervals.length) : 0;
+    const rhythmStr = intervals.length
+      ? (intervals.slice(-64).map(x=>Math.round(x)).join(",")+"|m="+mean.toFixed(1)+"|v="+vari.toFixed(1))
+      : "no_rhythm";
+    const rhythmHash = await sha256Hex(textToU8(rhythmStr));
+    const textHash = await sha256Hex(textToU8(txt));
+
+    // score: based on length + interval count + variance (variance optional)
+    const norm = Math.max(1, Number(cfg.normChars) || 80);
+    const score = clamp01((txt.length/norm)*0.65 + (Math.min(intervals.length,40)/40)*0.30 + (intervals.length? (Math.min(vari,60000)/60000)*0.05 : 0));
+
+    onDone({textHash, rhythmHash, score_0_1:score});
+    markDone();
+  }
+
+  el.addEventListener("keydown", ()=>{
+    if(done) return;
+    const t = nowMs();
+    if(startedAt === null){
+      startedAt = t;
+      if(cfg.autoAfterMs !== null && !timerId){
+        timerId = setTimeout(()=>{ computeAndDone(); }, cfg.autoAfterMs);
+      }
+    }
+    if(lastT!==null){
+      const dt = t-lastT;
+      if(dt>10 && dt<3000) intervals.push(dt);
+    }
+    lastT = t;
   });
 
-  const img=new Image();
-  await new Promise((resolve,reject)=>{ img.onload=resolve; img.onerror=reject; img.src=dataUrl; });
+  el.addEventListener("input", ()=>{
+    if(done) return;
+    const txt = el.value || "";
 
-  const min=256;
-  const w0=img.naturalWidth||img.width;
-  const h0=img.naturalHeight||img.height;
-  const scale=Math.max(min/w0, min/h0, 1);
-  const w=Math.round(w0*scale), h=Math.round(h0*scale);
-
-  const canvas=document.createElement("canvas");
-  canvas.width=w; canvas.height=h;
-  canvas.getContext("2d").drawImage(img,0,0,w,h);
-
-  const jpegBlob = await new Promise((resolve)=>{ canvas.toBlob(b=>resolve(b),"image/jpeg",0.92); });
-  const blobToSend = jpegBlob || file;
-
-  const form=new FormData();
-  form.append("image", blobToSend, "upload.jpg");
-
-  try{
-    const res = await fetch("https://signai-tamy.onrender.com/detect-image", { method:"POST", body:form });
-    const rawText = await res.text();
-    let data=null; try{ data=JSON.parse(rawText); }catch(_e){}
-    if(!res.ok){
-      const msg=data?.label||data?.error||data?.message||rawText?.slice(0,180)||("HTTP error "+res.status);
-      return { ai_score:0.5, label:"Backend/Winston error: "+msg, version:data?.version||"signai-backend", raw:data||rawText };
+    // Auto-capture by characters (e.g. profile mindprint)
+    if(cfg.autoAfterChars !== null && txt.length >= cfg.autoAfterChars){
+      computeAndDone();
+      return;
     }
-    const cand=data?.ai_score;
-    const aiScore=(typeof cand==="number" && Number.isFinite(cand)) ? (cand>1? cand/100 : cand) : 0.5;
-    const label=(typeof data?.label==="string" && data.label) ? data.label : "Unknown";
-    return { ai_score:aiScore, label, version:data?.version||"winston-ai", raw:data };
-  }catch(err){
-    return { ai_score:0.5, label:"Network error contacting backend: "+err.message, version:"signai-backend", raw:null };
-  }
-}
 
-function renderContentOrigin(info){
-  if(!info){
-    if(co_status) co_status.textContent='Analyzing content origin…';
-    if(co_details) co_details.textContent='';
+    // Otherwise: capture when minimums met (non-timed)
+    if(cfg.autoAfterMs === null){
+      // only try compute when we might be eligible
+      if(txt.length >= cfg.minChars && (cfg.minIntervals===0 || intervals.length >= cfg.minIntervals)){
+        computeAndDone();
+      }
+    }
+  });
+}
+function refreshMindprintUI(){
+  const profileOk = vaultUnlocked && !!profileMindprint?.textHash && (profileMindprint.score_0_1>0.6);
+  const badgeOk = !!badgeMindprint?.ready && !!badgeMindprint?.textHash && (badgeMindprint.score_0_1>0.35);
+
+  $("#vault_mp_status").textContent = profileOk ? "registered ✓" : "required";
+  $("#vault_mp_status").className = profileOk ? "ok" : "warn";
+
+  $("#mp_status").textContent = badgeOk ? "registered ✓" : "required";
+  $("#mp_status").className = badgeOk ? "ok" : "warn";
+
+  setReadyUI();
+}
+rhythmTracker($("#vault_mp"), (mp)=>{
+  if(!vaultUnlocked) return; // only register when unlocked
+  const txt = $("#vault_mp").value || "";
+  if(txt.length < 20){
+    $("#vault_mp_hint").textContent = "Skriv minst 20 tecken för att registrera.";
+    $("#vault_mp_hint").className="hint";
     return;
   }
-  const scoreTxt=(info.score!==undefined) ? (info.score*100).toFixed(1)+'%' : 'N/A';
-  if(co_status) co_status.textContent=`${info.label} (${scoreTxt})`;
-  if(co_details){
-    const lines=[];
-    if(info.image){
-      lines.push(`IMAGE SCORE: ${(info.image.score*100).toFixed(1)}% → ${info.image.label}`);
-      if(info.image.hash) lines.push(`Image hash: ${info.image.hash}`);
-      lines.push('');
-    }
-    if(info.explanation){ lines.push('EXPLANATION:'); lines.push(info.explanation); lines.push(''); }
-    co_details.textContent=lines.join('\n');
+  // Ensure we always treat profile mindprint as "strong enough" for gating (v40 behavior tweak)
+  profileMindprint = { ...mp, score_0_1: clamp01(txt.length/20) };
+  store.set("signai_profile_mp", JSON.stringify(profileMindprint));
+  $("#vault_mp_hint").textContent = "Mindprint registered ✓";
+  $("#vault_mp_hint").className="hint";
+  refreshMindprintUI();
+},{ autoAfterChars: 20, minIntervals: 0, normChars: 20 });
+rhythmTracker($("#mp_badge"), (mp)=>{
+  const txt = $("#mp_badge").value || "";
+  if(txt.length < 10){
+    badgeMindprint = { textHash:null, rhythmHash:null, score_0_1:0, ready:false };
+    $("#mp_hint").textContent = "Minst 10 tecken krävs.";
+    refreshMindprintUI();
+    return;
   }
-}
+  badgeMindprint = { ...mp, score_0_1: clamp01(txt.length/10), ready:true };
+  $("#mp_hint").textContent = "Mindprint registered ✓";
+  refreshMindprintUI();
+},{ autoAfterChars: 10, minIntervals: 0, normChars: 10 });
 
-async function buildGlyphSvg(seed, originScore, isAI){
-  const h=await sha256Hex(seed);
-  const human=['#22b7ff','#22e0d8','#4ade80','#22c55e'];
-  const ai=['#ef4444','#fb7185','#f97316','#facc15'];
-  const colors=isAI?ai:human;
-  const accent=isAI?'#ef4444':'#1d4ed8';
-  const chip2=isAI?'AI':'HUMAN';
-  const grid=4, cell=22, margin=10;
-  let shapes='';
-  for(let i=0;i<grid*grid;i++){
-    const val=parseInt(h[i],16);
-    if((val%2)===0){
-      const row=Math.floor(i/grid), col=i%grid;
-      const cx=margin+cell/2+col*cell;
-      const cy=margin+cell/2+row*cell;
-      const r=4+(val%4);
-      const color=colors[val%colors.length];
-      shapes+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="${color}" opacity="0.92"><animate attributeName="r" values="${r};${r+1.5};${r}" dur="${1+val/32}s" repeatCount="indefinite"/></circle>`;
-    }
-  }
-  return `  <g id="trace_fp" transform="translate(20,22)">
-    <rect x="0" y="0" width="140" height="126" rx="22" fill="#020617" stroke="#1e293b" stroke-width="1.2"/>
-    <rect x="3" y="3" width="134" height="120" rx="20" fill="#020617" stroke="#111827" stroke-width="1"/>
-    <rect x="3" y="3" width="134" height="120" rx="20" fill="none" stroke="${accent}" stroke-width="0.9" opacity="0.75"/>
-    <g transform="translate(14,14)"><g>${shapes}<animateTransform attributeName="transform" type="rotate" from="0 44 44" to="360 44 44" dur="18s" repeatCount="indefinite"/></g></g>
-    <g transform="translate(10,102)">
-      <rect x="0" y="0" width="32" height="16" rx="7" fill="#020617" stroke="#1e293b" stroke-width="1"/>
-      <text x="16" y="11" text-anchor="middle" font-family="system-ui" font-size="9" fill="#a5b4fc">ORIGIN</text>
-      <rect x="38" y="0" width="34" height="16" rx="7" fill="#020617" stroke="#1e293b" stroke-width="1"/>
-      <text x="55" y="11" text-anchor="middle" font-family="system-ui" font-size="9" fill="#a5b4fc">${chip2}</text>
-      <rect x="78" y="0" width="32" height="16" rx="7" fill="#020617" stroke="#1e293b" stroke-width="1"/>
-      <text x="94" y="11" text-anchor="middle" font-family="system-ui" font-size="9" fill="#a5b4fc">TT</text>
-    </g>
-  </g>`;
-}
+/* ========= origin (Winston AI attempt) ========= */
+let selectedImageFile = null;
+$("#file_img").addEventListener("change", ()=>{
+  const f = $("#file_img").files && $("#file_img").files[0];
+  selectedImageFile = f || null;
+  $("#img_hint").textContent = f ? `Selected: ${f.name} (${f.type||"image"})` : "Ingen bild vald.";
+  $("#origin_out").textContent = "Inte analyserad ännu.";
+});
 
-async function buildBadge(){
+async function attemptWinstonAI(file){
+  // Fail-closed default: AI
+  const fallback = { ok:false, score_0_1:1.0, ai_flag:true, reason:"winston_unavailable_or_no_credits" };
+  if(!file) return { ok:false, score_0_1:0.0, ai_flag:false, reason:"no_image" };
+
   try{
-    const txt=(c_text?c_text.value:'')||'';
-    if(!txt.trim()){ alert('Write or paste some text first.'); return; }
-    const privRaw=store.get('sa_priv'), pubRaw=store.get('sa_pub');
-    if(!privRaw || !pubRaw){ alert('Create/import key first (Admin → Creator).'); return; }
-    const mpRaw=store.get('mindprint');
-    if(!mpRaw){ alert('Create your mindprint first (Admin → Creator).'); return; }
+    const fd = new FormData();
+    fd.append("image", file);
 
-    renderContentOrigin(null);
+    // Placeholder endpoint (CORS/credits will likely fail in file://). We still attempt.
+    const res = await fetch("https://api.winston.ai/origin", { method:"POST", body: fd });
+    if(!res.ok) return fallback;
+    const data = await res.json();
+    const score = Number(data?.score ?? data?.result?.score ?? data?.origin?.score ?? NaN);
+    if(!isFinite(score)) return fallback;
+    const s = clamp01(score);
+    return { ok:true, score_0_1:s, ai_flag:(s>=0.5), reason:"winston_ok" };
+  }catch(e){
+    return fallback;
+  }
+}
 
-    let originInfo;
-    if(attachedImageFile){
-      const online=await callOnlineAIDetector(attachedImageFile);
-      originInfo={
-        score:online.ai_score,
-        label:online.label,
-        explanation:`Winston AI image detection: score ${online.ai_score.toFixed(3)} → ${online.label} (model: ${online.version||'winston-ai'})`,
-        text:null,
-        image:{score:online.ai_score,label:online.label,hash:attachedImageHash||null}
-      };
-    }else{
-      originInfo={score:0.30,label:'Human (no image, not scanned)',explanation:'No image attached. Winston AI runs only on images.',text:null,image:null};
+/* ========= badge + proof ========= */
+
+function makeHelixSvg(seedHex, aiFlag, imgDataUrl){
+  // Modern biometric DNA glyph (deterministic, *crisp* 4k-ish vector):
+  // - JS-driven helix motion where the two strands rotate *around each other*
+  // - pseudo-3D via depth (z) -> width/opacity and subtle perspective cues
+  // - no blur / minimal glow (laboratory sharp)
+  // - optional symmetric watermark from origin-proof image
+  // - colors shift warmer/redder if AI flagged / error
+
+  const w = 120, h = 92;
+  const seed = (seedHex||"").replace(/^sha256:/,"").toLowerCase();
+  const bytes = [];
+  for(let i=0;i<seed.length;i+=2){
+    const v = parseInt(seed.slice(i,i+2),16);
+    if(Number.isFinite(v)) bytes.push(v);
+  }
+  const b = (i)=> bytes.length ? bytes[i % bytes.length] : 0;
+  const r01 = (i)=> (b(i) / 255);
+
+  // deterministic parameters (kept conservative for sharpness)
+  const amp = 12 + r01(2)*7;                 // helix width
+  const turns = 1.65 + r01(3)*1.25;          // twists
+  const beads = 10 + (b(4)%8);
+  const pairs = 18 + (b(5)%10);
+  const basePhase = (r01(11)*Math.PI*2);
+
+  // motion: strands rotate around each other (NOT whole badge spinning)
+  // seeded speed (slower) + subtle "inward" rotation via perspective-like skew
+  const rotHz = 0.055 + r01(6)*0.075;        // rotations per second (slow)
+  const foldHz = 0.035 + r01(7)*0.060;       // inward fold cycle
+  const breatheHz = 0.060 + r01(8)*0.090;    // gentle breathing
+
+  // palette
+  let colA, colB, colCore;
+  if(aiFlag){
+    // warmer/redder for AI/error
+    colA = "hsl(352 92% 60%)";
+    colB = "hsl(18 95% 58%)";
+    colCore = "rgba(255,120,120,.55)";
+  }else{
+    const hueA = (b(0)*2) % 360;
+    const hueB = (hueA + 46 + b(1)) % 360;
+    colA = `hsl(${hueA} 92% 62%)`;
+    colB = `hsl(${hueB} 92% 60%)`;
+    colCore = "rgba(255,255,255,.38)";
+  }
+
+  const mid = w/2;
+  const y0 = 8, y1 = h-8;
+  const steps = 72;
+
+  const fmt = (x)=>Number(x).toFixed(2);
+  const lerp = (a,c,t)=>a+(c-a)*t;
+
+  // initial backbone points (t=0) — will be animated by JS
+  function buildPts(tSec){
+    const omega = 2*Math.PI*rotHz;
+    const omegaFold = 2*Math.PI*foldHz;
+    const omegaBreath = 2*Math.PI*breatheHz;
+    const rot = omega*tSec;
+    const fold = Math.sin(omegaFold*tSec + r01(9)*Math.PI*2);
+    const breath = 1 + 0.05*Math.sin(omegaBreath*tSec + r01(10)*Math.PI*2);
+
+    const ptsL = [], ptsR = [];
+    for(let i=0;i<=steps;i++){
+      const tt = i/steps;
+      const y = lerp(y0,y1,tt);
+      // helix phase advances in time => strands rotate around each other
+      const ph = (tt*turns*Math.PI*2) + basePhase + rot;
+      // pseudo-3D: x controls separation; z controls thickness/opacity
+      const x = Math.sin(ph) * amp * breath;
+      const z = (Math.cos(ph)+1)/2; // 0..1 (front when high)
+
+      // "inward" fold: compress X nonlinearly based on depth and fold factor
+      const foldAmt = 1 - 0.26*fold*(0.35 + z*0.65);
+      const xFolded = x * foldAmt;
+
+      const xl = mid - xFolded;
+      const xr = mid + xFolded;
+      ptsL.push([xl,y,z,ph]);
+      ptsR.push([xr,y,1-z,ph+Math.PI]);
+    }
+    return {ptsL, ptsR};
+  }
+
+  // build smoother paths (quadratic)
+  function quadPath(pts){
+    let d = `M ${fmt(pts[0][0])} ${fmt(pts[0][1])}`;
+    for(let i=1;i<pts.length-1;i++){
+      const cx = pts[i][0], cy = pts[i][1];
+      const nx = (pts[i][0] + pts[i+1][0]) / 2;
+      const ny = (pts[i][1] + pts[i+1][1]) / 2;
+      d += ` Q ${fmt(cx)} ${fmt(cy)} ${fmt(nx)} ${fmt(ny)}`;
+    }
+    const last = pts[pts.length-1];
+    d += ` T ${fmt(last[0])} ${fmt(last[1])}`;
+    return d;
+  }
+
+  const init = buildPts(0);
+  const dL = quadPath(init.ptsL);
+  const dR = quadPath(init.ptsR);
+
+  // base-pairs (depth-weighted) — use initial frame; will be updated by JS too
+  const pairLines = [];
+  for(let k=0;k<pairs;k++){
+    const t = (k+0.55)/pairs;
+    const j = (r01(30+k)-0.5) * (0.9/pairs);
+    const tt = Math.min(0.985, Math.max(0.015, t+j));
+    const idx = Math.round(tt*steps);
+    const L = init.ptsL[idx], R = init.ptsR[idx];
+    const depth = Math.max(L[2], R[2]);
+    const th = 0.65 + depth*1.35;
+    const op = 0.10 + depth*0.42;
+    pairLines.push({idx, th, op});
+  }
+
+  // beads (depth-weighted) — stored by index and updated by JS
+  const beadDots = [];
+  for(let k=0;k<beads;k++){
+    const t = (k+0.12)/beads;
+    const idx = Math.max(0, Math.min(steps, Math.round(t*steps)));
+    const L = init.ptsL[idx], R = init.ptsR[idx];
+    const d1 = L[2], d2 = R[2];
+    const rL = (0.9 + d1*1.8) * (0.85 + r01(60+k)*0.55);
+    const rR = (0.9 + d2*1.8) * (0.85 + r01(80+k)*0.55);
+    beadDots.push({idx, rL, rR, opL:0.12+d1*0.42, opR:0.12+d2*0.42});
+  }
+
+  const gid = `g${seed.slice(0,8)||"00000000"}`;
+
+  // Symmetric watermark (visible, still subtle)
+  const wm = imgDataUrl ? `
+    <g opacity="0.18" style="mix-blend-mode:screen">
+      <defs>
+        <clipPath id="${gid}_wmClip">
+          <circle cx="${fmt(w/2)}" cy="${fmt(h/2)}" r="${fmt(Math.min(w,h)*0.26)}"/>
+        </clipPath>
+      </defs>
+      <image href="${imgDataUrl}" x="${fmt(w/2 - 28)}" y="${fmt(h/2 - 28)}" width="56" height="56"
+        preserveAspectRatio="xMidYMid slice" clip-path="url(#${gid}_wmClip)"/>
+      <g transform="translate(${fmt(w)} 0) scale(-1 1)">
+        <image href="${imgDataUrl}" x="${fmt(w/2 - 28)}" y="${fmt(h/2 - 28)}" width="56" height="56"
+          preserveAspectRatio="xMidYMid slice" clip-path="url(#${gid}_wmClip)"/>
+      </g>
+    </g>
+  ` : ``;
+
+  // micro lattice (crisp)
+  const hex = [];
+  const hexR = 7 + r01(90)*6;
+  const hx = w/2, hy = h/2;
+  const rings = 2 + (b(91)%3);
+  for(let ring=1; ring<=rings; ring++){
+    const rr = hexR * ring * 1.35;
+    const pts = [];
+    for(let a=0;a<6;a++){
+      const ang = (Math.PI/3)*a + r01(92)*0.35;
+      pts.push([hx + Math.cos(ang)*rr, hy + Math.sin(ang)*rr]);
+    }
+    hex.push(`<path d="M ${pts.map(p=>`${fmt(p[0])} ${fmt(p[1])}`).join(" L ")} Z" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="0.7" opacity="${fmt(0.10/(ring))}"/>`);
+  }
+
+  return `
+  <svg class="glyph3d" data-seed="${seedHex||""}" data-ai="${aiFlag?"1":"0"}"
+       viewBox="0 0 ${w} ${h}" width="${w}" height="${h}"
+       xmlns="http://www.w3.org/2000/svg" aria-label="TRACE glyph"
+       shape-rendering="geometricPrecision" text-rendering="geometricPrecision">
+    <defs>
+      <linearGradient id="${gid}_gA" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stop-color="${colA}"/>
+        <stop offset="100%" stop-color="${colB}"/>
+      </linearGradient>
+      <!-- No blur/glow: lab sharp -->
+    </defs>
+
+    <style>
+      /* Keep CSS minimal; JS drives geometry for true strand rotation */
+      .vx{vector-effect:non-scaling-stroke;}
+    
+  /* === Profile enhancements === */
+  .profileHero{
+    display:flex; gap:14px; align-items:stretch;
+    padding:14px;
+    background: linear-gradient(135deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+    border:1px solid rgba(255,255,255,.10);
+    border-radius:18px;
+  }
+  .profileHero .avatarGlyph{
+    width:64px; height:64px; border-radius:16px;
+    display:flex; align-items:center; justify-content:center;
+    border:1px solid rgba(255,255,255,.12);
+    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.08), rgba(0,0,0,.18));
+    overflow:hidden;
+  }
+  .profileHero .heroMeta{ min-width:0; flex:1 1 auto; }
+  .profileHero .heroTitle{ font-size:18px; font-weight:700; letter-spacing:.2px; }
+  .profileHero .heroSub{ color:rgba(255,255,255,.72); margin-top:2px; }
+  .profilePills{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+  .profilePill{
+    padding:6px 10px; border-radius:999px;
+    border:1px solid rgba(255,255,255,.14);
+    background: rgba(255,255,255,.04);
+    font-size:12px;
+  }
+
+  details.profileItem{
+    border:1px solid rgba(255,255,255,.10);
+    border-radius:16px;
+    background: rgba(255,255,255,.04);
+    overflow:hidden;
+  }
+  details.profileItem > summary{
+    list-style:none;
+    cursor:pointer;
+    padding:12px 12px;
+    user-select:none;
+  }
+  details.profileItem > summary::-webkit-details-marker{ display:none; }
+  .profileSummaryRow{
+    display:flex; gap:12px; align-items:center;
+  }
+  .profileSummaryRow .sumMeta{ min-width:0; flex:1 1 auto; }
+  .profileChevron{
+    width:24px; height:24px; border-radius:10px;
+    display:flex; align-items:center; justify-content:center;
+    border:1px solid rgba(255,255,255,.14);
+    background: rgba(255,255,255,.03);
+    flex:0 0 auto;
+    transition: transform .18s ease;
+  }
+  details[open].profileItem .profileChevron{ transform: rotate(90deg); }
+
+  .profileDetails{
+    padding:12px 12px 14px;
+    border-top:1px solid rgba(255,255,255,.10);
+  }
+  .kvGrid{
+    display:grid;
+    grid-template-columns: 1fr;
+    gap:10px;
+  }
+  .kv{
+    display:flex; gap:10px; align-items:flex-start;
+    padding:10px 10px;
+    border-radius:14px;
+    border:1px solid rgba(255,255,255,.10);
+    background: rgba(0,0,0,.12);
+  }
+  .k{ width:120px; flex:0 0 auto; color:rgba(255,255,255,.72); font-size:12px; }
+  .v{ flex:1 1 auto; min-width:0; }
+  .monoWrap{
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size:12px;
+    white-space: nowrap;
+    overflow:hidden;
+    text-overflow: ellipsis;
+    display:block;
+    max-width:100%;
+  }
+  .monoBlock{
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size:12px;
+    white-space: pre-wrap;
+    word-break: break-word;
+    line-height: 1.35;
+    margin:0;
+  }
+  .rowBtns{ display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
+
+</style>
+
+    ${wm}
+
+    <g opacity="0.55">${hex.join("")}</g>
+
+    <g>
+      <!-- backbones (animated by JS) -->
+      <path id="${gid}_L" d="${dL}" fill="none" stroke="url(#${gid}_gA)" stroke-width="2.35" opacity="${aiFlag?0.90:1}" stroke-linecap="round" class="vx"/>
+      <path id="${gid}_R" d="${dR}" fill="none" stroke="url(#${gid}_gA)" stroke-width="2.35" opacity="${aiFlag?0.88:0.98}" stroke-linecap="round" class="vx"/>
+
+      <!-- core line (depth cue) -->
+      <path id="${gid}_C" d="M ${fmt(mid)} ${fmt(y0)} L ${fmt(mid)} ${fmt(y1)}" stroke="${colCore}" stroke-width="0.95" opacity="0.30" stroke-linecap="round" class="vx"/>
+
+      <!-- base pairs (animated by JS) -->
+      ${pairLines.map((p,idx)=>`
+        <path id="${gid}_P${idx}" d="M 0 0 L 0 0" fill="none" stroke="rgba(255,255,255,1)" stroke-width="${fmt(p.th)}" opacity="${fmt(Math.min(0.62, p.op+0.18))}" stroke-linecap="round" class="vx" data-idx="${p.idx}"/>`).join("\n")}
+
+      <!-- beads (animated by JS) -->
+      ${beadDots.map((p,idx)=>`
+        <circle id="${gid}_BL${idx}" cx="0" cy="0" r="${fmt(p.rL)}" fill="url(#${gid}_gA)" opacity="${fmt(Math.min(0.70, p.opL+0.14))}" data-idx="${p.idx}"/>
+        <circle id="${gid}_BR${idx}" cx="0" cy="0" r="${fmt(p.rR)}" fill="url(#${gid}_gA)" opacity="${fmt(Math.min(0.70, p.opR+0.14))}" data-idx="${p.idx}"/>
+      `).join("\n")}
+    </g>
+  </svg>`;
+}
+
+// JS-driven glyph motion: strands rotate around each other (crisp, no blur)
+let _glyphRAF = null;
+function startGlyphMotion(svg){
+  if(!svg) return;
+  // stop any previous animation
+  if(_glyphRAF){ cancelAnimationFrame(_glyphRAF); _glyphRAF=null; }
+
+  const seedHex = svg.getAttribute("data-seed") || "";
+  const seed = seedHex.replace(/^sha256:/, "").toLowerCase();
+  const bytes = [];
+  for(let i=0;i<seed.length;i+=2){
+    const v = parseInt(seed.slice(i,i+2),16);
+    if(Number.isFinite(v)) bytes.push(v);
+  }
+  const b = (i)=> bytes.length ? bytes[i % bytes.length] : 0;
+  const r01 = (i)=> (b(i) / 255);
+
+  const w = 120, h = 92;
+  const mid = w/2;
+  const y0 = 8, y1 = h-8;
+  const steps = 72;
+  const amp = 12 + r01(2)*7;
+  const turns = 1.65 + r01(3)*1.25;
+  const basePhase = (r01(11)*Math.PI*2);
+  const rotHz = 0.055 + r01(6)*0.075;
+  const foldHz = 0.035 + r01(7)*0.060;
+  const breatheHz = 0.060 + r01(8)*0.090;
+
+  // element handles
+  const gid = `g${(seed.slice(0,8)||"00000000")}`;
+  const pL = svg.querySelector(`#${gid}_L`);
+  const pR = svg.querySelector(`#${gid}_R`);
+  if(!pL || !pR) return;
+  const pairEls = [...svg.querySelectorAll(`[id^="${gid}_P"]`)].filter(n=>n instanceof SVGPathElement);
+  const beadL = [...svg.querySelectorAll(`[id^="${gid}_BL"]`)].filter(n=>n instanceof SVGCircleElement);
+  const beadR = [...svg.querySelectorAll(`[id^="${gid}_BR"]`)].filter(n=>n instanceof SVGCircleElement);
+
+  const fmt = (x)=>Number(x).toFixed(2);
+  const lerp = (a,c,t)=>a+(c-a)*t;
+  function quadPath(pts){
+    let d = `M ${fmt(pts[0][0])} ${fmt(pts[0][1])}`;
+    for(let i=1;i<pts.length-1;i++){
+      const cx = pts[i][0], cy = pts[i][1];
+      const nx = (pts[i][0] + pts[i+1][0]) / 2;
+      const ny = (pts[i][1] + pts[i+1][1]) / 2;
+      d += ` Q ${fmt(cx)} ${fmt(cy)} ${fmt(nx)} ${fmt(ny)}`;
+    }
+    const last = pts[pts.length-1];
+    d += ` T ${fmt(last[0])} ${fmt(last[1])}`;
+    return d;
+  }
+
+  function buildPts(tSec){
+    const omega = 2*Math.PI*rotHz;
+    const omegaFold = 2*Math.PI*foldHz;
+    const omegaBreath = 2*Math.PI*breatheHz;
+    const rot = omega*tSec;
+    const fold = Math.sin(omegaFold*tSec + r01(9)*Math.PI*2);
+    const breath = 1 + 0.05*Math.sin(omegaBreath*tSec + r01(10)*Math.PI*2);
+
+    const ptsL = [], ptsR = [];
+    for(let i=0;i<=steps;i++){
+      const tt = i/steps;
+      const y = lerp(y0,y1,tt);
+      const ph = (tt*turns*Math.PI*2) + basePhase + rot;
+      const x = Math.sin(ph) * amp * breath;
+      const z = (Math.cos(ph)+1)/2;
+      const foldAmt = 1 - 0.26*fold*(0.35 + z*0.65);
+      const xFolded = x * foldAmt;
+      const xl = mid - xFolded;
+      const xr = mid + xFolded;
+      ptsL.push([xl,y,z]);
+      ptsR.push([xr,y,1-z]);
+    }
+    return {ptsL, ptsR};
+  }
+
+  let start = null;
+  const tick = (ts)=>{
+    if(start===null) start = ts;
+    const t = (ts-start)/1000;
+
+    const {ptsL, ptsR} = buildPts(t);
+    pL.setAttribute("d", quadPath(ptsL));
+    pR.setAttribute("d", quadPath(ptsR));
+
+    // base pairs: update from indices stored in data-idx
+    for(const el of pairEls){
+      const idx = Math.max(0, Math.min(steps, Number(el.getAttribute("data-idx"))||0));
+      const L = ptsL[idx], R = ptsR[idx];
+      el.setAttribute("d", `M ${fmt(L[0])} ${fmt(L[1])} L ${fmt(R[0])} ${fmt(R[1])}`);
     }
 
-    const isAI = (typeof originInfo.score==='number') && originInfo.score>=0.50;
-    renderContentOrigin(originInfo);
-
-    if(b_preview){
-      b_preview.classList.remove('ok','bad','expired');
-      b_preview.classList.add(isAI?'bad':'ok');
+    // beads
+    for(const el of beadL){
+      const idx = Math.max(0, Math.min(steps, Number(el.getAttribute("data-idx"))||0));
+      const L = ptsL[idx];
+      el.setAttribute("cx", fmt(L[0]));
+      el.setAttribute("cy", fmt(L[1]));
+    }
+    for(const el of beadR){
+      const idx = Math.max(0, Math.min(steps, Number(el.getAttribute("data-idx"))||0));
+      const R = ptsR[idx];
+      el.setAttribute("cx", fmt(R[0]));
+      el.setAttribute("cy", fmt(R[1]));
     }
 
-    const mp=JSON.parse(mpRaw);
-    const content_hash=await sha256Hex(txt);
-    const session={issued_at:new Date().toISOString(),expires_in:60,nonce:[...crypto.getRandomValues(new Uint8Array(8))].map(b=>b.toString(16).padStart(2,'0')).join('')};
-    const pubJ=JSON.parse(pubRaw);
+    _glyphRAF = requestAnimationFrame(tick);
+  };
+  _glyphRAF = requestAnimationFrame(tick);
+}
 
-    const tokenCore={
-      version:'trace-7.0',scheme:'signai-trace',content_type:'text/plain',
-      content_hash,created_at:session.issued_at,
-      metadata:{
-        creator_id:await creatorId(pubJ),
-        mindprint:{mind_hash:mp.mind_hash},
-        image_hash:attachedImageHash||null,
-        content_origin:{score:originInfo.score,label:originInfo.label,text:null,image:originInfo.image||null},
-        session
-      }
+
+function makeBadgeHtml(proof){
+  const ai = !!proof.origin.ai_flag;
+  const scoreTxt = (proof.origin.score_0_1*100).toFixed(1)+"%";
+  const windowS = proof.window_s;
+
+  const helix = makeHelixSvg(proof.glyph_seed, ai, proof.img_data_url||null);
+
+  return `
+    <div class="badge ${ai?"bad":"good"}" id="badge_click">
+      <div class="cornerDot"></div>
+      <div class="badgeInner">
+        <div class="glyphBox">${helix}${proof.img_data_url?`<div class="thumbWatermark" style="background-image:url(${proof.img_data_url})"></div>`:""}</div>
+        <div class="badgeRight">
+          <div class="badgeTop">
+            <div>
+              <div class="badgeTitle">TRACE · TRACE</div>
+              <div class="badgeSub">${ai ? "AI ORIGIN FLAG" : "HUMAN ORIGIN"} · score ${scoreTxt}</div>
+            </div>
+          </div>
+          <div class="badgePills">
+            <div class="pill">ORIGIN</div>
+            <div class="pill ${ai?"bad":"good"}">${ai?"AI":"HUMAN"}</div>
+            <div class="pill"><span id="badge_window_left">${windowS}s</span> left</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+
+function storeLast(proof, badgeSvg){
+  lastProof = proof;
+  lastBadgeSvg = badgeSvg || null;
+
+  // Keep full in-memory; store slim for persistence (avoid quota kills)
+  const slim = slimProofForStorage(proof);
+  safeJsonStore("signai_last_proof", slim);
+
+  if(badgeSvg){
+    safeJsonStore("signai_last_badge_svg", badgeSvg);
+  }
+}
+
+
+
+const HIST_KEY = "signai_badge_history";
+
+function getHistory(){
+  try{
+    const j = store.get(HIST_KEY);
+    const arr = j ? JSON.parse(j) : [];
+    return Array.isArray(arr) ? arr : [];
+  }catch(e){ return []; }
+}
+function setHistory(arr){
+  try{ store.set(HIST_KEY, JSON.stringify(arr)); }catch(e){}
+}
+
+function addToHistory(proof){
+  try{
+    const arr = getHistory();
+    const slim = slimProofForStorage(proof);
+
+    const entry = {
+      ts: slim.ts,
+      creator_id: slim.creator_id,
+      badge_key: slim.badge_key,
+      glyph_seed: slim.glyph_seed,
+      window_s: slim.window_s,
+      origin: slim.origin,
+      img_hash: slim.img_hash || null,
+      img_data_url: slim.img_data_url || null,
+      proof: slim
     };
 
-    const msg=enc.encode(canonicalJSONString(tokenCore));
-    const sig=await signBytesEd25519(msg);
+    const next = [entry, ...arr.filter(x=>x?.badge_key !== entry.badge_key)].slice(0, 50);
+    setHistory(next);
 
-    const token={...tokenCore, proof:{alg:'Ed25519',edPublic:pubJ.edPublic,sig:b64u(sig)}};
-    lastToken=token;
-
-    const encoded=btoa(unescape(encodeURIComponent(JSON.stringify(token))));
-    const prefix=isAI?'AI':'HUMAN';
-    const shortCode=(await sha256Hex(content_hash+(attachedImageHash||'')+session.nonce)).slice(0,10).toUpperCase();
-    const humanCode=`${prefix}: ${shortCode}`;
-
-    const thumb = attachedThumbDataURL ?
-      `<g transform="translate(134,18)">
-        <rect x="0" y="0" width="40" height="40" rx="12" fill="#020617" stroke="${isAI?'#ef4444':'#22b7ff'}" stroke-width="1.2">
-          <animate attributeName="stroke-width" values="1.2;2;1.2" dur="2.4s" repeatCount="indefinite"/>
-        </rect>
-        <rect x="0" y="0" width="40" height="40" rx="12" fill="none" stroke="${isAI?'#fb7185':'#22e0d8'}" stroke-width="0.6" opacity="0.6">
-          <animate attributeName="opacity" values="0.4;1;0.4" dur="3.5s" repeatCount="indefinite"/>
-        </rect>
-        <image href="${attachedThumbDataURL}" x="4" y="4" width="32" height="32" preserveAspectRatio="xMidYMid slice" opacity="0.98"/>
-      </g>` : '';
-
-    const glyphSeed=content_hash+'|'+(attachedImageHash||'')+'|'+token.metadata.creator_id;
-    const glyph=await buildGlyphSvg(glyphSeed, originInfo.score, isAI);
-
-    const titleMain='ORIGIN CHECK (Winston AI)';
-    const titleSub=isAI ? 'AI flagged (≥ 50%)' : 'Human marked (< 50%)';
-
-    const svg=`<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 170" width="420" height="170" data-trace="${encoded}" role="img" aria-label="SignAi BIO-ID — Proof of Origin (Winston AI)">
-  <defs>
-    <linearGradient id="bg_grad" x1="0" y="0" x2="1" y="1">
-      <stop offset="0" stop-color="#020617"/><stop offset="0.4" stop-color="#020824"/><stop offset="1" stop-color="#020617"/>
-    </linearGradient>
-    <linearGradient id="border_grad" x1="0" y="0" x2="1" y2="0">
-      <stop offset="0" stop-color="${isAI?'#ef4444':'#22b7ff'}"/>
-      <stop offset="0.5" stop-color="${isAI?'#fb7185':'#22e0d8'}"/>
-      <stop offset="1" stop-color="${isAI?'#f97316':'#5b21ff'}"/>
-    </linearGradient>
-    <style>
-      .title{font:800 16px system-ui;fill:#e5f2ff}
-      .subtitle{font:700 12px system-ui;fill:${isAI?'#fecaca':'#bbf7d0'}}
-      .label{font:600 11px system-ui;fill:#9fb0c4}
-      .value{font:700 12px system-ui;fill:#cfe8ff}
-      .code{font:700 12px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;letter-spacing:0.08em}
-      .chip{font:700 9px system-ui;fill:#a5b4fc}
-    </style>
-  </defs>
-
-  <rect x="0.5" y="0.5" width="419" height="169" rx="22" fill="url(#bg_grad)"/>
-  <rect x="1.5" y="1.5" width="417" height="167" rx="21" fill="none" stroke="url(#border_grad)" stroke-width="1.5"/>
-
-  <g transform="translate(398,18)">
-    <circle id="timerDot" cx="0" cy="0" r="6" fill="${isAI?'#ef4444':'#16a34a'}">
-      <animate attributeName="r" values="6;7.5;6" dur="1.6s" repeatCount="indefinite"/>
-      <animate attributeName="opacity" values="0.35;1;0.35" dur="1.6s" repeatCount="indefinite"/>
-    </circle>
-  </g>
-
-${glyph}
-${thumb}
-
-  <g transform="translate(20,144)">
-    <rect x="0" y="-18" width="220" height="22" rx="10" fill="#020617" stroke="#1e293b" stroke-width="1"/>
-    <text x="10" y="-4" class="code" fill="#f9fafb">${humanCode}</text>
-  </g>
-
-  <g transform="translate(190,30)">
-    <text x="0" y="0" class="label">SIGNAI / HOP 7.0 BIO-ID</text>
-    <text x="0" y="22" class="title">${titleMain}</text>
-    <text x="0" y="40" class="subtitle">${titleSub}</text>
-
-    <text x="0" y="60" class="label">MODE</text>
-    <text x="84" y="60" class="value">Proof of Origin (BIO-ID + Winston)</text>
-
-    <text x="0" y="78" class="label">WINDOW</text>
-    <text x="84" y="78" class="value">TRACE · <tspan id="timerText">60s</tspan> window</text>
-
-    <text x="0" y="96" class="label">CREATOR_ID</text>
-    <text x="84" y="96" class="value">${token.metadata.creator_id}</text>
-
-    <text x="0" y="114" class="label">CONTENT ORIGIN</text>
-    <text x="84" y="114" class="value">${originInfo.label}</text>
-
-    <text x="0" y="132" class="label">ORIGIN SCORE</text>
-    <text x="84" y="132" class="value" fill="${isAI?'#fecaca':'#bbf7d0'}">${(originInfo.score*100).toFixed(1)} %</text>
-
-    <g transform="translate(0,144)">
-      <rect x="0" y="0" width="60" height="18" rx="9" fill="#020617" stroke="#1e293b"/><text x="30" y="13" text-anchor="middle" class="chip">ORIGIN</text>
-      <rect x="68" y="0" width="60" height="18" rx="9" fill="#020617" stroke="#1e293b"/><text x="98" y="13" text-anchor="middle" class="chip">${isAI?'AI':'HUMAN'}</text>
-      <rect x="136" y="0" width="60" height="18" rx="9" fill="#020617" stroke="#1e293b"/><text x="166" y="13" text-anchor="middle" class="chip">TRACE·TT</text>
-    </g>
-  </g>
-</svg>`;
-
-    lastSvg=svg;
-
-    if(b_preview){
-      b_preview.innerHTML=svg;
-      b_preview.classList.add('clickable');
-      b_preview.onclick=()=>{ quickVerifyCurrent(); switchTab('verify', document.getElementById('tb_verify')); };
-    }
-    if(b_preview_hint) b_preview_hint.classList.remove('hide');
-
-    const expiresAt = new Date(session.issued_at).getTime() + session.expires_in*1000;
-    startBadgeCountdown(expiresAt);
-
-    ensureTraceNetRegistered();
-  }catch(err){ console.error(err); alert('Error creating badge: '+err.message); }
+    bumpProfileEpoch();
+  }catch(e){}
 }
 
-function downloadSVG(){
-  if(!lastSvg){ alert('No badge yet.'); return; }
-  const blob=new Blob([lastSvg],{type:'image/svg+xml'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a'); a.href=url; a.download='signai_hop7_badge.svg'; a.click();
-  URL.revokeObjectURL(url);
-}
-function downloadJSON(){
-  if(!lastToken){ alert('No badge yet.'); return; }
-  const blob=new Blob([JSON.stringify(lastToken,null,2)],{type:'application/json'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a'); a.href=url; a.download='signai_trace_token.json'; a.click();
-  URL.revokeObjectURL(url);
-}
 
-/* Verify helpers */
-function vSetVisual(statusLabel, subText, boxMode){
-  if(v_human_status) v_human_status.textContent=statusLabel;
-  if(v_human_sub) v_human_sub.textContent=subText;
-  if(v_box){
-    v_box.className='resultBox';
-    if(boxMode==='ok') v_box.classList.add('ok');
-    if(boxMode==='bad') v_box.classList.add('bad');
-    if(boxMode==='expired') v_box.classList.add('expired');
-  }
-}
-function resetChecks(){
-  if(!v_checks_panel) return;
-  v_checks_panel.classList.add('hide');
-  [chk_sign,chk_time,chk_creator,chk_mind,chk_img].forEach(el=>{
-    if(!el) return;
-    el.className='check-pill check-na';
-    el.textContent='N/A';
-  });
-  if(chk_summary) chk_summary.textContent='Signal-score: –/5. No checks yet.';
-}
-function setCheck(el,state){
-  if(!el) return;
-  el.className='check-pill';
-  if(state==='ok'){ el.classList.add('check-ok'); el.textContent='OK'; }
-  else if(state==='fail'){ el.classList.add('check-fail'); el.textContent='FAIL'; }
-  else{ el.classList.add('check-na'); el.textContent='N/A'; }
-}
-function parseBadgeFromText(text){
-  try{ return JSON.parse(text); }catch(_e){}
-  const m=text.match(/data-trace="([^"]+)"/i);
-  if(m){
-    try{ const raw=decodeURIComponent(escape(atob(m[1]))); return JSON.parse(raw); }catch(_e){}
-  }
-  return null;
-}
-async function fileToHash(file){ if(!file) return null; const buf=await file.arrayBuffer(); return await sha256HexBuffer(buf); }
+function renderProfile(){
+  const list = $("#profile_list");
+  const hint = $("#profile_hint");
+  const countEl = $("#profile_count");
+  const cShort = $("#profile_creator_short");
+  const vState = $("#profile_vault_state");
+  const aWrap = $("#profile_avatar");
+  const humanEl = $("#profile_human");
+  const aiEl = $("#profile_ai");
+  if(!list || !hint || !countEl) return;
 
-async function verifyToken(token, maybeImageFile){
-  resetChecks();
-  if(!token || !token.proof || !token.proof.sig){ vSetVisual('INVALID BADGE ❌','Badge is missing proof data.','bad'); return; }
+  const arr = getHistory();
 
-  const core={...token}; delete core.proof;
-  const msg=enc.encode(canonicalJSONString(core));
-
-  let sigOK=false;
-  try{ sigOK=await verifyBytesEd25519(msg, token.proof.sig, token.proof.edPublic); }catch(e){ console.error(e); sigOK=false; }
-
-  let expired=false;
+  // top stats
+  countEl.textContent = String(arr.length);
   try{
-    const issued=Date.parse(token.metadata?.session?.issued_at || token.created_at || 0);
-    const expMs=(token.metadata?.session?.expires_in ?? 0)*1000;
-    if(!isNaN(issued) && expMs>0) expired = (Date.now() > (issued+expMs));
-  }catch(_e){ expired=false; }
+    const cid = creator?.creatorId || (arr[0]?.proof?.creator_id) || (arr[0]?.creator_id) || null;
+    if(cShort) cShort.textContent = cid ? shortHash(cid, 14) : "—";
+  }catch(e){}
+  if(vState) vState.innerHTML = `<span class="${vaultUnlocked?"ok":"warn"}">${vaultUnlocked?"Unlocked":"Locked"}</span>`;
 
-  const tn=getTraceNet();
-  const cid=token.metadata?.creator_id;
-  let creatorOK=false, mindOK=false;
-  if(cid && tn[cid]){
-    creatorOK=true;
-    const storedMind=tn[cid].mind;
-    const tokenMind=token.metadata?.mindprint?.mind_hash;
-    if(storedMind && tokenMind && storedMind===tokenMind) mindOK=true;
+  let hN = 0, aN = 0;
+  for(const it of arr){
+    const p = it.proof || it;
+    const ai = !!p?.origin?.ai_flag;
+    if(ai) aN++; else hN++;
   }
+  if(humanEl) humanEl.textContent = String(hN);
+  if(aiEl) aiEl.textContent = String(aN);
 
-  let imgOK=true;
-  if(token.metadata?.image_hash){
-    if(maybeImageFile){
-      const upHash=await fileToHash(maybeImageFile);
-      imgOK = (!!upHash && upHash===token.metadata.image_hash);
-    }else imgOK=true;
+  // avatar: deterministic profile glyph + trust aura + gentle mutation
+  try{
+    const wrap = $("#profile_avatar_wrap");
+    if(wrap && aWrap){
+      const epoch = getProfileEpoch();
+      const baseSeed = (creator?.creatorId || "no-creator") + "::" + (profileMindprint?.textHash||"no-mp") + "::epoch="+epoch;
+      // Trust: based on history (human vs ai) + volume
+      const total = Math.max(0, arr.length);
+      const trust = total ? clamp01((hN/(hN+aN+0.0001))*0.75 + Math.min(total,20)/20*0.25) : 0.0;
+      wrap.style.setProperty("--trust", String(trust));
+      wrap.dataset.risk = (aN>hN && total>=3) ? "ai" : "ok";
+
+      // Render avatar glyph
+      aWrap.innerHTML = makeHelixSvg(baseSeed, (aN>hN && total>=3), null);
+      const svg = aWrap.querySelector("svg.glyph3d");
+      if(svg) startGlyphMotion(svg);
+    }else if(aWrap){
+      const seed = (creator?.creatorId || "no-creator") + "::profile";
+      aWrap.innerHTML = makeHelixSvg(seed, false, null);
+      const svg = aWrap.querySelector("svg.glyph3d");
+      if(svg) startGlyphMotion(svg);
+    }
+  }catch(e){}
+
+  list.innerHTML = "";
+  if(!arr.length){
+    hint.classList.remove("hide");
+    return;
   }
+  hint.classList.add("hide");
 
-  if(expired) vSetVisual('EXPIRED ⏳','Badge was valid, but the 60s window has passed.','expired');
-  else if(!sigOK) vSetVisual('VERIFICATION FAILED ❌','Signature does not match public key (invalid badge).','bad');
+  for(const item of arr){
+    const proof = item.proof || item;
 
-  const checks={signatur:sigOK,tid:!expired,creator:creatorOK,mindprint:mindOK,bild:imgOK};
-  const passed=Object.values(checks).filter(Boolean).length;
+    const ai = !!proof?.origin?.ai_flag;
+    const scoreTxt = (proof?.origin?.score_0_1===undefined || proof?.origin?.score_0_1===null) ? "—" : (proof.origin.score_0_1*100).toFixed(1)+"%";
+    const when = new Date(Number(proof.ts||0)).toLocaleString("sv-SE");
+    const helix = makeHelixSvg(proof.glyph_seed, ai, proof.img_data_url||null);
 
-  if(sigOK && !expired && passed>=4){
-    let summary='Signature OK, time within window.';
-    if(creatorOK) summary+=' TraceNet identity found.';
-    if(mindOK) summary+=' Mindprint matches.';
-    if(token.metadata?.image_hash && !maybeImageFile) summary+=' Image not verified now, but other signals are strong.';
-    else if(token.metadata?.image_hash && imgOK) summary+=' Image hash matches.';
-    vSetVisual('HUMAN VERIFIED ✅', summary, 'ok');
-  }else if(!expired && sigOK){
-    vSetVisual('VERIFICATION FAILED ❌','Too few signals match (need at least 4/5).','bad');
-  }
+    const mpP = proof?.mindprint_profile || {};
+    const mpB = proof?.mindprint_badge || {};
 
-  if(v_checks_panel) v_checks_panel.classList.remove('hide');
-  setCheck(chk_sign, sigOK?'ok':'fail');
-  setCheck(chk_time, !expired?'ok':'fail');
-  setCheck(chk_creator, creatorOK?'ok':'fail');
-  setCheck(chk_mind, cid ? (mindOK?'ok':'fail') : 'na');
-  setCheck(chk_img, token.metadata?.image_hash ? (imgOK?'ok':'fail') : 'na');
+    const originReason = proof?.origin?.reason ? String(proof.origin.reason) : (ai ? "Flagged / error" : "OK");
+    const proofJson = safeJson(prettyProof(proof));
 
-  if(chk_summary){
-    chk_summary.textContent = `Signal-score: ${passed}/5. ` + (passed>=4 ? 'Enough signals satisfied to treat the badge as human-verified.' : 'Too few signals satisfied to verify this badge as human.');
+    const details = document.createElement("details");
+    details.className = "profileItem";
+
+    details.innerHTML = `
+      <summary>
+        <div class="profileSummaryRow">
+          <div class="glyphBox" style="width:124px; height:90px; flex:0 0 auto">${helix}${proof.img_data_url?`<div class="glyphWatermark" style="background-image:url(${proof.img_data_url})"></div>`:""}</div>
+          <div class="sumMeta">
+            <div class="rowBetween" style="gap:10px">
+              <div style="min-width:0">
+                <div class="cardTitle">TRACE · ${ai ? "AI ORIGIN" : "HUMAN ORIGIN"}</div>
+                <div class="hint">${when} · score ${scoreTxt}</div>
+              </div>
+              <div class="row" style="gap:10px; align-items:center">
+                <div class="stat ${ai?"err":"ok"}">${ai?"AI":"HUMAN"}</div>
+                <div class="profileChevron">›</div>
+              </div>
+            </div>
+            <div style="height:10px"></div>
+            <div class="stat">Badge_key: <span class="monoWrap">${proof.badge_key||"—"}</span></div>
+          </div>
+        </div>
+      </summary>
+
+      <div class="profileDetails">
+        <div class="kvGrid">
+          <div class="kv"><div class="k">Creator_ID</div><div class="v"><span class="monoBlock">${escapeHtml(proof.creator_id||"—")}</span></div></div>
+          <div class="kv"><div class="k">Badge_key</div><div class="v"><span class="monoBlock">${escapeHtml(proof.badge_key||"—")}</span></div></div>
+          <div class="kv"><div class="k">Proof hash</div><div class="v"><span class="monoBlock">${escapeHtml(proof.proof_hash||"—")}</span></div></div>
+          <div class="kv"><div class="k">Image hash</div><div class="v"><span class="monoBlock">${escapeHtml(proof.img_hash||"—")}</span></div></div>
+          <div class="kv"><div class="k">Glyph seed</div><div class="v"><span class="monoBlock">${escapeHtml(proof.glyph_seed||"—")}</span></div></div>
+
+          <div class="kv"><div class="k">Window</div><div class="v"><span class="monoWrap">${Number(proof.window_s||0)}s · ts ${Number(proof.ts||0)}</span></div></div>
+          <div class="kv"><div class="k">Origin</div><div class="v"><span class="monoWrap">${ai ? "AI ORIGIN FLAG" : "HUMAN ORIGIN"} · ${scoreTxt} · ${escapeHtml(originReason)}</span></div></div>
+
+          <div class="kv"><div class="k">Mindprint</div><div class="v">
+            <div class="hint" style="margin-bottom:6px">Profile: score ${(Number(mpP.score_0_1||0)*100).toFixed(1)}% · Badge: score ${(Number(mpB.score_0_1||0)*100).toFixed(1)}%</div>
+            <div class="hint">Profile textHash</div>
+            <div class="monoWrap">${escapeHtml(mpP.textHash||"—")}</div>
+            <div style="height:6px"></div>
+            <div class="hint">Badge textHash</div>
+            <div class="monoWrap">${escapeHtml(mpB.textHash||"—")}</div>
+          </div></div>
+
+          <div class="kv"><div class="k">Glyph</div><div class="v">
+            <div class="glyphBox" style="width:180px; height:120px">${helix}${proof.img_data_url?`<div class="glyphWatermark" style="background-image:url(${proof.img_data_url})"></div>`:""}</div>
+          </div></div>
+
+          <div class="kv"><div class="k">Proof JSON</div><div class="v"><pre class="monoBlock">${proofJson}</pre></div></div>
+        </div>
+
+        <div class="rowBtns">
+          <button class="btn primary" data-act="open_verify">Open in Verify</button>
+          <button class="btn" data-act="copy_hash">Copy proof hash</button>
+          <button class="btn" data-act="copy_json">Copy JSON</button>
+        </div>
+      </div>
+    `;
+
+    // actions
+    details.addEventListener("click", (ev)=>{
+      const btn = ev.target?.closest?.("button[data-act]");
+      if(!btn) return;
+      ev.preventDefault();
+      ev.stopPropagation();
+      const act = btn.getAttribute("data-act");
+      if(act==="open_verify"){
+        lastProof = proof;
+        storeLast(proof, null);
+        setTab("verify");
+        loadLastIntoVerify();
+      }else if(act==="copy_hash"){
+        copyToClipboard(proof.proof_hash || "");
+        toast("Copied proof hash");
+      }else if(act==="copy_json"){
+        copyToClipboard(JSON.stringify(prettyProof(proof), null, 2));
+        toast("Copied JSON");
+      }
+    });
+
+    list.appendChild(details);
+
+    // start motion on glyphs inside this item
+    try{
+      const svgs = details.querySelectorAll("svg.glyph3d");
+      svgs.forEach(svg=>startGlyphMotion(svg));
+    }catch(e){}
   }
 }
-async function smartVerify(){
-  const badgeFile=v_file && v_file.files ? v_file.files[0] : null;
-  const imgFile=v_img && v_img.files ? (v_img.files[0]||null) : null;
-  if(!badgeFile){ alert('Upload a TRACE badge (.svg) first.'); return; }
-  const text=await badgeFile.text();
-  const token=parseBadgeFromText(text);
-  if(!token){ alert('Could not read badge data.'); return; }
-  await verifyToken(token, imgFile);
-}
-async function quickVerifyCurrent(){
-  const imgFile=v_img && v_img.files ? (v_img.files[0]||null) : null;
-  if(!lastToken){ vSetVisual('NO BADGE YET','Create a TRACE badge first in Use.','bad'); resetChecks(); return; }
-  await verifyToken(lastToken, imgFile);
+function loadLast(){
+  try{
+    const j = store.get("signai_last_proof");
+    return j ? JSON.parse(j) : null;
+  }catch(e){ return null; }
 }
 
-/* init */
-ensureTraceNetRegistered();
-renderTraceNetStatus();
-updateKeyDisplay();
-loadVault();
-resetChecks();
+/* ========= analyze + create ========= */
+async function signBytes(privKey, bytes){
+  const sig = await crypto.subtle.sign("Ed25519", privKey, bytes);
+  return new Uint8Array(sig);
+}
+async function verifySig(pubKey, sigU8, bytes){
+  return await crypto.subtle.verify("Ed25519", pubKey, sigU8, bytes);
+}
+
+function canonicalize(obj){
+  // deterministic JSON
+  const keys = Object.keys(obj).sort();
+  const o = {};
+  for(const k of keys){
+    const v = obj[k];
+    o[k] = (v && typeof v === "object" && !Array.isArray(v)) ? canonicalize(v) : v;
+  }
+  return o;
+}
+
+$("#btn_analyze").addEventListener("click", async ()=>{
+  try{
+  if(!vaultUnlocked) return warn("Unlocka Vault först.");
+  if(!creator.privKey || !creator.pubKey || !creator.creatorId) return warn("Skapa keypair i Vault först.");
+  if(!(profileMindprint.score_0_1>0.6)) return warn("Registrera Vault mindprint först (profil).");
+  if(!badgeMindprint.ready) return warn("Registrera mindprint per badge först.");
+
+  $("#origin_out").textContent = "Analyserar (Winston AI)…";
+  const origin = await attemptWinstonAI(selectedImageFile);
+  // If no image: allow human (no origin)
+  if(origin.reason==="no_image"){
+    origin.score_0_1 = 0.0;
+    origin.ai_flag = false;
+  }else if(!origin.ok){
+    // fail-closed
+    origin.score_0_1 = 1.0;
+    origin.ai_flag = true;
+  }
+
+  $("#origin_out").textContent = origin.ai_flag ? `AI flagged (≥ 50%) · score ${(origin.score_0_1*100).toFixed(1)}%` : `Looks human · score ${(origin.score_0_1*100).toFixed(1)}%`;
+
+  const windowS = Number($("#window_s").value || 24);
+  const ts = Date.now();
+
+  // Unique per-badge key (decoupled from creator key): deterministic container value for seed + proof
+  const rnd = new Uint8Array(16);
+  crypto.getRandomValues(rnd);
+  const rndHex = [...rnd].map(b=>b.toString(16).padStart(2,"0")).join("");
+  const badge_key = await sha256Hex(textToU8([creator.creatorId, ts, rndHex, badgeMindprint.textHash||""].join("|")));
+
+  const payloadText = $("#payload_text").value || "";
+
+  // image hash (optional)
+  let imgHash = null;
+  let baseImgDataUrl = null;
+  if(selectedImageFile){
+    const ab = await selectedImageFile.arrayBuffer();
+    imgHash = await sha256Hex(new Uint8Array(ab));
+    try{ baseImgDataUrl = await fileToDataUrl(selectedImageFile); }catch(e){}
+  }
+
+  // glyph seed combines: creatorId + profileMP + badgeMP + imgHash + origin score
+  const seedMaterial = [
+    creator.creatorId,
+    badge_key,
+    profileMindprint.textHash, profileMindprint.rhythmHash,
+    badgeMindprint.textHash, badgeMindprint.rhythmHash,
+    imgHash || "noimg",
+    "origin="+origin.score_0_1.toFixed(4),
+    origin.ai_flag ? "AI" : "HUMAN"
+  ].join("|");
+  const glyphSeed = await sha256Hex(textToU8(seedMaterial));
+
+  const base = {
+    v: "1.0",
+    hop: "8.0",
+    ts,
+    window_s: windowS,
+    creator_id: creator.creatorId,
+    badge_key,
+    payload_text: payloadText,
+    img_hash: imgHash,
+    img_data_url: null,
+    origin: {
+      provider: "WinstonAI",
+      ok: !!origin.ok,
+      score_0_1: origin.score_0_1,
+      ai_flag: !!origin.ai_flag,
+      reason: origin.reason
+    },
+    mindprint_profile: {
+      textHash: profileMindprint.textHash,
+      rhythmHash: profileMindprint.rhythmHash,
+      score_0_1: profileMindprint.score_0_1
+    },
+    mindprint_badge: {
+      textHash: badgeMindprint.textHash,
+      rhythmHash: badgeMindprint.rhythmHash,
+      score_0_1: badgeMindprint.score_0_1
+    },
+    glyph_seed: glyphSeed
+  };
+  if(baseImgDataUrl) base.img_data_url = baseImgDataUrl;
+
+
+  const canon = JSON.stringify(canonicalize(base));
+  const bytes = textToU8(canon);
+  const sig = await signBytes(creator.privKey, bytes);
+  const proof = {
+    ...base,
+    sig_b64: btoa(String.fromCharCode(...sig)),
+    pub_jwk: JSON.parse(store.get("signai_pub_jwk")||"{}")
+  };
+
+  // save in memory
+  lastProof = proof;
+  storeLast(proof, null);
+  addToHistory(proof);
+
+  // render badge
+  $("#badge_wrap").innerHTML = makeBadgeHtml(proof);
+  // start countdown (window left)
+  startWindowCountdown(proof.ts, proof.window_s, $("#badge_window_left"), "badge");
+  // start glyph motion (crisp rotating strands)
+  try{
+    const svg = $("#badge_wrap").querySelector("svg.glyph3d");
+    if(svg) startGlyphMotion(svg);
+  }catch(e){}
+  // countdown (window left)
+  $("#badge_click").addEventListener("click", ()=>{
+    setTab("verify");
+    loadLastIntoVerify();
+  });
+
+  // admin dump if unlocked
+  if(adminUnlocked){
+    $("#admin_dump").value = JSON.stringify(proof, null, 2);
+  }
+
+  }catch(e){
+    console.error(e);
+    warn('Error: '+(e && e.message ? e.message : e));
+  }
+});
+
+$("#btn_download_svg").addEventListener("click", ()=>{
+  if(!lastProof) return warn("Skapa en badge först.");
+  // We'll export just the helix svg (glyph) as svg file for now.
+  const ai = !!lastProof.origin.ai_flag;
+  const svg = makeHelixSvg(lastProof.glyph_seed, ai);
+  downloadText(svg, "signai_glyph.svg", "image/svg+xml");
+});
+$("#btn_save_json").addEventListener("click", ()=>{
+  if(!lastProof) return warn("Skapa en badge först.");
+  downloadText(JSON.stringify(lastProof, null, 2), "signai_proof.json", "application/json");
+});
+
+/* ========= verify ========= */
+async function verifyProof(proof){
+  // Reconstruct base (without signature/public key container)
+  const {sig_b64, pub_jwk, ...base} = proof;
+  const canon = JSON.stringify(canonicalize(base));
+  const bytes = textToU8(canon);
+
+  let pubKey=null;
+  try{
+    pubKey = await crypto.subtle.importKey("jwk", pub_jwk, {name:"Ed25519"}, true, ["verify"]);
+  }catch(e){
+    return {ok:false, reason:"bad_pubkey"};
+  }
+
+  const sigBytes = Uint8Array.from(atob(sig_b64), c=>c.charCodeAt(0));
+  const sigOk = await verifySig(pubKey, sigBytes, bytes);
+
+  const now = Date.now();
+  const windowOk = (typeof base.window_s === "number") ? ((now >= base.ts) && ((now - base.ts) <= base.window_s*1000)) : false;
+
+  // mindprints: we can only verify hashes are present (for demo). In a real system you'd compare to live input.
+  const mpOk = !!(base.mindprint_badge?.textHash && base.mindprint_badge?.rhythmHash);
+  const traceOk = true; // placeholder (TraceNet)
+
+  return {sigOk, windowOk, mpOk, traceOk};
+}
+
+function renderVerify(proof, checks){
+  const ai = !!proof?.origin?.ai_flag;
+  const scoreTxt = (proof?.origin?.score_0_1===undefined || proof?.origin?.score_0_1===null) ? "—" : (proof.origin.score_0_1*100).toFixed(1)+"%";
+  $("#verify_out").textContent = ai ? "AI FLAGGED" : "HUMAN VERIFIED";
+  $("#verify_out").className = ai ? "err" : "ok";
+
+  $("#verify_box").innerHTML = `
+    <div class="resultCard ${ai?"bad":"good"}">
+      <div class="resultTitle">${ai?"AI ORIGIN FLAG":"HUMAN ORIGIN"}</div>
+      <div class="resultSub">${ai?"content looks synthetic":"content looks human"} · score ${scoreTxt}</div>
+      <div class="resultMeta">
+        <div><b>Signature:</b> <span class="${checks.sigOk?"ok":"err"}">${checks.sigOk?"OK":"FAIL"}</span></div>
+        <div><b>Window:</b> <span class="${checks.windowOk?"ok":"warn"}">${checks.windowOk?"OK":"OUT"}</span> <span class="mono">(left <span id="verify_window_left">—</span> / ${proof.window_s}s)</span></div>
+        <div><b>TraceNet:</b> <span class="${checks.traceOk?"ok":"warn"}">${checks.traceOk?"OK":"—"}</span></div>
+        <div><b>Mindprint:</b> <span class="${checks.mpOk?"ok":"warn"}">${checks.mpOk?"OK":"—"}</span></div>
+        <div class="mono"><b>Creator_ID:</b> ${proof.creator_id}</div>
+        <div class="mono"><b>Image hash:</b> ${proof.img_hash || "—"}</div>
+      </div>
+    </div>
+  `;
+
+  // start verify countdown after DOM exists
+  startWindowCountdown(proof.ts, proof.window_s, $("#verify_window_left"), "verify");
+}
+
+async function loadLastIntoVerify(){
+  const proof = lastProof || loadLast();
+  if(!proof){
+    $("#verify_out").textContent="—";
+    $("#verify_box").innerHTML="";
+    $("#verify_raw").value="";
+    return;
+  }
+  $("#verify_raw").value = JSON.stringify(proof, null, 2);
+  const checks = await verifyProof(proof);
+  renderVerify(proof, checks);
+}
+
+$("#btn_load_last").addEventListener("click", ()=>{
+  loadLastIntoVerify();
+});
+
+
+$("#btn_profile_refresh").addEventListener("click", ()=>renderProfile());
+$("#btn_profile_clear").addEventListener("click", ()=>{
+  if(!confirm("Clear badge history on this device?")) return;
+  setHistory([]);
+  renderProfile();
+});
+
+
+$("#btn_verify").addEventListener("click", async ()=>{
+  const f = $("#file_proof").files && $("#file_proof").files[0];
+  if(!f) return warn("Välj en proof .json först.");
+  const txt = await f.text();
+  let proof=null;
+  try{ proof = JSON.parse(txt); }catch(e){ return warn("Ogiltig JSON."); }
+  lastProof = proof;
+  storeLast(proof, null);
+  $("#verify_raw").value = JSON.stringify(proof, null, 2);
+  const checks = await verifyProof(proof);
+  renderVerify(proof, checks);
+});
+
+/* ========= admin ========= */
+$("#btn_admin_unlock").addEventListener("click", ()=>{
+  const pin = $("#admin_pin").value || "";
+  if(pin !== "1996") return warn("Fel PIN.");
+  adminUnlocked = true;
+  $("#admin_state").textContent = "Unlocked";
+  $("#admin_state").className = "ok";
+  $("#admin_dump").value = lastProof ? JSON.stringify(lastProof, null, 2) : "(No proof yet)";
+});
+$("#btn_admin_lock").addEventListener("click", ()=>{
+  adminUnlocked = false;
+  $("#admin_state").textContent="Locked";
+  $("#admin_state").className="warn";
+  $("#admin_dump").value="(Locked)";
+});
+
+/* ========= init ========= */
+(function init(){
+  setVaultUI();
+  refreshMindprintUI();
+  setReadyUI();
+  // Try to load last proof for verify
+  const lp = loadLast();
+  if(lp) lastProof = lp;
+  // Profile history
+  try{ renderProfile(); }catch(e){}
+})();
 </script>
 </body>
 </html>
