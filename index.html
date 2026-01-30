@@ -181,27 +181,33 @@
   .glyphBox{ }
   .glyphBox svg.glyph3d{
     display:block;
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    z-index:2;
     shape-rendering: geometricPrecision;
     text-rendering: geometricPrecision;
     image-rendering: auto;
-    filter: none;
-  
-    width:100%;
-    height:100%;}
+    filter:none;
+  }
 .glyphBox{position:relative; overflow:hidden;}
-  .glyphBox .thumbWatermark{
+  .glyphBox{position:relative; overflow:hidden; background:#000;}
+  .glyphBox .thumbBg{
     position:absolute;
-    width:22px; height:22px;
-    left:50%; top:50%;
-    transform:translate(-50%,-50%) rotate(45deg);
-    border-radius:50%;
+    width:40px;
+    height:40px;
+    right:10px;
+    top:10px;
+    border-radius:10px;
     background-size:cover;
     background-position:center;
     opacity:.22;
-    filter: none;
-    box-shadow:0 0 0 1px rgba(255,255,255,.10), 0 0 18px rgba(0,0,0,.35) inset;
+    filter:saturate(1.15) contrast(1.08);
     mix-blend-mode:screen;
+    z-index:1;
     pointer-events:none;
+    box-shadow: 0 0 0 1px rgba(255,255,255,.10) inset, 0 10px 24px rgba(0,0,0,.45);
   }
   .glyphHint{
     position:absolute; left:12px; bottom:10px;
@@ -429,135 +435,6 @@
 function getActiveUser(){
   return localStorage.getItem("trace_active_user") || "default";
 }
-</script>
-
-
-<script>
-(function(){
-  function resetProfileMindprintForUser(){
-    const u = localStorage.getItem("trace_active_user") || "default";
-    const k = "signai_profile_mp_" + u;
-    try{
-      const saved = localStorage.getItem(k);
-      if(!saved){
-        window.profileMindprint = null;
-        if(typeof refreshMindprintUI==="function") refreshMindprintUI();
-      }
-    }catch(e){}
-  }
-  document.addEventListener("DOMContentLoaded", resetProfileMindprintForUser);
-})();
-</script>
-
-
-<script>
-(function(){
-  const _oldRefresh = window.refreshMindprintUI;
-  window.refreshMindprintUI = function(){
-    try{
-      const u = localStorage.getItem("trace_active_user") || "default";
-      const k = "signai_profile_mp_" + u;
-      const stored = localStorage.getItem(k);
-
-      // derive profileMindprint ONLY from storage
-      window.profileMindprint = stored ? JSON.parse(stored) : null;
-    }catch(e){
-      window.profileMindprint = null;
-    }
-    if(typeof _oldRefresh === "function"){
-      _oldRefresh();
-    }
-  };
-})();
-</script>
-
-
-<script>
-(function(){
-  function updateProfileMindprintStatus(){
-    const u = localStorage.getItem("trace_active_user") || "default";
-    const k = "signai_profile_mp_" + u;
-    const has = !!localStorage.getItem(k);
-
-    const label = document.querySelector("#vault_mp_status");
-    if(label){
-      if(has){
-        label.textContent = "registered ✓";
-        label.classList.add("ok");
-        label.classList.remove("warn");
-      }else{
-        label.textContent = "not registered";
-        label.classList.remove("ok");
-        label.classList.add("warn");
-      }
-    }
-  }
-
-  // run on load + expose for later calls
-  document.addEventListener("DOMContentLoaded", updateProfileMindprintStatus);
-  window.__updateProfileMindprintStatus = updateProfileMindprintStatus;
-})();
-</script>
-
-
-<script>
-(function(){
-  function forceInitialProfileMindprintState(){
-    const label = document.querySelector("#vault_mp_status");
-    if(!label) return;
-
-    const u = localStorage.getItem("trace_active_user") || "default";
-    const k = "signai_profile_mp_" + u;
-    const has = !!localStorage.getItem(k);
-
-    if(!has){
-      label.textContent = "not registered";
-      label.classList.remove("ok");
-      label.classList.add("warn");
-    }
-  }
-  document.addEventListener("DOMContentLoaded", forceInitialProfileMindprintState);
-  window.__forceInitialProfileMindprintState = forceInitialProfileMindprintState;
-})();
-</script>
-
-
-<script>
-(function(){
-  const _orig = window.refreshMindprintUI;
-  window.refreshMindprintUI = function(){
-    const u = localStorage.getItem("trace_active_user") || "default";
-    const k = "signai_profile_mp_" + u;
-    const stored = localStorage.getItem(k);
-
-    const profileHas = !!stored;
-
-    const badgeOk = !!window.badgeMindprint?.ready
-      && !!window.badgeMindprint?.textHash
-      && (window.badgeMindprint.score_0_1 > 0.35);
-
-    const profLabel = document.querySelector("#vault_mp_status");
-    if(profLabel){
-      if(profileHas){
-        profLabel.textContent = "registered ✓";
-        profLabel.className = "ok";
-      }else{
-        profLabel.textContent = "required";
-        profLabel.className = "warn";
-      }
-    }
-
-    const badgeLabel = document.querySelector("#mp_status");
-    if(badgeLabel){
-      badgeLabel.textContent = badgeOk ? "registered ✓" : "required";
-      badgeLabel.className = badgeOk ? "ok" : "warn";
-    }
-
-    if(typeof _orig === "function"){
-      try{ _orig(); }catch(e){}
-    }
-  };
-})();
 </script>
 
 
@@ -888,12 +765,19 @@ function safeJsonStore(key, obj){
   }
 }
 function slimProofForStorage(proof){
-  // Avoid storing massive data URLs/signatures repeatedly.
+  // Keep storage small: preserve thumb_data_url, drop huge full-size img_data_url
   try{
     const p = JSON.parse(JSON.stringify(proof||{}));
+
+    // Always prefer keeping thumbnails (small) for history previews
+    if(typeof p.thumb_data_url !== "string" || !p.thumb_data_url.startsWith("data:")){
+      p.thumb_data_url = null;
+    }
+
+    // Drop full image if it's large (localStorage quota protection)
     if(typeof p.img_data_url==="string" && p.img_data_url.length>45000){
-      // keep a short marker; full proof still available in-memory for the latest badge
-      p.img_data_url = p.img_data_url.slice(0,120) + "…";
+      p.img_data_url = null;
+      p.img_data_url_dropped = true;
     }
     return p;
   }catch(e){
@@ -1119,6 +1003,52 @@ async function fileToDataUrl(file){
   }
   const b64 = btoa(bin);
   return `data:${file.type || "application/octet-stream"};base64,${b64}`;
+}
+async function fileToThumbDataUrl(file, maxSize=140, quality=0.82){
+  // Creates a small thumbnail data URL for badge history (keeps localStorage sane)
+  let objUrl = null;
+  try{
+    let src = null;
+    try{ objUrl = URL.createObjectURL(file); src = objUrl; }catch(e){ src = null; }
+    if(!src){
+      src = await fileToDataUrl(file);
+    }
+
+    const img = await new Promise((resolve, reject)=>{
+      const im = new Image();
+      im.onload = ()=> resolve(im);
+      im.onerror = (e)=> reject(e);
+      im.src = src;
+    });
+
+    const iw = (img.naturalWidth || img.width || 1);
+    const ih = (img.naturalHeight || img.height || 1);
+    const s = Math.max(1, Math.max(iw, ih));
+    const scale = Math.min(1, maxSize / s);
+    const w = Math.max(1, Math.round(iw * scale));
+    const h = Math.max(1, Math.round(ih * scale));
+
+    const canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext("2d", { alpha: true });
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(img, 0, 0, w, h);
+
+    // Prefer WebP if supported
+    try{
+      const webp = canvas.toDataURL("image/webp", quality);
+      if(webp && webp.startsWith("data:image/webp")) return webp;
+    }catch(e){}
+
+    // Fall back to JPEG (small)
+    return canvas.toDataURL("image/jpeg", quality);
+  }catch(e){
+    return null;
+  }finally{
+    try{ if(objUrl) URL.revokeObjectURL(objUrl); }catch(e){}
+  }
 }
 function textToU8(s){ return new TextEncoder().encode(s||""); }
 function clamp01(x){ return Math.max(0, Math.min(1, x)); }
@@ -1446,13 +1376,25 @@ function rhythmTracker(el, onDone, opts={}){
   let lastT = null;
   let intervals = [];
   let done = false;
+  let doneText = "";
 
   let startedAt = null;
   let timerId = null;
 
   function markDone(){
     done = true;
+    doneText = el.value || "";
     if(timerId) { clearTimeout(timerId); timerId = null; }
+
+  function resetCapture(){
+    done = false;
+    doneText = "";
+    lastT = null;
+    intervals = [];
+    startedAt = null;
+    if(timerId) { clearTimeout(timerId); timerId = null; }
+  }
+
   }
 
   async function computeAndDone(){
@@ -1490,7 +1432,11 @@ function rhythmTracker(el, onDone, opts={}){
   }
 
   el.addEventListener("keydown", ()=>{
-    if(done) return;
+    if(done){
+      const cur = el.value || "";
+      if(cur !== doneText) resetCapture();
+      else return;
+    }
     const t = nowMs();
     if(startedAt === null){
       startedAt = t;
@@ -1506,7 +1452,11 @@ function rhythmTracker(el, onDone, opts={}){
   });
 
   el.addEventListener("input", ()=>{
-    if(done) return;
+    if(done){
+      const cur = el.value || "";
+      if(cur !== doneText) resetCapture();
+      else return;
+    }
     const txt = el.value || "";
 
     // Auto-capture by characters (e.g. profile mindprint)
@@ -1525,14 +1475,41 @@ function rhythmTracker(el, onDone, opts={}){
   });
 }
 function refreshMindprintUI(){
-  const profileOk = vaultUnlocked && !!profileMindprint?.textHash && (profileMindprint.score_0_1>0.6);
+  const vaultLabel = $("#vault_mp_status");
+  const badgeLabel = $("#mp_status");
+  const vaultInput = $("#vault_mp");
+  const vaultHint  = $("#vault_mp_hint");
+
   const badgeOk = !!badgeMindprint?.ready && !!badgeMindprint?.textHash && (badgeMindprint.score_0_1>0.35);
 
-  $("#vault_mp_status").textContent = profileOk ? "registered ✓" : "required";
-  $("#vault_mp_status").className = profileOk ? "ok" : "warn";
+  // Badge mindprint (per badge)
+  if(badgeLabel){
+    badgeLabel.textContent = badgeOk ? "registered ✓" : "required";
+    badgeLabel.className = badgeOk ? "ok" : "warn";
+  }
 
-  $("#mp_status").textContent = badgeOk ? "registered ✓" : "required";
-  $("#mp_status").className = badgeOk ? "ok" : "warn";
+  // Profile/Vault mindprint
+  if(!vaultUnlocked){
+    if(vaultLabel){
+      vaultLabel.textContent = "locked";
+      vaultLabel.className = "warn";
+    }
+    if(vaultInput) vaultInput.disabled = true;
+    if(vaultHint){
+      vaultHint.textContent = "Unlock vault to register (or update) your profile mindprint.";
+      vaultHint.className = "hint";
+    }
+    setReadyUI();
+    return;
+  }
+
+  if(vaultInput) vaultInput.disabled = false;
+
+  const profileOk = !!profileMindprint?.textHash && (profileMindprint.score_0_1>0.6);
+  if(vaultLabel){
+    vaultLabel.textContent = profileOk ? "registered ✓" : "required";
+    vaultLabel.className = profileOk ? "ok" : "warn";
+  }
 
   setReadyUI();
 }
@@ -1597,16 +1574,22 @@ async function attemptWinstonAI(file){
 
 /* ========= badge + proof ========= */
 
-function makeHelixSvg(seedInput, aiFlag, scoreOrImg, maybeImg){
-  // TRACE glyph v4.5: crisper + bolder colors + modern "sigil" complexity (no face), used for profile + badges
+function makeHelixSvg(seedInput, aiFlag, scoreOrImg, maybeImg, mode){
+  // TRACE glyph v6: cleaner "future_glyph" — few readable neon strands + deterministic morph
+  // mode: "badge" (default) or "avatar" (profile)
   let score = NaN;
   let imgDataUrl = null;
   if(typeof scoreOrImg === "number") score = scoreOrImg;
   else if(typeof scoreOrImg === "string") imgDataUrl = scoreOrImg;
   if(typeof maybeImg === "string") imgDataUrl = maybeImg;
+  mode = mode || "badge";
 
-  const w = 120, h = 92;
+  // Match real UI box ratios (prevents side-bars / "grey notch")
+  const w = (mode==="badge") ? 142 : 92;
+  const h = 92;
   const cx = w/2, cy = h/2;
+  const phi = 1.61803398875;
+  const golden = 2*Math.PI*(1 - 1/phi); // golden angle
 
   // ---- seed bytes (hex sha256 or fallback string hash)
   const seedStr = String(seedInput || "");
@@ -1630,338 +1613,431 @@ function makeHelixSvg(seedInput, aiFlag, scoreOrImg, maybeImg){
   const b = (i)=> bytes[i % bytes.length];
   const r01 = (i)=> b(i)/255;
   const clamp01 = (x)=> Math.max(0, Math.min(1, x));
-  const fmt = (x)=> Number(x).toFixed(2);
 
   const s01 = isFinite(score) ? clamp01(score) : (aiFlag ? 0.72 : 0.18);
-  const risk = aiFlag ? (0.28 + 0.72*s01) : (0.10*s01);
+  const hasImg = !!imgDataUrl;
 
-  // Color logic: HUMAN = vivid spectrum, AI = constrained red family (in-structure, not overlay)
-  const baseHue = r01(0)*360;
-  const hue  = aiFlag ? (3 + r01(1)*14) : baseHue;
-  const hue2 = aiFlag ? (350 + r01(2)*18) : ((hue + 120 + r01(3)*70) % 360);
-  const hue3 = aiFlag ? (12 + r01(4)*20)  : ((hue + 242 + r01(5)*60) % 360);
+  // If NO image and default human => render more primitive (fewer features)
+  const primitive = (mode==="badge") && (!hasImg) && (!aiFlag) && (isFinite(score) ? (s01 < 0.05) : true);
 
-  const sat   = Math.round(82 + r01(6)*16 + (aiFlag?8:0));   // bolder
-  const light = Math.round(56 + r01(7)*7);                   // brighter
-  const sat2  = Math.max(55, sat - 10);
+  // Strand counts (keep readable)
+  let strandCount = (mode==="avatar") ? (primitive ? 1 : 2) : (primitive ? 1 : (hasImg ? 3 : 2));
+  // keep AI tight / readable
+  if(aiFlag && mode!=="avatar") strandCount = Math.min(3, strandCount);
 
-  // Evolution knobs (stage included upstream in seedInput)
-  const stage = Math.max(0, Math.min(12, b(200)%13));  // 0..12
+  // Constellation nodes (badge only)
+  const nodeCount = (mode==="avatar" || primitive) ? 0 : (hasImg ? 10 : 7);
 
-  // Species selection (iconic silhouettes)
-  // 0 = ORB (smooth), 1 = KITE (angular), 2 = CRAB (side lobes)
-  const species = (b(24) % 3);
+  // Color palette (seeded micro-variation, but controlled)
+  // HUMAN: cyan ↔ magenta ↔ amber. AI: warm amber/orange/red.
+  const jitter = (x, j)=> x + (r01(j)-0.5)*10;
+  let h1, h2, h3;
+  if(aiFlag){
+    h1 = jitter(20, 3);
+    h2 = jitter(34, 4);
+    h3 = jitter(10, 5);
+  }else{
+    h1 = jitter(192, 3);
+    h2 = jitter(312, 4);
+    h3 = jitter(44,  5);
+  }
+  const sat = primitive ? 54 : 84;
+  const light = primitive ? 60 : 62;
 
   const gid = "g"+bytes.slice(0,6).map(x=>x.toString(16).padStart(2,"0")).join("");
-  const crispStroke = 'vector-effect="non-scaling-stroke"';
 
-  // Body base (slightly larger at higher stage)
-  const bodyR = 21 + stage*0.75 + r01(8)*4.8;
-  const squish = 0.75 + r01(9)*0.12;
-  let d = "";
+  const hsl = (hh, ss, ll, aa=1)=> `hsla(${hh.toFixed(1)}, ${ss}%, ${ll}%, ${aa})`;
 
-  if(species === 0){
-    // ORB: smooth blob with even harmonics (symmetry + clarity)
-    const spikes = 12;
-    const wob  = 0.14 + r01(10)*0.10;
-    const wob2 = 0.08 + r01(11)*0.10;
-    const ph1 = r01(12)*Math.PI*2;
-    const ph2 = r01(13)*Math.PI*2;
-    for(let i=0;i<=spikes;i++){
-      const t = (i/spikes) * Math.PI*2;
-      const rr = bodyR * (1 + wob*Math.sin(2*t + ph1) + wob2*Math.sin(4*t + ph2));
-      const x = cx + rr*Math.cos(t);
-      const y = cy + (rr*squish)*Math.sin(t);
-      d += (i===0 ? "M":"L") + fmt(x) + " " + fmt(y) + " ";
-    }
-    d += "Z";
-  }else if(species === 1){
-    // KITE: symmetric diamond with soft corners
-    const top = cy - (bodyR*0.98);
-    const bot = cy + (bodyR*0.92);
-    const left = cx - (bodyR*1.12);
-    const right = cx + (bodyR*1.12);
-    const k = 0.34 + r01(30)*0.14;
-    d = `M ${fmt(cx)} ${fmt(top)}
-         Q ${fmt(cx + (right-cx)*k)} ${fmt(cy - bodyR*0.58)} ${fmt(right)} ${fmt(cy)}
-         Q ${fmt(cx + (right-cx)*k)} ${fmt(cy + bodyR*0.58)} ${fmt(cx)} ${fmt(bot)}
-         Q ${fmt(cx - (cx-left)*k)} ${fmt(cy + bodyR*0.58)} ${fmt(left)} ${fmt(cy)}
-         Q ${fmt(cx - (cx-left)*k)} ${fmt(cy - bodyR*0.58)} ${fmt(cx)} ${fmt(top)} Z`;
-  }else{
-    // CRAB: central body + mirrored side lobes
-    const rx = bodyR*0.92;
-    const ry = bodyR*0.66*squish;
-    const k = 0.42 + r01(42)*0.12;
-    d = `M ${fmt(cx)} ${fmt(cy-ry)}
-         Q ${fmt(cx+rx*k)} ${fmt(cy-ry)} ${fmt(cx+rx)} ${fmt(cy)}
-         Q ${fmt(cx+rx*k)} ${fmt(cy+ry)} ${fmt(cx)} ${fmt(cy+ry)}
-         Q ${fmt(cx-rx*k)} ${fmt(cy+ry)} ${fmt(cx-rx)} ${fmt(cy)}
-         Q ${fmt(cx-rx*k)} ${fmt(cy-ry)} ${fmt(cx)} ${fmt(cy-ry)} Z`;
+  // defs (strand gradients + optional avatar core)
+  const gradDefs = [];
+  for(let i=0;i<strandCount;i++){
+    // golden-angle shift keeps harmony but avoids "same-y"
+    const shift = (i- (strandCount-1)/2) * (aiFlag ? 7 : 11) + (r01(20+i)-0.5)*5;
+    const a = hsl(h1+shift, sat, light, 0.97);
+    const b2 = hsl(h2+shift, sat, light, 0.97);
+    const c  = hsl(h3+shift, sat, light, 0.97);
+    gradDefs.push(`
+      <linearGradient id="${gid}_grad${i}" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%"  stop-color="${a}"/>
+        <stop offset="50%" stop-color="${b2}"/>
+        <stop offset="100%" stop-color="${c}"/>
+      </linearGradient>
+    `);
+  }
+  if(mode==="avatar"){
+    const ca = hsl(aiFlag?30:205, 84, 60, 0.55);
+    const cb = hsl(aiFlag?10:315, 84, 60, 0.00);
+    gradDefs.push(`
+      <radialGradient id="${gid}_core" cx="50%" cy="45%" r="70%">
+        <stop offset="0%"   stop-color="${ca}"/>
+        <stop offset="70%"  stop-color="${cb}"/>
+        <stop offset="100%" stop-color="rgba(0,0,0,0)"/>
+      </radialGradient>
+    `);
   }
 
-  // Extra lobes for CRAB (mirrored)
-  let extras = "";
-  if(species === 2){
-    const rx = bodyR*0.92;
-    const ry = bodyR*0.66*squish;
-    const lrx = rx*(0.40 + r01(40)*0.10);
-    const lry = ry*(0.36 + r01(41)*0.08);
-    const offsetX = rx*(1.30 + r01(43)*0.08);
-    const offsetY = ry*(0.18 + r01(44)*0.06);
-    extras += `
-      <ellipse cx="${fmt(cx-offsetX)}" cy="${fmt(cy+offsetY)}" rx="${fmt(lrx)}" ry="${fmt(lry)}"
-               fill="url(#${gid}_body)" opacity="${fmt(0.80)}" stroke="url(#${gid}_stroke)"
-               stroke-width="${fmt(1.45)}" ${crispStroke}/>
-      <ellipse cx="${fmt(cx+offsetX)}" cy="${fmt(cy+offsetY)}" rx="${fmt(lrx)}" ry="${fmt(lry)}"
-               fill="url(#${gid}_body)" opacity="${fmt(0.80)}" stroke="url(#${gid}_stroke)"
-               stroke-width="${fmt(1.45)}" ${crispStroke}/>`;
-  }
+  // Build points (deterministic “snake” motion). Time=0 for initial render.
+  function buildPoints(params, tSec){
+    const N = params.N;
+    const pts = [];
+    for(let k=0;k<N;k++){
+      const t = (k/N) * Math.PI*2;
 
-  // Orbits: segmented, deterministic dash (adds modern technical feel)
-  const orbitR1 = 30 + r01(21)*10;
-  const orbitR2 = 18 + r01(22)*8;
-  const dashA1 = 6 + (b(210)%7);
-  const dashB1 = 3 + (b(211)%6);
-  const dashA2 = 4 + (b(212)%6);
-  const dashB2 = 2 + (b(213)%5);
+      // radial wobble (bounded, readable)
+      const wob =
+          params.w1*Math.sin(params.f1*t + params.p1 + tSec*params.s1)
+        + params.w2*Math.sin(params.f2*t*phi + params.p2 + tSec*params.s2)
+        + params.w3*Math.sin(params.f5*t + params.p6 + tSec*params.s6);
 
-  // Rune ticks on outer orbit
-  const tickN = 10 + (b(214)%7); // 10..16
-  let ticks = "";
-  for(let i=0;i<tickN;i++){
-    const t = (i/tickN)*Math.PI*2 + r01(215)*0.7;
-    const r1 = orbitR1*(0.98);
-    const r2 = orbitR1*(1.05);
-    const x1 = cx + r1*Math.cos(t);
-    const y1 = cy + r1*0.55*Math.sin(t);
-    const x2 = cx + r2*Math.cos(t);
-    const y2 = cy + r2*0.55*Math.sin(t);
-    const op = 0.12 + 0.18*(1-risk);
-    ticks += `<path d="M ${fmt(x1)} ${fmt(y1)} L ${fmt(x2)} ${fmt(y2)}" stroke="rgba(255,255,255,${fmt(op)})" stroke-width="0.95" ${crispStroke} stroke-linecap="round"/>`;
-  }
+      // angular twist (two-layer for uniqueness without scribble)
+      const twist =
+          params.tw1*Math.sin(phi*t + params.p3 + tSec*params.s3)
+        + params.tw2*Math.sin(2*phi*t + params.p7 + tSec*params.s7);
 
-  // AI mutations: symmetric scars + stress spikes (in-structure)
-  let scars = "";
-  let stress = "";
-  if(aiFlag){
-    const scarPairs = 1 + Math.round(risk*2); // 1..3 pairs
-    for(let i=0;i<scarPairs;i++){
-      const ang = (r01(60+i)*Math.PI*0.9) - (Math.PI*0.45);
-      const len = 14 + r01(70+i)*16;
-      const x1 = cx + Math.cos(ang)*(bodyR*0.30);
-      const y1 = cy + Math.sin(ang)*(bodyR*0.22*squish);
-      const x2 = x1 + Math.cos(ang+1.15)*len;
-      const y2 = y1 + Math.sin(ang+1.15)*len*0.55;
+      const rr = params.r0 * (1 + wob);
+      const ang = t + twist;
 
-      const mx1 = cx - (x1 - cx);
-      const mx2 = cx - (x2 - cx);
+      // gentle drift (life) — we re-center after
+      const driftX = params.d1*Math.sin(params.f3*t + params.p4 + tSec*params.s4);
+      const driftY = params.d2*Math.cos(params.f4*t + params.p5 + tSec*params.s5);
 
-      const op = 0.28 + 0.58*risk;
-      const sw = 1.10 + 0.70*risk;
-
-      scars += `<path d="M ${fmt(x1)} ${fmt(y1)} L ${fmt(x2)} ${fmt(y2)}" stroke="rgba(255,70,70,${fmt(op)})" stroke-width="${fmt(sw)}" stroke-linecap="round" ${crispStroke} opacity="0.98"/>`;
-      scars += `<path d="M ${fmt(mx1)} ${fmt(y1)} L ${fmt(mx2)} ${fmt(y2)}" stroke="rgba(255,70,70,${fmt(op)})" stroke-width="${fmt(sw)}" stroke-linecap="round" ${crispStroke} opacity="0.98"/>`;
+      const x = cx + rr*Math.cos(ang) + driftX;
+      const y = cy + rr*Math.sin(ang)*params.aspect + driftY;
+      pts.push([x,y]);
     }
 
-    const spikeN = 8 + Math.round(risk*7); // 8..15
-    for(let i=0;i<spikeN;i++){
-      const t = (i/spikeN)*Math.PI*2;
-      const rr = bodyR*(0.94 + 0.14*risk);
-      const rr2 = rr + (7 + 10*risk)*(0.70 + r01(100+i)*0.30);
-      const x1 = cx + rr*Math.cos(t);
-      const y1 = cy + rr*squish*Math.sin(t);
-      const x2 = cx + rr2*Math.cos(t);
-      const y2 = cy + rr2*squish*Math.sin(t);
-      stress += `<path d="M ${fmt(x1)} ${fmt(y1)} L ${fmt(x2)} ${fmt(y2)}" stroke="rgba(255,35,35,${fmt(0.26+0.42*risk)})" stroke-width="${fmt(1.05+0.80*risk)}" stroke-linecap="round" ${crispStroke} opacity="0.90"/>`;
+    // ---- Centering + fit (prevents off-center / asymmetry in the box)
+    let mx=0,my=0;
+    for(const p of pts){ mx+=p[0]; my+=p[1]; }
+    mx/=pts.length; my/=pts.length;
+    const dx = cx - mx, dy = cy - my;
+    for(const p of pts){ p[0]+=dx; p[1]+=dy; }
+
+    // Fit within a safe margin
+    let minx=1e9,miny=1e9,maxx=-1e9,maxy=-1e9;
+    for(const p of pts){
+      if(p[0]<minx) minx=p[0]; if(p[0]>maxx) maxx=p[0];
+      if(p[1]<miny) miny=p[1]; if(p[1]>maxy) maxy=p[1];
     }
+    const margin = (mode==="avatar") ? 6.0 : 6.0;
+    const sx = (w - 2*margin) / Math.max(1e-6, (maxx-minx));
+    const sy = (h - 2*margin) / Math.max(1e-6, (maxy-miny));
+    const sc = Math.min(1, sx, sy);
+    if(sc < 1){
+      for(const p of pts){
+        p[0] = cx + (p[0]-cx)*sc;
+        p[1] = cy + (p[1]-cy)*sc;
+      }
+    }
+    return pts;
   }
 
-  // Core geometry (non-face identity kernel)
-  const coreType = b(160) % 3; // triangle/square/hex
-  const coreR = 9.8 + r01(161)*8.0 + stage*0.16;
-  const coreRot = (r01(162)*Math.PI*2);
-  const sides = coreType===0 ? 3 : (coreType===1 ? 4 : 6);
-  let corePts = "";
-  for(let i=0;i<sides;i++){
-    const t = coreRot + (i/sides)*Math.PI*2;
-    const rr = coreR*(0.94 + 0.06*Math.sin((i+1)*1.7 + r01(163)*6.28));
-    const x = cx + rr*Math.cos(t);
-    const y = cy + rr*0.78*Math.sin(t);
-    corePts += fmt(x) + "," + fmt(y) + (i===sides-1 ? "" : " ");
+  function catmullRomClosedPath(pts){
+    const n = pts.length;
+    if(n<4) return "";
+    const alpha = 1.0;
+    const p = (i)=> pts[(i+n)%n];
+    let d = `M ${p(0)[0].toFixed(2)} ${p(0)[1].toFixed(2)}`;
+    for(let i=0;i<n;i++){
+      const p0 = p(i-1), p1 = p(i), p2 = p(i+1), p3 = p(i+2);
+      const c1x = p1[0] + (p2[0]-p0[0])*(alpha/6);
+      const c1y = p1[1] + (p2[1]-p0[1])*(alpha/6);
+      const c2x = p2[0] - (p3[0]-p1[0])*(alpha/6);
+      const c2y = p2[1] - (p3[1]-p1[1])*(alpha/6);
+      d += ` C ${c1x.toFixed(2)} ${c1y.toFixed(2)}, ${c2x.toFixed(2)} ${c2y.toFixed(2)}, ${p2[0].toFixed(2)} ${p2[1].toFixed(2)}`;
+    }
+    d += " Z";
+    return d;
   }
 
-  // Constellation nodes
-  const nodeN = 4 + (b(170)%3); // 4..6
+  const baseR = Math.min(cx, cy) * (mode==="avatar" ? 0.90 : 0.88);
+  const energy = primitive ? 0.55 : (0.85 + 0.55*s01);
+  const baseSpeed = (aiFlag ? 0.80 : 0.60) * (primitive ? 0.55 : 1.0) * (hasImg ? 1.0 : 0.90);
+
+  // Badge uses a flatter ellipse; avatar closer to a circle
+  const aspect = (mode==="avatar")
+    ? (0.98 + (r01(9)-0.5)*0.04)
+    : (0.80 + (r01(9)-0.5)*0.04);
+
+  const strands = [];
+  for(let i=0;i<strandCount;i++){
+    // pleasing phase offsets: seed + golden angle
+    const baseP = (Math.PI*2*r01(30)) + i*golden;
+
+    const p1 = baseP + Math.PI*2*r01(30+i*11);
+    const p2 = baseP + Math.PI*2*r01(31+i*11);
+    const p3 = baseP + Math.PI*2*r01(32+i*11);
+    const p4 = baseP + Math.PI*2*r01(33+i*11);
+    const p5 = baseP + Math.PI*2*r01(34+i*11);
+    const p6 = baseP + Math.PI*2*r01(35+i*11);
+    const p7 = baseP + Math.PI*2*r01(36+i*11);
+
+    // frequencies (biased toward clean harmonic relationships)
+    const f1 = 2 + (b(60+i*7)%4);     // 2..5
+    const f2 = 3 + (b(61+i*7)%5);     // 3..7
+    const f5 = 5 + (b(62+i*7)%5);     // 5..9
+    const f3 = 1 + (b(63+i*7)%3);     // 1..3
+    const f4 = 2 + (b(64+i*7)%3);     // 2..4
+
+    // amplitudes (bounded for clarity)
+    const w1 = (primitive ? 0.065 : 0.085)*energy + r01(80+i)*0.030;
+    const w2 = (primitive ? 0.030 : 0.050)*energy + r01(81+i)*0.020;
+    const w3 = (primitive ? 0.000 : 0.016)*energy + r01(82+i)*0.012;
+
+    const tw1 = (primitive ? 0.140 : 0.175) + r01(90+i)*0.100;
+    const tw2 = (primitive ? 0.000 : 0.060) + r01(91+i)*0.085;
+
+    // drift gives "snake" life; avatar gets slightly more volume
+    const d1 = (mode==="avatar" ? 0.92 : 0.70) * (0.40 + 0.60*r01(100+i));
+    const d2 = (mode==="avatar" ? 0.84 : 0.62) * (0.40 + 0.60*r01(110+i));
+
+    const s1 = baseSpeed * (0.70 + 0.80*r01(120+i));
+    const s2 = baseSpeed * (0.60 + 0.90*r01(121+i));
+    const s3 = baseSpeed * (0.55 + 0.95*r01(122+i));
+    const s4 = baseSpeed * (0.65 + 0.80*r01(123+i));
+    const s5 = baseSpeed * (0.60 + 0.85*r01(124+i));
+    const s6 = baseSpeed * (0.55 + 0.95*r01(125+i));
+    const s7 = baseSpeed * (0.50 + 1.05*r01(126+i));
+
+    // radius layering (balanced)
+    const layer = (strandCount===1) ? 0 : (i/(strandCount-1) - 0.5);
+    const r0 = baseR * (0.92 + layer*0.10 + (r01(40+i)-0.5)*0.05);
+
+    const params = { i, N: (mode==="avatar" ? 150 : 170), r0, aspect, f1,f2,f3,f4,f5, w1,w2,w3, tw1,tw2, d1,d2, p1,p2,p3,p4,p5,p6,p7, s1,s2,s3,s4,s5,s6,s7 };
+    const d0 = catmullRomClosedPath(buildPoints(params, 0));
+
+    const dataAttrs =
+      `data-i="${i}" data-n="${params.N}" data-r0="${r0.toFixed(3)}" data-aspect="${aspect.toFixed(4)}"` +
+      ` data-f1="${f1}" data-f2="${f2}" data-f3="${f3}" data-f4="${f4}" data-f5="${f5}"` +
+      ` data-w1="${w1.toFixed(5)}" data-w2="${w2.toFixed(5)}" data-w3="${w3.toFixed(5)}"` +
+      ` data-tw1="${tw1.toFixed(5)}" data-tw2="${tw2.toFixed(5)}"` +
+      ` data-d1="${d1.toFixed(5)}" data-d2="${d2.toFixed(5)}"` +
+      ` data-p1="${p1.toFixed(5)}" data-p2="${p2.toFixed(5)}" data-p3="${p3.toFixed(5)}" data-p4="${p4.toFixed(5)}" data-p5="${p5.toFixed(5)}" data-p6="${p6.toFixed(5)}" data-p7="${p7.toFixed(5)}"` +
+      ` data-s1="${s1.toFixed(6)}" data-s2="${s2.toFixed(6)}" data-s3="${s3.toFixed(6)}" data-s4="${s4.toFixed(6)}" data-s5="${s5.toFixed(6)}" data-s6="${s6.toFixed(6)}" data-s7="${s7.toFixed(6)}"`;
+
+    const grad = `url(#${gid}_grad${i})`;
+
+    const glow1 = primitive ? 6.2 : (mode==="avatar" ? 9.8 : 9.2);
+    const glow2 = primitive ? 4.0 : (mode==="avatar" ? 6.3 : 6.0);
+    const coreW = (mode==="avatar" ? 2.35 : 2.15) + (primitive ? -0.25 : 0);
+
+    const glowA1 = primitive ? 0.10 : 0.10;
+    const glowA2 = primitive ? 0.18 : 0.18;
+
+    strands.push(`
+      <g class="strand" ${dataAttrs}>
+        <path class="strandGlow1" d="${d0}" fill="none" stroke="${grad}" stroke-width="${glow1}" stroke-linecap="round" stroke-linejoin="round" opacity="${glowA1}"/>
+        <path class="strandGlow2" d="${d0}" fill="none" stroke="${grad}" stroke-width="${glow2}" stroke-linecap="round" stroke-linejoin="round" opacity="${glowA2}"/>
+        <path class="strandCore"  d="${d0}" fill="none" stroke="${grad}" stroke-width="${coreW}" stroke-linecap="round" stroke-linejoin="round" opacity="0.92"/>
+      </g>
+    `);
+  }
+
+  // Constellation nodes (badge only, sparse)
   let nodes = "";
-  for(let i=0;i<nodeN;i++){
-    const t = (r01(171+i)*Math.PI*2);
-    const rr = (14 + r01(180+i)*18) * (0.96 + 0.10*(1-risk));
-    const x = cx + rr*Math.cos(t);
-    const y = cy + rr*0.72*Math.sin(t);
-    const r = 1.10 + r01(190+i)*1.40;
-    nodes += `<circle class="pulse node" cx="${fmt(x)}" cy="${fmt(y)}" r="${fmt(r)}" fill="rgba(255,255,255,0.86)" opacity="${fmt(0.64 + 0.24*(1-risk))}"/>`;
-    if(i>=1){
-      const t2 = (r01(171+i-1)*Math.PI*2);
-      const rr2 = (14 + r01(180+i-1)*18) * (0.96 + 0.10*(1-risk));
-      const x2 = cx + rr2*Math.cos(t2);
-      const y2 = cy + rr2*0.72*Math.sin(t2);
-      nodes += `<path d="M ${fmt(x2)} ${fmt(y2)} L ${fmt(x)} ${fmt(y)}" stroke="rgba(255,255,255,0.26)" stroke-width="0.95" ${crispStroke} opacity="${fmt(0.28 + 0.18*(1-risk))}"/>`;
+  if(nodeCount>0){
+    const pts = [];
+    const startAng = Math.PI*2*r01(200);
+    const ringR = baseR * 1.03;
+    for(let i=0;i<nodeCount;i++){
+      const ang = startAng + i*golden + (r01(210+i)-0.5)*0.15;
+      const rr = ringR*(0.92 + 0.12*r01(220+i));
+      pts.push([cx + rr*Math.cos(ang), cy + rr*Math.sin(ang)*aspect]);
     }
+    // links: each node to next + occasional skip link
+    const links = [];
+    for(let i=0;i<nodeCount;i++){
+      links.push([i,(i+1)%nodeCount]);
+      if(b(230+i)%4===0) links.push([i,(i+3)%nodeCount]);
+    }
+    const linkSvg = links.map(([i,j])=>{
+      const a = pts[i], c = pts[j];
+      return `<line x1="${a[0].toFixed(2)}" y1="${a[1].toFixed(2)}" x2="${c[0].toFixed(2)}" y2="${c[1].toFixed(2)}" stroke="rgba(210,240,255,0.15)" stroke-width="1.0"/>`;
+    }).join("");
+    const dotSvg = pts.map((p,i)=>{
+      const r = 1.35 + 0.85*r01(240+i);
+      return `<circle class="pulse node" cx="${p[0].toFixed(2)}" cy="${p[1].toFixed(2)}" r="${r.toFixed(2)}" fill="rgba(235,250,255,0.92)"/>`;
+    }).join("");
+    nodes = `<g class="nodes">${linkSvg}${dotSvg}</g>`;
   }
 
-  // Fill / strokes (stronger for clarity at small size)
-  const fillOp = (0.82 - 0.22*risk);
-  const strokeW = (1.85 + 0.40*r01(23) + stage*0.012);
+  // Label (stable — NOT inside motion group)
+  const pct = aiFlag ? Math.round(s01*100) : Math.round((1-s01)*100);
+  const label = `${aiFlag ? "AI" : "HUMAN"} ${pct}%`;
+  const showLabel = (mode!=="avatar");
 
-  // Thumbnail (optional)
-  const thumb = imgDataUrl
-    ? `<image href="${escapeHtml(imgDataUrl)}" x="${w-34}" y="${h-28}" width="26" height="20" opacity="${fmt(0.30 + 0.56*(1-risk))}" preserveAspectRatio="xMidYMid meet" clip-path="url(#${gid}_clip)"/>`
+  // Avatar gets a subtle volumetric core (behind motion)
+  const avatarBack = (mode==="avatar")
+    ? `<g class="avatarBack">
+         <circle cx="${cx}" cy="${cy}" r="${(baseR*0.78).toFixed(2)}" fill="url(#${gid}_core)" opacity="0.70"/>
+         <circle cx="${cx}" cy="${cy}" r="${(baseR*1.04).toFixed(2)}" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="1.0"/>
+       </g>`
     : "";
-
-  const blinkL = aiFlag ? "1" : "0";
 
   return `
 <svg class="glyph3d" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" preserveAspectRatio="xMidYMid meet"
-     xmlns="http://www.w3.org/2000/svg" role="img" aria-label="TRACE glyph"
-     data-ai="${aiFlag?1:0}" data-blinkl="${blinkL}"
-     shape-rendering="geometricPrecision" text-rendering="geometricPrecision">
+     data-ai="${aiFlag ? "1" : "0"}" data-mode="${mode}" data-primitive="${primitive ? "1":"0"}" data-w="${w}" data-h="${h}">
   <defs>
-    <radialGradient id="${gid}_bg" cx="50%" cy="45%" r="80%">
-      <stop offset="0" stop-color="rgba(255,255,255,0.06)"/>
-      <stop offset="1" stop-color="rgba(0,0,0,0.00)"/>
-    </radialGradient>
-
-    <linearGradient id="${gid}_body" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="hsl(${hue} ${sat}% ${light}%)" stop-opacity="1"/>
-      <stop offset="1" stop-color="hsl(${hue2} ${sat2}% ${Math.max(38, light-10)}%)" stop-opacity="1"/>
-    </linearGradient>
-    <linearGradient id="${gid}_stroke" x1="1" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="hsl(${(hue3)%360} ${sat}% ${Math.min(70, light+10)}%)" stop-opacity="1"/>
-      <stop offset="1" stop-color="hsl(${(hue+12)%360} ${sat2}% ${Math.max(32, light-18)}%)" stop-opacity="1"/>
-    </linearGradient>
-
-    <radialGradient id="${gid}_core" cx="50%" cy="45%" r="70%">
-      <stop offset="0" stop-color="rgba(255,255,255,0.86)"/>
-      <stop offset="1" stop-color="rgba(255,255,255,0.10)"/>
-    </radialGradient>
-
-    <!-- Crisp shadow (tiny) -->
-    <filter id="${gid}_shadow" x="-35%" y="-35%" width="170%" height="170%">
-      <feDropShadow dx="0" dy="0.8" stdDeviation="${fmt(0.55 + 0.65*(0.22 + risk))}" flood-color="rgba(0,0,0,0.78)"/>
-    </filter>
-
-    <clipPath id="${gid}_clip"><rect x="${w-34}" y="${h-28}" width="26" height="20" rx="6"/></clipPath>
+    ${gradDefs.join("")}
   </defs>
 
-  <rect x="0" y="0" width="${w}" height="${h}" rx="14" fill="rgba(0,0,0,0.46)"/>
-  <rect x="0" y="0" width="${w}" height="${h}" rx="14" fill="url(#${gid}_bg)"/>
-  <rect x="1.2" y="1.2" width="${w-2.4}" height="${h-2.4}" rx="13" fill="rgba(0,0,0,0.04)" stroke="rgba(255,255,255,0.16)"/>
+  ${avatarBack}
 
-  <g class="motion" transform-origin="${cx}px ${cy}px" filter="url(#${gid}_shadow)">
-    <ellipse cx="${cx}" cy="${cy}" rx="${fmt(orbitR1)}" ry="${fmt(orbitR1*0.55)}"
-             fill="none" stroke="url(#${gid}_stroke)" stroke-width="1.42" ${crispStroke}
-             stroke-dasharray="${dashA1} ${dashB1}" opacity="${fmt(0.24 + 0.22*(1-risk))}"/>
-    <ellipse cx="${cx}" cy="${cy}" rx="${fmt(orbitR2)}" ry="${fmt(orbitR2*0.45)}"
-             fill="none" stroke="url(#${gid}_stroke)" stroke-width="1.22" ${crispStroke}
-             stroke-dasharray="${dashA2} ${dashB2}" opacity="${fmt(0.22 + 0.20*(1-risk))}"/>
-
-    ${ticks}
-    ${stress}
-    ${extras}
-
-    <!-- Outer stroke for crisp silhouette -->
-    <path d="${d}" fill="none" stroke="rgba(255,255,255,0.10)" stroke-width="${fmt(strokeW+1.35)}" ${crispStroke}
-          stroke-linejoin="round" stroke-linecap="round" opacity="${fmt(0.55*(1-risk)+0.15)}"/>
-
-    <path d="${d}" fill="url(#${gid}_body)" opacity="${fmt(fillOp)}"
-          stroke="url(#${gid}_stroke)" stroke-width="${fmt(strokeW)}" ${crispStroke}
-          stroke-linejoin="round" stroke-linecap="round" paint-order="stroke fill"/>
-
-    <!-- Inner contour -->
-    <path d="${d}" fill="none"
-          stroke="rgba(255,255,255,0.30)" stroke-width="1.05" ${crispStroke}
-          opacity="${fmt(0.36 + 0.20*(1-risk))}" stroke-linejoin="round" stroke-linecap="round"/>
-
-    ${scars}
-
-    <!-- Core geometry -->
-    <polygon points="${corePts}" fill="url(#${gid}_core)" opacity="${fmt(0.64 + 0.16*(1-risk))}"
-             stroke="rgba(255,255,255,0.36)" stroke-width="1.05" ${crispStroke}/>
-
-    <!-- Constellation -->
+  <g class="motion" transform-origin="${cx}px ${cy}px">
+    ${strands.join("")}
     ${nodes}
   </g>
 
-  ${thumb}
-
-  <text x="10" y="${h-10}" font-size="9" fill="rgba(255,255,255,0.62)"
-        font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace">
-    ${aiFlag ? "AI" : "HUMAN"} ${Math.round(s01*100)}%
-  </text>
+  ${showLabel ? `
+  <text class="glyphLabel" x="10" y="${h-10}" font-size="9"
+        fill="rgba(255,255,255,0.82)" stroke="rgba(0,0,0,0.65)" stroke-width="2.3"
+        paint-order="stroke" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace">
+    ${label}
+  </text>` : ``}
 </svg>`;
 }
 
 // JS-driven glyph motion: strands rotate around each other (crisp, no blur)
+// JS-driven glyph motion: "snake" strand morph (label stays still)
 const _glyphRAFBySvg = new WeakMap();
 function startGlyphMotion(svg){
   if(!svg) return;
+
   // stop any previous animation (per SVG)
   const prev = _glyphRAFBySvg.get(svg);
   if(prev){ cancelAnimationFrame(prev); _glyphRAFBySvg.delete(svg); }
 
-  const g = svg.querySelector("g.motion");
-  if(!g) return;
+  const phi = 1.61803398875;
 
+  // derive dimensions from viewBox (supports badge 142x92, avatar 92x92)
+  const vb = (svg.viewBox && svg.viewBox.baseVal) ? svg.viewBox.baseVal : null;
+  const w = (vb && vb.width) ? vb.width : (Number(svg.getAttribute("data-w"))||120);
+  const h = (vb && vb.height) ? vb.height : (Number(svg.getAttribute("data-h"))||92);
+  const cx = w/2, cy = h/2;
+
+  const groups = Array.from(svg.querySelectorAll("g.strand"));
+  if(!groups.length) return;
+
+  const mode = svg.getAttribute("data-mode") || "badge";
+  const primitive = (svg.getAttribute("data-primitive")==="1");
   const ai = (svg.getAttribute("data-ai")==="1");
-  const blinkL = (svg.getAttribute("data-blinkl")==="1");
+
+  // parse params once
+  const strands = groups.map(g=>{
+    const d = g.dataset;
+    const num = (k, fallback=0)=> {
+      const v = d[k];
+      const n = Number(v);
+      return Number.isFinite(n) ? n : fallback;
+    };
+    return {
+      g,
+      N: Math.max(32, Math.min(260, Math.floor(num("n", 170)))),
+      r0: num("r0", Math.min(cx,cy)*0.85),
+      aspect: num("aspect", 0.82),
+      f1: num("f1", 3), f2: num("f2", 5), f3: num("f3", 2), f4: num("f4", 3), f5: num("f5", 7),
+      w1: num("w1", 0.09), w2: num("w2", 0.05), w3: num("w3", 0.02),
+      tw1: num("tw1", 0.18), tw2: num("tw2", 0.08),
+      d1: num("d1", 0.7), d2: num("d2", 0.62),
+      p1: num("p1", 0.0), p2: num("p2", 0.0), p3: num("p3", 0.0),
+      p4: num("p4", 0.0), p5: num("p5", 0.0), p6: num("p6", 0.0), p7: num("p7", 0.0),
+      s1: num("s1", 0.6), s2: num("s2", 0.6), s3: num("s3", 0.6),
+      s4: num("s4", 0.6), s5: num("s5", 0.6), s6: num("s6", 0.6), s7: num("s7", 0.6),
+      paths: Array.from(g.querySelectorAll("path"))
+    };
+  });
+
+  function buildPoints(params, tSec){
+    const N = params.N;
+    const pts = [];
+    for(let k=0;k<N;k++){
+      const t = (k/N) * Math.PI*2;
+
+      const wob =
+          params.w1*Math.sin(params.f1*t + params.p1 + tSec*params.s1)
+        + params.w2*Math.sin(params.f2*t*phi + params.p2 + tSec*params.s2)
+        + params.w3*Math.sin(params.f5*t + params.p6 + tSec*params.s6);
+
+      const twist =
+          params.tw1*Math.sin(phi*t + params.p3 + tSec*params.s3)
+        + params.tw2*Math.sin(2*phi*t + params.p7 + tSec*params.s7);
+
+      const rr = params.r0 * (1 + wob);
+      const ang = t + twist;
+
+      const driftX = params.d1*Math.sin(params.f3*t + params.p4 + tSec*params.s4);
+      const driftY = params.d2*Math.cos(params.f4*t + params.p5 + tSec*params.s5);
+
+      const x = cx + rr*Math.cos(ang) + driftX;
+      const y = cy + rr*Math.sin(ang)*params.aspect + driftY;
+      pts.push([x,y]);
+    }
+
+    // center + fit (keeps symmetry in the box)
+    let mx=0,my=0;
+    for(const p of pts){ mx+=p[0]; my+=p[1]; }
+    mx/=pts.length; my/=pts.length;
+    const dx = cx - mx, dy = cy - my;
+    for(const p of pts){ p[0]+=dx; p[1]+=dy; }
+
+    let minx=1e9,miny=1e9,maxx=-1e9,maxy=-1e9;
+    for(const p of pts){
+      if(p[0]<minx) minx=p[0]; if(p[0]>maxx) maxx=p[0];
+      if(p[1]<miny) miny=p[1]; if(p[1]>maxy) maxy=p[1];
+    }
+    const margin = (mode==="avatar") ? 6.0 : 6.0;
+    const sx = (w - 2*margin) / Math.max(1e-6, (maxx-minx));
+    const sy = (h - 2*margin) / Math.max(1e-6, (maxy-miny));
+    const sc = Math.min(1, sx, sy);
+    if(sc < 1){
+      for(const p of pts){
+        p[0] = cx + (p[0]-cx)*sc;
+        p[1] = cy + (p[1]-cy)*sc;
+      }
+    }
+    return pts;
+  }
+
+  function catmullRomClosedPath(pts){
+    const n = pts.length;
+    if(n<4) return "";
+    const alpha = 1.0;
+    const p = (i)=> pts[(i+n)%n];
+    let d = `M ${p(0)[0].toFixed(2)} ${p(0)[1].toFixed(2)}`;
+    for(let i=0;i<n;i++){
+      const p0 = p(i-1), p1 = p(i), p2 = p(i+1), p3 = p(i+2);
+      const c1x = p1[0] + (p2[0]-p0[0])*(alpha/6);
+      const c1y = p1[1] + (p2[1]-p0[1])*(alpha/6);
+      const c2x = p2[0] - (p3[0]-p1[0])*(alpha/6);
+      const c2y = p2[1] - (p3[1]-p1[1])*(alpha/6);
+      d += ` C ${c1x.toFixed(2)} ${c1y.toFixed(2)}, ${c2x.toFixed(2)} ${c2y.toFixed(2)}, ${p2[0].toFixed(2)} ${p2[1].toFixed(2)}`;
+    }
+    d += " Z";
+    return d;
+  }
+
   const t0 = performance.now();
-  const speed = ai ? 0.00085 : 0.00055;
-  const wobble = ai ? 2.8 : 2.1;
+  const baseWobble = primitive ? 0.75 : 1.0;
+  const speedScale = (ai ? 1.08 : 1.0) * (primitive ? 0.80 : 1.0);
 
-  const irisL = svg.querySelector("circle.eyeL.eyeIris");
-  const irisR = svg.querySelector("circle.eyeR.eyeIris");
-  const irisL0 = irisL ? Number(irisL.getAttribute("r")||"1") : 0;
-  const irisR0 = irisR ? Number(irisR.getAttribute("r")||"1") : 0;
+  function frame(now){
+    const tSec = ((now - t0)/1000) * speedScale;
 
-  const tick = (t)=>{
-    const dt = t - t0;
-    const ang = Math.sin(dt*speed)* (6 + wobble);
-    const sc = 1 + Math.sin(dt*speed*1.7)*0.005;
-    g.setAttribute("transform", `rotate(${ang.toFixed(3)} 60 46) scale(${sc.toFixed(4)})`);
-
-    // subtle pulse for generic dots
-    const pulses = svg.querySelectorAll("circle.pulse:not(.eyeIris)");
-    const ph = dt*0.003;
-    for(let i=0;i<pulses.length;i++){
-      const c = pulses[i];
-      const base = Number(c.getAttribute("data-r0") || c.getAttribute("r"));
-      if(!c.getAttribute("data-r0")) c.setAttribute("data-r0", String(base));
-      const rr = base * (1 + 0.10*Math.sin(ph + i*0.6));
-      c.setAttribute("r", rr.toFixed(3));
+    for(const s of strands){
+      const pts = buildPoints(s, tSec * baseWobble);
+      const d = catmullRomClosedPath(pts);
+      for(const p of s.paths){
+        p.setAttribute("d", d);
+      }
     }
 
-    // Asymmetric blink for AI: left iris occasionally "compresses"
-    if(ai && irisL){
-      const blink = 0.35 + 0.65*Math.max(0, Math.sin(dt*0.0028 + 2.2));
-      const micro = 0.85 + 0.15*Math.sin(dt*0.010 + 1.1);
-      const r = irisL0 * (0.55 + 0.45*blink) * micro;
-      irisL.setAttribute("r", r.toFixed(3));
-    }else if(irisL){
-      irisL.setAttribute("r", irisL0.toFixed(3));
-    }
-    if(irisR){
-      // keep right iris stable, but still alive
-      const micro = 0.92 + 0.08*Math.sin(dt*0.008 + 0.7);
-      irisR.setAttribute("r", (irisR0*micro).toFixed(3));
-    }
-
-    const id = requestAnimationFrame(tick);
+    const id = requestAnimationFrame(frame);
     _glyphRAFBySvg.set(svg, id);
-  };
-  const id0 = requestAnimationFrame(tick);
-  _glyphRAFBySvg.set(svg, id0);
-}
+  }
 
+  const id = requestAnimationFrame(frame);
+  _glyphRAFBySvg.set(svg, id);
+}
 
 function makeBadgeHtml(proof){
   const ai = !!proof.origin.ai_flag;
@@ -1974,7 +2050,7 @@ function makeBadgeHtml(proof){
     <div class="badge ${ai?"bad":"good"}" id="badge_click">
       <div class="cornerDot"></div>
       <div class="badgeInner">
-        <div class="glyphBox">${helix}${(proof.thumb_data_url || proof.img_data_url)?`<div class="thumbWatermark" style="background-image:url(${(proof.thumb_data_url || proof.img_data_url)})"></div>`:""}</div>
+        <div class="glyphBox">${(proof.thumb_data_url || proof.img_data_url)?`<div class="thumbBg" style="background-image:url(${(proof.thumb_data_url || proof.img_data_url)})"></div>`:""}${helix}</div>
         <div class="badgeRight">
           <div class="badgeTop">
             <div>
@@ -2035,6 +2111,7 @@ function addToHistory(proof){
       window_s: slim.window_s,
       origin: slim.origin,
       img_hash: slim.img_hash || null,
+      thumb_data_url: slim.thumb_data_url || null,
       img_data_url: slim.img_data_url || null,
       proof: slim
     };
@@ -2092,12 +2169,12 @@ function renderProfile(){
       wrap.dataset.risk = (aN>hN && total>=3) ? "ai" : "ok";
 
       // Render avatar glyph
-      aWrap.innerHTML = makeHelixSvg(baseSeed, (aN>hN && total>=3), (aN/(total||1)), null);
+      aWrap.innerHTML = makeHelixSvg(baseSeed, (aN>hN && total>=3), (aN/(total||1)), null, "avatar");
       const svg = aWrap.querySelector("svg.glyph3d");
       if(svg) startGlyphMotion(svg);
     }else if(aWrap){
       const seed = (creator?.creatorId || "no-creator") + "::profile";
-      aWrap.innerHTML = makeHelixSvg(seed, false, null);
+      aWrap.innerHTML = makeHelixSvg(seed, false, null, null, "avatar");
       const svg = aWrap.querySelector("svg.glyph3d");
       if(svg) startGlyphMotion(svg);
     }
@@ -2130,7 +2207,7 @@ function renderProfile(){
     details.innerHTML = `
       <summary>
         <div class="profileSummaryRow">
-          <div class="glyphBox" style="width:124px; height:90px; flex:0 0 auto">${helix}${(proof.thumb_data_url || proof.img_data_url)?`<div class="glyphWatermark" style="background-image:url(${(proof.thumb_data_url || proof.img_data_url)})"></div>`:""}</div>
+          <div class="glyphBox" style="width:124px; height:90px; flex:0 0 auto">${(proof.thumb_data_url || proof.img_data_url)?`<div class="thumbBg" style="background-image:url(${(proof.thumb_data_url || proof.img_data_url)})"></div>`:""}${helix}</div>
           <div class="sumMeta">
             <div class="rowBetween" style="gap:10px">
               <div style="min-width:0">
@@ -2169,7 +2246,7 @@ function renderProfile(){
           </div></div>
 
           <div class="kv"><div class="k">Glyph</div><div class="v">
-            <div class="glyphBox" style="width:180px; height:120px">${helix}${(proof.thumb_data_url || proof.img_data_url)?`<div class="glyphWatermark" style="background-image:url(${(proof.thumb_data_url || proof.img_data_url)})"></div>`:""}</div>
+            <div class="glyphBox" style="width:180px; height:120px">${(proof.thumb_data_url || proof.img_data_url)?`<div class="thumbBg" style="background-image:url(${(proof.thumb_data_url || proof.img_data_url)})"></div>`:""}${helix}</div>
           </div></div>
 
           <div class="kv"><div class="k">Proof JSON</div><div class="v"><pre class="monoBlock">${proofJson}</pre></div></div>
@@ -2276,10 +2353,12 @@ $("#btn_analyze").addEventListener("click", async ()=>{
   // image hash (optional)
   let imgHash = null;
   let baseImgDataUrl = null;
+  let thumbDataUrl = null;
   if(selectedImageFile){
     const ab = await selectedImageFile.arrayBuffer();
     imgHash = await sha256Hex(new Uint8Array(ab));
     try{ baseImgDataUrl = await fileToDataUrl(selectedImageFile); }catch(e){}
+    try{ thumbDataUrl = await fileToThumbDataUrl(selectedImageFile, 140, 0.82); }catch(e){}
   }
 
   // glyph seed combines: creatorId + profileMP + badgeMP + imgHash + origin score
@@ -2304,6 +2383,7 @@ $("#btn_analyze").addEventListener("click", async ()=>{
     payload_text: payloadText,
     img_hash: imgHash,
     img_data_url: null,
+    thumb_data_url: null,
     origin: {
       provider: "WinstonAI",
       ok: !!origin.ok,
@@ -2324,6 +2404,7 @@ $("#btn_analyze").addEventListener("click", async ()=>{
     glyph_seed: glyphSeed
   };
   if(baseImgDataUrl) base.img_data_url = baseImgDataUrl;
+  if(thumbDataUrl) base.thumb_data_url = thumbDataUrl;
 
 
   const canon = JSON.stringify(canonicalize(base));
