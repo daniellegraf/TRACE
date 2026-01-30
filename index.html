@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="sv">
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -170,23 +170,24 @@
   .glyphBox{
     border-radius:18px;
     border:1px solid rgba(255,255,255,.12);
-    background: rgba(0,0,0,.22);
     height:92px;
     display:flex; align-items:center; justify-content:center;
     position:relative;
     overflow:hidden;
-  }
+  
+    background:#000;}
 
   /* Glyph presentation (crisp) */
   .glyphBox{ }
   .glyphBox svg.glyph3d{
-    width:120px; height:92px;
     display:block;
     shape-rendering: geometricPrecision;
     text-rendering: geometricPrecision;
     image-rendering: auto;
     filter: none;
-  }
+  
+    width:100%;
+    height:100%;}
 .glyphBox{position:relative; overflow:hidden;}
   .glyphBox .thumbWatermark{
     position:absolute;
@@ -300,9 +301,20 @@
     width:64px; height:64px; border-radius:16px;
     display:flex; align-items:center; justify-content:center;
     border:1px solid rgba(255,255,255,.12);
-    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.08), rgba(0,0,0,.18));
+    position:relative;
     overflow:hidden;
+  
+    background:#000;}
+
+  /* Avatar glyph: fill entire square (cover) */
+  .profileHero .avatarGlyph > svg.glyph3d{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    display:block;
   }
+
 
   .avatarWrap{
     position:relative;
@@ -470,7 +482,7 @@ function getActiveUser(){
     const label = document.querySelector("#vault_mp_status");
     if(label){
       if(has){
-        
+        label.textContent = "registered ✓";
         label.classList.add("ok");
         label.classList.remove("warn");
       }else{
@@ -753,13 +765,14 @@ function getActiveUser(){
           <div class="profilePill">Human: <b id="profile_human">0</b></div>
           <div class="profilePill">AI: <b id="profile_ai">0</b></div>
         
+        </div>
+
         <div class="row" style="margin-top:10px;gap:10px;flex-wrap:wrap;align-items:center">
           <button class="btn ghost" id="btn_vaultkey_toggle">Show vault key</button>
           <button class="btn ghost" id="btn_vaultkey_copy" disabled>Copy</button>
           <span class="hint monoWrap" id="vaultkey_value" style="max-width:360px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">••••••••••</span>
           <span class="hint" id="vaultkey_hint" style="margin-left:auto;color:#888">Locked</span>
         </div>
-</div>
       </div>
     </div>
 
@@ -810,7 +823,7 @@ function getActiveUser(){
           <button class="btn ghost" id="admin_btn_export_history">Export history</button>
           <button class="btn ghost" id="admin_btn_export_public">Export public key</button>
           <button class="btn ghost" id="admin_btn_run_selftest">Run self-test</button>
-          <button class="btn danger" id="admin_btn_purge_user">Purge active user</button>
+          <button class="btn bad" id="admin_btn_purge_user">Purge active user</button>
         </div>
         <div class="hint">Export sparar JSON lokalt via nedladdning. Purge tar bort den aktiva användarens nycklar + history.</div>
       </div>
@@ -1187,7 +1200,7 @@ async function hashPass(pass){
 }
 function setVaultUI(){
   const st = $("#vault_state");
-  st.innerHTML = "Status: <b class='"+(vaultUnlocked?"ok":"warn")+"'>"+(vaultUnlocked?"Unlock vaulted":"Locked")+"</b>";
+  st.innerHTML = "Status: <b class='"+(vaultUnlocked?"ok":"warn")+"'>"+(vaultUnlocked?"Unlocked":"Locked")+"</b>";
   $("#creator_id").textContent = creator.creatorId ? creator.creatorId : "—";
 }
 function setReadyUI(){
@@ -1802,13 +1815,13 @@ function makeHelixSvg(seedInput, aiFlag, scoreOrImg, maybeImg){
 
   // Thumbnail (optional)
   const thumb = imgDataUrl
-    ? `<image href="${escapeHtml(imgDataUrl)}" x="${w-34}" y="${h-28}" width="26" height="20" opacity="${fmt(0.30 + 0.56*(1-risk))}" preserveAspectRatio="xMidYMid slice" clip-path="url(#${gid}_clip)"/>`
+    ? `<image href="${escapeHtml(imgDataUrl)}" x="${w-34}" y="${h-28}" width="26" height="20" opacity="${fmt(0.30 + 0.56*(1-risk))}" preserveAspectRatio="xMidYMid meet" clip-path="url(#${gid}_clip)"/>`
     : "";
 
   const blinkL = aiFlag ? "1" : "0";
 
   return `
-<svg class="glyph3d" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}"
+<svg class="glyph3d" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" preserveAspectRatio="xMidYMid meet"
      xmlns="http://www.w3.org/2000/svg" role="img" aria-label="TRACE glyph"
      data-ai="${aiFlag?1:0}" data-blinkl="${blinkL}"
      shape-rendering="geometricPrecision" text-rendering="geometricPrecision">
@@ -2054,7 +2067,7 @@ function renderProfile(){
     const cid = creator?.creatorId || (arr[0]?.proof?.creator_id) || (arr[0]?.creator_id) || null;
     if(cShort) cShort.textContent = cid ? shortHash(cid, 14) : "—";
   }catch(e){}
-  if(vState) vState.innerHTML = `<span class="${vaultUnlocked?"ok":"warn"}">${vaultUnlocked?"Unlock vaulted":"Locked"}</span>`;
+  if(vState) vState.innerHTML = `<span class="${vaultUnlocked?"ok":"warn"}">${vaultUnlocked?"Unlocked":"Locked"}</span>`;
   try{ refreshVaultKeyUI(); }catch(e){}
 
   let hN = 0, aN = 0;
