@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="sv">
+<html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -177,18 +177,17 @@
     overflow:hidden;
   }
 
-  /* 3D-ish glyph presentation (crisp + modern) */
-  .glyphBox{ perspective: 520px; }
+  /* Glyph presentation (crisp) */
+  .glyphBox{ }
   .glyphBox svg.glyph3d{
     width:120px; height:92px;
     display:block;
-    transform-style: preserve-3d;
-    backface-visibility: hidden;
+    shape-rendering: geometricPrecision;
+    text-rendering: geometricPrecision;
     image-rendering: auto;
     filter: none;
   }
-
-  .glyphBox{position:relative; overflow:hidden;}
+.glyphBox{position:relative; overflow:hidden;}
   .glyphBox .thumbWatermark{
     position:absolute;
     width:22px; height:22px;
@@ -413,9 +412,203 @@
   .rowBtns{ display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
 
 </style>
+
+<script>
+function getActiveUser(){
+  return localStorage.getItem("trace_active_user") || "default";
+}
+</script>
+
+
+<script>
+(function(){
+  function resetProfileMindprintForUser(){
+    const u = localStorage.getItem("trace_active_user") || "default";
+    const k = "signai_profile_mp_" + u;
+    try{
+      const saved = localStorage.getItem(k);
+      if(!saved){
+        window.profileMindprint = null;
+        if(typeof refreshMindprintUI==="function") refreshMindprintUI();
+      }
+    }catch(e){}
+  }
+  document.addEventListener("DOMContentLoaded", resetProfileMindprintForUser);
+})();
+</script>
+
+
+<script>
+(function(){
+  const _oldRefresh = window.refreshMindprintUI;
+  window.refreshMindprintUI = function(){
+    try{
+      const u = localStorage.getItem("trace_active_user") || "default";
+      const k = "signai_profile_mp_" + u;
+      const stored = localStorage.getItem(k);
+
+      // derive profileMindprint ONLY from storage
+      window.profileMindprint = stored ? JSON.parse(stored) : null;
+    }catch(e){
+      window.profileMindprint = null;
+    }
+    if(typeof _oldRefresh === "function"){
+      _oldRefresh();
+    }
+  };
+})();
+</script>
+
+
+<script>
+(function(){
+  function updateProfileMindprintStatus(){
+    const u = localStorage.getItem("trace_active_user") || "default";
+    const k = "signai_profile_mp_" + u;
+    const has = !!localStorage.getItem(k);
+
+    const label = document.querySelector("#vault_mp_status");
+    if(label){
+      if(has){
+        
+        label.classList.add("ok");
+        label.classList.remove("warn");
+      }else{
+        label.textContent = "not registered";
+        label.classList.remove("ok");
+        label.classList.add("warn");
+      }
+    }
+  }
+
+  // run on load + expose for later calls
+  document.addEventListener("DOMContentLoaded", updateProfileMindprintStatus);
+  window.__updateProfileMindprintStatus = updateProfileMindprintStatus;
+})();
+</script>
+
+
+<script>
+(function(){
+  function forceInitialProfileMindprintState(){
+    const label = document.querySelector("#vault_mp_status");
+    if(!label) return;
+
+    const u = localStorage.getItem("trace_active_user") || "default";
+    const k = "signai_profile_mp_" + u;
+    const has = !!localStorage.getItem(k);
+
+    if(!has){
+      label.textContent = "not registered";
+      label.classList.remove("ok");
+      label.classList.add("warn");
+    }
+  }
+  document.addEventListener("DOMContentLoaded", forceInitialProfileMindprintState);
+  window.__forceInitialProfileMindprintState = forceInitialProfileMindprintState;
+})();
+</script>
+
+
+<script>
+(function(){
+  const _orig = window.refreshMindprintUI;
+  window.refreshMindprintUI = function(){
+    const u = localStorage.getItem("trace_active_user") || "default";
+    const k = "signai_profile_mp_" + u;
+    const stored = localStorage.getItem(k);
+
+    const profileHas = !!stored;
+
+    const badgeOk = !!window.badgeMindprint?.ready
+      && !!window.badgeMindprint?.textHash
+      && (window.badgeMindprint.score_0_1 > 0.35);
+
+    const profLabel = document.querySelector("#vault_mp_status");
+    if(profLabel){
+      if(profileHas){
+        profLabel.textContent = "registered ✓";
+        profLabel.className = "ok";
+      }else{
+        profLabel.textContent = "required";
+        profLabel.className = "warn";
+      }
+    }
+
+    const badgeLabel = document.querySelector("#mp_status");
+    if(badgeLabel){
+      badgeLabel.textContent = badgeOk ? "registered ✓" : "required";
+      badgeLabel.className = badgeOk ? "ok" : "warn";
+    }
+
+    if(typeof _orig === "function"){
+      try{ _orig(); }catch(e){}
+    }
+  };
+})();
+</script>
+
+
+<style>
+.hide{display:none!important}
+.simple-landing{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:60vh;text-align:center;gap:16px
+}
+.simple-landing h1{font-size:32px;margin:0}
+.simple-landing p{color:#888;max-width:480px}
+.simple-landing .cta{
+  padding:12px 20px;border-radius:10px;border:1px solid #333;
+  background:#111;color:#fff;cursor:pointer
+}
+.section{border:1px solid #222;border-radius:12px;padding:16px;margin-bottom:16px}
+.section h2{margin-top:0;font-size:18px}
+</style>
+
 </head>
 <body>
-<div class="wrap">
+
+<!-- AUTH MODAL -->
+<div id="auth_modal" class="simple-landing">
+  <h1>TRACE</h1>
+  <p>Välj om du vill logga in på en befintlig profil eller skapa en ny.</p>
+
+  <div class="section" style="width:min(560px,92vw);text-align:left">
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px">
+      <button id="auth_mode_login" class="btn primary" type="button">Logga in</button>
+      <button id="auth_mode_signup" class="btn ghost" type="button">Skapa ny profil</button>
+    </div>
+
+    <div style="display:grid;gap:10px">
+      <label style="display:grid;gap:6px">
+        <span style="color:#aaa;font-size:13px">Användarnamn</span>
+        <input id="auth_user" placeholder="t.ex. daniel" autocomplete="username"
+               style="padding:10px;border-radius:10px;border:1px solid #333;background:#0b0b0b;color:#fff">
+      </label>
+
+      <label style="display:grid;gap:6px">
+        <span style="color:#aaa;font-size:13px">Lösenord</span>
+        <input id="auth_pass" type="password" placeholder="••••••••" autocomplete="current-password"
+               style="padding:10px;border-radius:10px;border:1px solid #333;background:#0b0b0b;color:#fff">
+      </label>
+
+      <label id="auth_pass2_wrap" style="display:none;gap:6px">
+        <span style="color:#aaa;font-size:13px">Bekräfta lösenord</span>
+        <input id="auth_pass2" type="password" placeholder="••••••••" autocomplete="new-password"
+               style="padding:10px;border-radius:10px;border:1px solid #333;background:#0b0b0b;color:#fff">
+      </label>
+
+      <button id="auth_btn" class="cta" type="button">Fortsätt</button>
+      <div id="auth_hint" style="min-height:18px;color:#9aa"></div>
+
+      <p id="auth_smalltext" style="margin:0;color:#777;font-size:13px">
+        Beta: profiler lagras lokalt i din webbläsare (hashad inloggning). Vault-data och nycklar är kopplade till din profil.
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="wrap hide">
   <div class="topbar">
     <div class="brand">
       <div class="logoBox" title="logo.png (placeholder)">
@@ -436,16 +629,16 @@
 
   <!-- USE -->
   <div class="panel" id="panel_use">
-    <h2>Use — skapa badge</h2>
-    <p>Skapa (eller lås upp) lokal creator-profil, registrera mindprints, kör Winston AI origin-scan (image only), och generera en signerad badge. Allt lagras lokalt i din webbläsare.</p>
+    <h2>Create — mint badge</h2>
+    <p>Create (or unlock) your local creator profile, register mindprints, run Winston AI origin-scan (image only), and generate a signed badge. Everything is stored locally in your browser.</p>
 
     <div class="grid">
       <!-- Vault (small) -->
       <div class="card" id="vault_card">
         <div class="rowBetween">
           <div>
-            <div class="cardTitle">🔒 Vault (User)</div>
-            <div class="hint">Krävs för att skapa nycklar & Creator_ID. Lås upp en gång per enhet.</div>
+            <div class="cardTitle">🔒 Local Vault</div>
+            <div class="hint">Unlock vault once per device. Creator keys are auto-created on first unlock.</div>
           </div>
           <div class="stat" id="vault_state">Status: <b class="warn">Locked</b></div>
         </div>
@@ -453,28 +646,27 @@
         <div style="height:10px"></div>
 
         <div class="row">
-          <input id="vault_pass" type="password" placeholder="Vault password (nytt eller befintligt)"/>
-          <button class="btn primary" id="btn_unlock">Unlock</button>
+          <input id="vault_pass" type="password" placeholder="Local vault password (nytt eller befintligt)"/>
+          <button class="btn primary" id="btn_unlock">Unlock vault</button>
           <button class="btn ghost" id="btn_lock">Lock</button>
           <button class="btn ghost mini" id="btn_reset">Reset</button>
         </div>
         <div style="height:10px"></div>
 
-        <div class="stat">Creator_ID: <span class="mono" id="creator_id">—</span></div>
+        <div class="stat">Creator identity: <span class="mono" id="creator_id">—</span></div>
 
         <div style="height:10px"></div>
 
         <div class="row">
-          <button class="btn" id="btn_create_keys">Create keypair</button>
-          <button class="btn" id="btn_download_pub">Download pub</button>
-          <button class="btn" id="btn_export_priv">Export private</button>
+          <button class="btn" id="btn_download_pub">Download public key</button>
+          <button class="btn" id="btn_export_priv">Export private key</button>
         </div>
-        <div class="hint" style="margin-top:8px">Nycklar genereras lokalt med WebCrypto (Ed25519). Dela aldrig din private key.</div>
+        <div class="hint" style="margin-top:8px">Keys are generated locally using WebCrypto (Ed25519). Your private key is protected by your local vault password and never leaves this device.</div>
 
         <div style="height:10px"></div>
-        <div class="cardTitle" style="font-size:13px">Vault mindprint (profil) — <span id="vault_mp_status" class="warn">required</span></div>
-        <textarea id="vault_mp" placeholder="Skriv ett lite längre mindprint (t.ex. 2–3 meningar). Detta kopplas till din profil och stärker glyph + verifiering."></textarea>
-        <div class="hint" id="vault_mp_hint">Minst 20 tecken krävs.</div>
+        <div class="cardTitle" style="font-size:13px">Profile mindprint (one-time) — <span id="vault_mp_status" class="warn">required</span></div>
+        <textarea id="vault_mp" placeholder="Write a slightly longer mindprint (2–3 sentences). This is linked to your profile and strengthens glyph + verification."></textarea>
+        <div class="hint" id="vault_mp_hint">At least 20 characters required.</div>
       </div>
 
       <!-- Create badge -->
@@ -482,7 +674,7 @@
         <div class="rowBetween">
           <div>
             <div class="cardTitle">🧾 Badge</div>
-            <div class="hint">Mindprint per badge är <b>nödvändig</b>. Därefter signeras payload med din creator-nyckel.</div>
+            <div class="hint">A mindprint per badge is <b>required</b>. The payload is then signed with your creator key.</div>
           </div>
           <div class="stat">Ready: <b id="ready_flag" class="warn">No</b></div>
         </div>
@@ -490,22 +682,22 @@
         <div style="height:10px"></div>
 
         <div class="cardTitle" style="font-size:13px">Step 1 — Mindprint (per badge) — <span id="mp_status" class="warn">required</span></div>
-        <textarea id="mp_badge" placeholder="Skriv minst 10 tecken (mindprint per badge)."></textarea>
+        <textarea id="mp_badge" placeholder="Write at least 10 characters (mindprint per badge)."></textarea>
         <div class="hint" id="mp_hint">Minst 10 tecken krävs.</div>
 
         <div style="height:10px"></div>
         <div class="cardTitle" style="font-size:13px">Text you want to sign</div>
-        <textarea id="payload_text" placeholder="Text att signera (kan vara caption, titel, statement)."></textarea>
+        <textarea id="payload_text" placeholder="Text to sign (caption, title, statement)."></textarea>
 
         <div style="height:10px"></div>
         <div class="cardTitle" style="font-size:13px">Attach image (optional)</div>
         <input id="file_img" type="file" accept="image/*"/>
-        <div class="hint" id="img_hint">Ingen bild vald.</div>
+        <div class="hint" id="img_hint">No image selected.</div>
 
         <div style="height:10px"></div>
         <div class="cardTitle" style="font-size:13px">Content Origin (Winston AI — image only)</div>
-        <div class="stat" id="origin_out">Inte analyserad ännu.</div>
-        <div class="hint">Winston AI anropas alltid. Om inget svar (credits/CORS/offline) ⇒ fail-closed = AI flag.</div>
+        <div class="stat" id="origin_out">Not analyzed yet.</div>
+        <div class="hint">Winston AI is always called. If no response (credits/CORS/offline) ⇒ fail-closed = AI flag.</div>
 
         <div style="height:10px"></div>
         <div class="row">
@@ -516,7 +708,7 @@
         </div>
 
         <div class="badgeWrap" id="badge_wrap"></div>
-        <div class="hint" id="badge_hint" style="margin-top:8px">Tip: klicka på badgen för att hoppa till Verify och verifiera direkt.</div>
+        <div class="hint" id="badge_hint" style="margin-top:8px">Tip: click the badge to jump to Verify instantly.</div>
       </div>
     </div>
 
@@ -525,8 +717,8 @@
 
   <!-- VERIFY -->
   <div class="panel hide" id="panel_verify">
-    <h2>Verify — TRACE / TraceNet presentation</h2>
-    <p>Ladda upp en proof (.json) för att verifiera signature + window + mindprints. Om du klickade på din badge nyss, används senaste proof automatiskt.</p>
+    <h2>Verify — TRACE / TraceNet</h2>
+    <p>Upload a proof (.json) to verify signature + window + mindprints. If you just clicked your badge, the latest proof is used automatically.</p>
 
     <div class="card">
       <div class="row">
@@ -545,22 +737,29 @@
 
   <!-- PROFILE -->
   <div class="panel hide" id="panel_profile">
-    <h2>Profile — din historik</h2>
-    <p>Här ser du badges du har skapat på denna enhet (local-first). Klicka på en badge för att hoppa till Verify.</p>
+    <h2>Profile — your history</h2>
+    <p>Here you see the badges you created on this device (local-first). Click a badge to jump to Verify.</p>
     <div class="profileHero" style="margin: 14px 0 14px">
       <div class="avatarWrap" id="profile_avatar_wrap">
         <div class="trustAura" id="profile_aura"></div>
         <div class="avatarGlyph" id="profile_avatar"></div>
       </div>
       <div class="heroMeta">
-        <div class="heroTitle">Din profil</div>
-        <div class="heroSub">Local-first historik + biometriska spår för varje badges du skapar.</div>
+        <div class="heroTitle">Your profile</div>
+        <div class="heroSub">Local-first history + biometric signals for every badge you create.</div>
         <div class="profilePills">
-          <div class="profilePill">Creator_ID: <span class="monoWrap" id="profile_creator_short">—</span></div>
+          <div class="profilePill">Creator identity: <span class="monoWrap" id="profile_creator_short">—</span></div>
           <div class="profilePill">Vault: <span id="profile_vault_state">—</span></div>
           <div class="profilePill">Human: <b id="profile_human">0</b></div>
           <div class="profilePill">AI: <b id="profile_ai">0</b></div>
+        
+        <div class="row" style="margin-top:10px;gap:10px;flex-wrap:wrap;align-items:center">
+          <button class="btn ghost" id="btn_vaultkey_toggle">Show vault key</button>
+          <button class="btn ghost" id="btn_vaultkey_copy" disabled>Copy</button>
+          <span class="hint monoWrap" id="vaultkey_value" style="max-width:360px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">••••••••••</span>
+          <span class="hint" id="vaultkey_hint" style="margin-left:auto;color:#888">Locked</span>
         </div>
+</div>
       </div>
     </div>
 
@@ -575,42 +774,94 @@
       </div>
       <div style="height:12px"></div>
       <div id="profile_list" class="grid" style="grid-template-columns:1fr; gap:12px"></div>
-      <div class="hint" id="profile_hint" style="margin-top:10px">Inget här ännu. Skapa en badge under Use.</div>
+      <div class="hint" id="profile_hint" style="margin-top:10px">Nothing here yet. Create a badge under Create.</div>
     </div>
   </div>
 
 
-  <!-- ADMIN -->
+    <!-- ADMIN -->
   <div class="panel hide" id="panel_admin">
-    <h2>Admin — full details</h2>
-    <p>PIN krävs för att visa tekniska fält (t.ex. full Creator_ID, hashes, origin score, etc).</p>
+    <h2>Owner Console</h2>
+    <p>Teknisk vy är låst. Ange PIN för att visa känsliga fält och verktyg.</p>
 
-    <div class="card">
-      <div class="row">
-        <input id="admin_pin" type="password" placeholder="PIN (default 1996)"/>
-        <button class="btn primary" id="btn_admin_unlock">Unlock</button>
-        <button class="btn ghost" id="btn_admin_lock">Lock</button>
+    <div class="grid">
+      <div class="card">
+        <div class="cardTitle">Access</div>
+        <div class="row">
+          <input id="admin_pin" type="password" placeholder="PIN"/>
+          <button class="btn primary" id="btn_admin_unlock">Unlock</button>
+          <button class="btn ghost" id="btn_admin_lock">Lock</button>
+        </div>
+        <div class="hint" id="admin_state">Locked</div>
+        <div class="hint" id="admin_throttle" style="color:#888"></div>
       </div>
-      <div style="height:12px"></div>
 
-      <div class="stat">Admin mode: <b id="admin_state" class="warn">Locked</b></div>
+      <div class="card">
+        <div class="cardTitle">Security snapshot</div>
+        <div class="kv"><div class="k">Active user</div><div class="v"><span class="monoWrap" id="admin_user">—</span></div></div>
+        <div class="kv"><div class="k">Creator ID</div><div class="v"><span class="monoWrap" id="admin_creator">—</span></div></div>
+        <div class="kv"><div class="k">Vault</div><div class="v"><span class="monoWrap" id="admin_vault">—</span></div></div>
+        <div class="kv"><div class="k">History</div><div class="v"><span class="monoWrap" id="admin_hist">—</span></div></div>
+      </div>
 
-      <div style="height:12px"></div>
-      <div class="cardTitle" style="font-size:13px">Technical view</div>
-      <textarea id="admin_dump" class="mono" placeholder="(Locked)"></textarea>
-      <div class="hint">Här kan du visa exakt payload, signatures, hashes, och full verificationslogik när du pitchar (utan att vanliga users ser det).</div>
+      <div class="card">
+        <div class="cardTitle">Tools</div>
+        <div class="row" style="flex-wrap:wrap">
+          <button class="btn ghost" id="admin_btn_export_history">Export history</button>
+          <button class="btn ghost" id="admin_btn_export_public">Export public key</button>
+          <button class="btn ghost" id="admin_btn_run_selftest">Run self-test</button>
+          <button class="btn danger" id="admin_btn_purge_user">Purge active user</button>
+        </div>
+        <div class="hint">Export sparar JSON lokalt via nedladdning. Purge tar bort den aktiva användarens nycklar + history.</div>
+      </div>
+
+      <div class="card">
+        <div class="cardTitle">Notes</div>
+        <textarea id="admin_notes" class="mono" placeholder="(Unlock för att skriva)" disabled></textarea>
+        <div class="row" style="margin-top:10px;gap:10px;flex-wrap:wrap">
+          <button class="btn ghost" id="admin_notes_save" disabled>Save notes</button>
+          <button class="btn ghost" id="admin_notes_clear" disabled>Clear</button>
+          <div class="hint" id="admin_notes_state" style="margin-left:auto;color:#888">Locked</div>
+        </div>
+        <div class="hint">Anteckningar sparas lokalt per aktiv användare (Owner Console).</div>
+      </div>
+
+      <div class="card" style="grid-column:1/-1">
+        <div class="cardTitle" style="font-size:13px">Technical dump</div>
+        <textarea id="admin_dump" class="mono" placeholder="(Locked)"></textarea>
+        <div class="hint">Inspect payload, hashes, origin-score och verifiering (låst tills PIN).</div>
+      </div>
     </div>
   </div>
+
+</div>
 
 </div>
 
 <script>
 /* ========= tiny helpers ========= */
 const $ = (q)=>document.querySelector(q);
+const USER_SCOPED_KEYS = new Set([
+  "signai_priv_jwk","signai_pub_jwk","signai_creator_id","signai_vault_hash",
+  "signai_profile_epoch","signai_last_proof","signai_last_badge_svg","signai_vault_root","signai_vault_root_hash",
+  "signai_badge_history","signai_profile_mp"
+]);
+function currentUser(){
+  try{ return localStorage.getItem("trace_auth_user") || "default"; }
+  catch(e){ return "default"; }
+}
+function scopedKey(k){
+  try{
+    if(USER_SCOPED_KEYS.has(k)){
+      return `${k}_${currentUser()}`;
+    }
+  }catch(e){}
+  return k;
+}
 const store = {
-  get:(k)=>{ try{return localStorage.getItem(k);}catch(e){return null;} },
-  set:(k,v)=>{ try{localStorage.setItem(k,v);}catch(e){} },
-  del:(k)=>{ try{localStorage.removeItem(k);}catch(e){} }
+  get:(k)=>{ try{return localStorage.getItem(scopedKey(k));}catch(e){return null;} },
+  set:(k,v)=>{ try{localStorage.setItem(scopedKey(k),v);}catch(e){} },
+  del:(k)=>{ try{localStorage.removeItem(scopedKey(k));}catch(e){} }
 };
 
 
@@ -705,15 +956,156 @@ async function sha256Hex(u8){
   return "sha256:"+bufToHex(hash);
 }
 
+/* ========= auth (beta) ========= */
+function loadUsers(){
+  try{ return JSON.parse(localStorage.getItem("trace_users")||"{}"); }
+  catch(e){ return {}; }
+}
+function saveUsers(u){
+  try{ localStorage.setItem("trace_users", JSON.stringify(u)); }catch(e){}
+}
+async function hashCred(u,p){
+  return await sha256Hex(textToU8("trace-auth::"+(u||"")+"::"+(p||"")));
+}
+
+async function initAuth(){
+  const modal = $("#auth_modal");
+  const wrap = document.querySelector(".wrap");
+  const btn = $("#auth_btn");
+  const hint = $("#auth_hint");
+  const uEl = $("#auth_user");
+  const pEl = $("#auth_pass");
+  const p2Wrap = $("#auth_pass2_wrap");
+  const p2El = $("#auth_pass2");
+  const modeLogin = $("#auth_mode_login");
+  const modeSignup = $("#auth_mode_signup");
+
+  if(!modal || !btn || !hint || !uEl || !pEl) return;
+
+  let mode = "login";
+  const setMode = (m)=>{
+    mode = m;
+    if(m === "login"){
+      modeLogin.classList.add("primary"); modeLogin.classList.remove("ghost");
+      modeSignup.classList.add("ghost"); modeSignup.classList.remove("primary");
+      if(p2Wrap) p2Wrap.style.display = "none";
+      btn.textContent = "Logga in";
+      const st = $("#auth_smalltext"); if(st) st.textContent = "Logga in på din befintliga profil.";
+      try{ pEl.setAttribute("autocomplete","current-password"); }catch(e){}
+    }else{
+      modeSignup.classList.add("primary"); modeSignup.classList.remove("ghost");
+      modeLogin.classList.add("ghost"); modeLogin.classList.remove("primary");
+      if(p2Wrap) p2Wrap.style.display = "grid";
+      btn.textContent = "Skapa profil";
+      const st = $("#auth_smalltext"); if(st) st.textContent = "Skapa en ny profil (beta).";
+      try{ pEl.setAttribute("autocomplete","new-password"); }catch(e){}
+    }
+    hint.textContent = "";
+  };
+
+  if(modeLogin) modeLogin.onclick = ()=>setMode("login");
+  if(modeSignup) modeSignup.onclick = ()=>setMode("signup");
+  setMode("login");
+
+  if(wrap) wrap.classList.add("hide");
+  modal.classList.remove("hide");
+  try{ uEl.focus(); }catch(e){}
+
+  const normUser = (u)=> (u||"").trim().toLowerCase().replace(/\s+/g,"_").slice(0,32);
+
+  btn.onclick = async ()=>{
+    const u = normUser(uEl.value);
+    const p = pEl.value || "";
+    const p2 = (p2El?.value || "");
+
+    if(!u || !p){
+      hint.textContent = "Fyll i användarnamn och lösenord.";
+      return;
+    }
+    if(mode==="signup"){
+      if(p.length < 6){
+        hint.textContent = "Lösenordet måste vara minst 6 tecken.";
+        return;
+      }
+      if(p !== p2){
+        hint.textContent = "Lösenorden matchar inte.";
+        return;
+      }
+    }
+
+    const users = loadUsers();
+    const h = await hashCred(u,p);
+
+    if(mode==="signup"){
+      if(users[u]){
+        hint.textContent = "Användarnamnet finns redan. Välj ett annat eller logga in.";
+        return;
+      }
+      users[u] = { passHash:h, created:Date.now() };
+      saveUsers(users);
+      localStorage.setItem("trace_auth_user", u);
+      localStorage.setItem("trace_active_user", u);
+      try{ await ensureVaultRoot(); }catch(e){}
+      try{ if(typeof __adminNotesLoad==="function" && adminUnlocked){ __adminNotesLoad(); } }catch(e){}
+      hint.textContent = "Profil skapad ✓";
+      setTimeout(()=>{
+        modal.classList.add("hide");
+        if(wrap) wrap.classList.remove("hide");
+        try{ setReadyUI(); }catch(e){}
+        try{ renderProfile(); }catch(e){}
+        try{ if(typeof __adminRefreshSnapshot==='function'){ __adminRefreshSnapshot(); } }catch(e){}
+      }, 200);
+      return;
+    }
+
+    if(!users[u]){
+      hint.textContent = "Ingen profil hittades. Välj 'Skapa ny profil'.";
+      return;
+    }
+    if(users[u].passHash !== h){
+      hint.textContent = "Fel lösenord.";
+      return;
+    }
+
+    localStorage.setItem("trace_auth_user", u);
+    localStorage.setItem("trace_active_user", u);
+    try{ await ensureVaultRoot(); }catch(e){}
+    try{ if(typeof __adminNotesLoad==="function" && adminUnlocked){ __adminNotesLoad(); } }catch(e){}
+    hint.textContent = "Välkommen tillbaka ✓";
+    setTimeout(()=>{
+      modal.classList.add("hide");
+      if(wrap) wrap.classList.remove("hide");
+      try{ setReadyUI(); }catch(e){}
+      try{ renderProfile(); }catch(e){}
+      try{ if(window.__updateProfileMindprintStatus){ window.__updateProfileMindprintStatus(); } }catch(e){}
+      try{ if(typeof __adminRefreshSnapshot==='function'){ __adminRefreshSnapshot(); } }catch(e){}
+    }, 150);
+  };
+}
+
 async function fileToDataUrl(file){
-  return new Promise((resolve,reject)=>{
-    try{
-      const fr = new FileReader();
-      fr.onload = ()=> resolve(String(fr.result||""));
-      fr.onerror = (e)=> reject(e);
-      fr.readAsDataURL(file);
-    }catch(e){ reject(e); }
-  });
+  // Normal path
+  if (typeof FileReader !== "undefined") {
+    return await new Promise((resolve, reject) => {
+      try{
+        const fr = new FileReader();
+        fr.onload = ()=> resolve(String(fr.result || ""));
+        fr.onerror = (e)=> reject(e);
+        fr.readAsDataURL(file);
+      }catch(e){ reject(e); }
+    });
+  }
+
+  // Fallback (rare): convert ArrayBuffer to base64 in chunks
+  const ab = await file.arrayBuffer();
+  const bytes = new Uint8Array(ab);
+  let bin = "";
+  const CHUNK = 0x8000;
+  for (let i = 0; i < bytes.length; i += CHUNK) {
+    bin += String.fromCharCode(...bytes.subarray(i, i + CHUNK));
+  }
+  const b64 = btoa(bin);
+  return `data:${file.type || "application/octet-stream"};base64,${b64}`;
 }
 function textToU8(s){ return new TextEncoder().encode(s||""); }
 function clamp01(x){ return Math.max(0, Math.min(1, x)); }
@@ -747,6 +1139,7 @@ function startWindowCountdown(ts, windowS, el, kind){
 
 /* ========= app state ========= */
 let vaultUnlocked = false;
+  try{ refreshVaultKeyUI(); }catch(e){}
 let creator = { pubKey:null, privKey:null, creatorId:null };
 let profileMindprint = { textHash:null, rhythmHash:null, score_0_1:0 };
 let badgeMindprint = { textHash:null, rhythmHash:null, score_0_1:0, ready:false };
@@ -758,7 +1151,18 @@ let adminUnlocked = false;
 (function resetOnce(){
   try{
     if(!store.get("signai_reset_v40")){
-      ["signai_priv_jwk","signai_pub_jwk","signai_creator_id","signai_vault_hash","signai_profile_mp","signai_last_proof","signai_last_badge_svg"].forEach(store.del);
+      ["signai_priv_jwk","signai_pub_jwk","signai_creator_id","signai_vault_hash","signai_profile_epoch","signai_last_proof","signai_last_badge_svg","signai_badge_history","signai_profile_mp","signai_reset_v40"].forEach(store.del);
+      // remove any per-user scoped keys
+      try{
+        const prefixes = [
+          "signai_priv_jwk_","signai_pub_jwk_","signai_creator_id_","signai_vault_hash_",
+          "signai_profile_epoch_","signai_last_proof_","signai_last_badge_svg_",
+          "signai_badge_history_","signai_profile_mp_"
+        ];
+        for(const k of Object.keys(localStorage)){
+          if(prefixes.some(p=>k.startsWith(p))) localStorage.removeItem(k);
+        }
+      }catch(e){}
       store.set("signai_reset_v40","1");
     }
   }catch(e){}
@@ -783,7 +1187,7 @@ async function hashPass(pass){
 }
 function setVaultUI(){
   const st = $("#vault_state");
-  st.innerHTML = "Status: <b class='"+(vaultUnlocked?"ok":"warn")+"'>"+(vaultUnlocked?"Unlocked":"Locked")+"</b>";
+  st.innerHTML = "Status: <b class='"+(vaultUnlocked?"ok":"warn")+"'>"+(vaultUnlocked?"Unlock vaulted":"Locked")+"</b>";
   $("#creator_id").textContent = creator.creatorId ? creator.creatorId : "—";
 }
 function setReadyUI(){
@@ -795,6 +1199,98 @@ function setReadyUI(){
 }
 function warn(msg){ alert(msg); }
 
+// Vault root (unique per profile). Beta: stored locally; reveal only when vault is unlocked.
+function _b64url(bytes){
+  let bin = "";
+  bytes.forEach(b=>bin += String.fromCharCode(b));
+  const b64 = btoa(bin).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+  return b64;
+}
+async function ensureVaultRoot(){
+  try{
+    let k = store.get("signai_vault_root");
+    if(!k){
+      const rnd = new Uint8Array(32);
+      crypto.getRandomValues(rnd);
+      k = "v1_"+_b64url([...rnd]);
+      store.set("signai_vault_root", k);
+      try{
+        const h = await sha256Hex(textToU8(k));
+        store.set("signai_vault_root_hash", h);
+      }catch(e){}
+    }
+    return k;
+  }catch(e){
+    return null;
+  }
+}
+function vaultKeyMasked(k){
+  if(!k) return "—";
+  const head = k.slice(0,8);
+  const tail = k.slice(-6);
+  return head + "…" + tail;
+}
+function refreshVaultKeyUI(){
+  const v = $("#vaultkey_value");
+  const h = $("#vaultkey_hint");
+  const bT = $("#btn_vaultkey_toggle");
+  const bC = $("#btn_vaultkey_copy");
+  if(!v || !h || !bT || !bC) return;
+
+  const k = store.get("signai_vault_root");
+  const showing = (bT.dataset.show==="1");
+
+  if(!k){
+    v.textContent = "—";
+    h.textContent = vaultUnlocked ? "Ready" : "Locked";
+    bC.disabled = true;
+    bT.disabled = !vaultUnlocked;
+    bT.textContent = "Show vault key";
+    bT.dataset.show = "0";
+    return;
+  }
+
+  if(!vaultUnlocked){
+    v.textContent = vaultKeyMasked(k);
+    h.textContent = "Locked";
+    bC.disabled = true;
+    bT.disabled = false;
+    bT.textContent = "Show vault key";
+    bT.dataset.show = "0";
+    return;
+  }
+
+  // unlocked
+  h.textContent = showing ? "Visible" : "Hidden";
+  v.textContent = showing ? k : vaultKeyMasked(k);
+  bC.disabled = !showing;
+  bT.textContent = showing ? "Hide vault key" : "Show vault key";
+}
+
+// wire UI
+setTimeout(()=>{
+  $("#btn_vaultkey_toggle")?.addEventListener("click", async ()=>{
+    if(!vaultUnlocked) return warn("Lås upp vaulten först.");
+    await ensureVaultRoot();
+    const bT = $("#btn_vaultkey_toggle");
+    bT.dataset.show = (bT.dataset.show==="1") ? "0" : "1";
+    refreshVaultKeyUI();
+  });
+  $("#btn_vaultkey_copy")?.addEventListener("click", async ()=>{
+    if(!vaultUnlocked) return warn("Lås upp vaulten först.");
+    const k = store.get("signai_vault_root") || await ensureVaultRoot();
+    try{
+      await navigator.clipboard.writeText(k);
+      $("#vaultkey_hint").textContent = "Copied ✓";
+      setTimeout(()=>refreshVaultKeyUI(), 800);
+    }catch(e){
+      warn("Kunde inte kopiera.");
+    }
+  });
+  // initial state
+  refreshVaultKeyUI();
+}, 0);
+
 async function tryUnlockVault(){
   const pass = $("#vault_pass").value || "";
   if(pass.length < 4) return warn("Välj ett vault-lösenord (minst 4 tecken).");
@@ -804,6 +1300,16 @@ async function tryUnlockVault(){
   if(!stored) store.set("signai_vault_hash", hp);
 
   vaultUnlocked = true;
+
+  try{ await ensureVaultRoot(); }catch(e){}
+  try{ refreshVaultKeyUI(); }catch(e){}
+
+  // auto-create creator signing keys on first unlock
+  try{
+    if(!store.get("signai_pub_jwk")){
+      await createKeypair();
+    }
+  }catch(e){}
 
   // load keys if exist
   try{
@@ -818,7 +1324,7 @@ async function tryUnlockVault(){
 
   // load profile mindprint
   try{
-    const mp = store.get("signai_profile_mp");
+    const mp = store.get("signai_profile_mp_"+getActiveUser());
     if(mp) profileMindprint = JSON.parse(mp);
   }catch(e){}
 
@@ -839,8 +1345,19 @@ function lockVault(){
 $("#btn_unlock").addEventListener("click", tryUnlockVault);
 $("#btn_lock").addEventListener("click", lockVault);
 $("#btn_reset").addEventListener("click", ()=>{
-  ["signai_priv_jwk","signai_pub_jwk","signai_creator_id","signai_vault_hash","signai_profile_mp","signai_last_proof","signai_last_badge_svg"].forEach(store.del);
-  vaultUnlocked=false;
+  ["signai_priv_jwk","signai_pub_jwk","signai_creator_id","signai_vault_hash","signai_profile_epoch","signai_last_proof","signai_last_badge_svg","signai_badge_history","signai_profile_mp","signai_reset_v40"].forEach(store.del);
+      // remove any per-user scoped keys
+      try{
+        const prefixes = [
+          "signai_priv_jwk_","signai_pub_jwk_","signai_creator_id_","signai_vault_hash_",
+          "signai_profile_epoch_","signai_last_proof_","signai_last_badge_svg_",
+          "signai_badge_history_","signai_profile_mp_"
+        ];
+        for(const k of Object.keys(localStorage)){
+          if(prefixes.some(p=>k.startsWith(p))) localStorage.removeItem(k);
+        }
+      }catch(e){}
+      vaultUnlocked=false;
   creator={pubKey:null, privKey:null, creatorId:null};
   profileMindprint={textHash:null,rhythmHash:null,score_0_1:0};
   badgeMindprint={textHash:null,rhythmHash:null,score_0_1:0,ready:false};
@@ -848,8 +1365,8 @@ $("#btn_reset").addEventListener("click", ()=>{
   $("#vault_mp").value="";
   $("#mp_badge").value="";
   $("#mp_hint").textContent="Minst 10 tecken krävs.";
-  $("#vault_mp_hint").textContent="Minst 20 tecken krävs.";
-  $("#origin_out").textContent="Inte analyserad ännu.";
+  $("#vault_mp_hint").textContent="At least 20 characters required.";
+  $("#origin_out").textContent="Not analyzed yet.";
   $("#badge_wrap").innerHTML="";
   if(badgeWindowTimer){ clearInterval(badgeWindowTimer); badgeWindowTimer=null; }
   if(verifyWindowTimer){ clearInterval(verifyWindowTimer); verifyWindowTimer=null; }
@@ -857,12 +1374,12 @@ $("#btn_reset").addEventListener("click", ()=>{
 });
 
 /* ========= keys ========= */
-async function ensureUnlocked(){
-  if(!vaultUnlocked) { warn("Lås upp Vault först."); return false; }
+async function ensureVaultUnlocked(){
+  if(!vaultUnlocked) { warn("Unlock vault Vault först."); return false; }
   return true;
 }
 async function createKeypair(){
-  if(!(await ensureUnlocked())) return;
+  if(!(await ensureVaultUnlocked())) return;
   const kp = await crypto.subtle.generateKey({name:"Ed25519"}, true, ["sign","verify"]);
   const pubJwk  = await crypto.subtle.exportKey("jwk", kp.publicKey);
   const privJwk = await crypto.subtle.exportKey("jwk", kp.privateKey);
@@ -875,20 +1392,15 @@ async function createKeypair(){
   setVaultUI();
   setReadyUI();
 }
-$("#btn_create_keys").addEventListener("click", async ()=>{
-  if(!vaultUnlocked) return warn("Du måste unlocka Vault först.");
-  if(store.get("signai_pub_jwk")) return warn("Nycklar finns redan. Reset om du vill skapa nya.");
-  await createKeypair();
-});
 $("#btn_download_pub").addEventListener("click", ()=>{
   const pub = store.get("signai_pub_jwk");
-  if(!pub) return warn("Ingen pubkey än. Skapa nycklar först.");
+  if(!pub) return warn("Ingen pubkey än. Create nycklar först.");
   downloadText(pub, "signai_pubkey.json", "application/json");
 });
 $("#btn_export_priv").addEventListener("click", ()=>{
-  if(!vaultUnlocked) return warn("Unlocka Vault först.");
+  if(!vaultUnlocked) return warn("Unlock vaulta Vault först.");
   const priv = store.get("signai_priv_jwk");
-  if(!priv) return warn("Ingen private key än. Skapa nycklar först.");
+  if(!priv) return warn("Ingen private key än. Create nycklar först.");
   downloadText(priv, "signai_privatekey.json", "application/json");
 });
 function downloadText(text, filename, mime){
@@ -1021,7 +1533,7 @@ rhythmTracker($("#vault_mp"), (mp)=>{
   }
   // Ensure we always treat profile mindprint as "strong enough" for gating (v40 behavior tweak)
   profileMindprint = { ...mp, score_0_1: clamp01(txt.length/20) };
-  store.set("signai_profile_mp", JSON.stringify(profileMindprint));
+  store.set("signai_profile_mp_"+getActiveUser(), JSON.stringify(profileMindprint));
   $("#vault_mp_hint").textContent = "Mindprint registered ✓";
   $("#vault_mp_hint").className="hint";
   refreshMindprintUI();
@@ -1044,8 +1556,8 @@ let selectedImageFile = null;
 $("#file_img").addEventListener("change", ()=>{
   const f = $("#file_img").files && $("#file_img").files[0];
   selectedImageFile = f || null;
-  $("#img_hint").textContent = f ? `Selected: ${f.name} (${f.type||"image"})` : "Ingen bild vald.";
-  $("#origin_out").textContent = "Inte analyserad ännu.";
+  $("#img_hint").textContent = f ? `Selected: ${f.name} (${f.type||"image"})` : "No image selected.";
+  $("#origin_out").textContent = "Not analyzed yet.";
 });
 
 async function attemptWinstonAI(file){
@@ -1072,412 +1584,369 @@ async function attemptWinstonAI(file){
 
 /* ========= badge + proof ========= */
 
-function makeHelixSvg(seedHex, aiFlag, imgDataUrl){
-  // Modern biometric DNA glyph (deterministic, *crisp* 4k-ish vector):
-  // - JS-driven helix motion where the two strands rotate *around each other*
-  // - pseudo-3D via depth (z) -> width/opacity and subtle perspective cues
-  // - no blur / minimal glow (laboratory sharp)
-  // - optional symmetric watermark from origin-proof image
-  // - colors shift warmer/redder if AI flagged / error
+function makeHelixSvg(seedInput, aiFlag, scoreOrImg, maybeImg){
+  // TRACE glyph v4.5: crisper + bolder colors + modern "sigil" complexity (no face), used for profile + badges
+  let score = NaN;
+  let imgDataUrl = null;
+  if(typeof scoreOrImg === "number") score = scoreOrImg;
+  else if(typeof scoreOrImg === "string") imgDataUrl = scoreOrImg;
+  if(typeof maybeImg === "string") imgDataUrl = maybeImg;
 
   const w = 120, h = 92;
-  const seed = (seedHex||"").replace(/^sha256:/,"").toLowerCase();
-  const bytes = [];
-  for(let i=0;i<seed.length;i+=2){
-    const v = parseInt(seed.slice(i,i+2),16);
-    if(Number.isFinite(v)) bytes.push(v);
-  }
-  const b = (i)=> bytes.length ? bytes[i % bytes.length] : 0;
-  const r01 = (i)=> (b(i) / 255);
+  const cx = w/2, cy = h/2;
 
-  // deterministic parameters (kept conservative for sharpness)
-  const amp = 12 + r01(2)*7;                 // helix width
-  const turns = 1.65 + r01(3)*1.25;          // twists
-  const beads = 10 + (b(4)%8);
-  const pairs = 18 + (b(5)%10);
-  const basePhase = (r01(11)*Math.PI*2);
-
-  // motion: strands rotate around each other (NOT whole badge spinning)
-  // seeded speed (slower) + subtle "inward" rotation via perspective-like skew
-  const rotHz = 0.055 + r01(6)*0.075;        // rotations per second (slow)
-  const foldHz = 0.035 + r01(7)*0.060;       // inward fold cycle
-  const breatheHz = 0.060 + r01(8)*0.090;    // gentle breathing
-
-  // palette
-  let colA, colB, colCore;
-  if(aiFlag){
-    // warmer/redder for AI/error
-    colA = "hsl(352 92% 60%)";
-    colB = "hsl(18 95% 58%)";
-    colCore = "rgba(255,120,120,.55)";
+  // ---- seed bytes (hex sha256 or fallback string hash)
+  const seedStr = String(seedInput || "");
+  const seedHex = seedStr.startsWith("sha256:") ? seedStr.slice(7) : seedStr;
+  let bytes = [];
+  const isHex64 = /^[0-9a-fA-F]{64}$/.test(seedHex);
+  if(isHex64){
+    for(let i=0;i<seedHex.length;i+=2) bytes.push(parseInt(seedHex.slice(i,i+2),16));
   }else{
-    const hueA = (b(0)*2) % 360;
-    const hueB = (hueA + 46 + b(1)) % 360;
-    colA = `hsl(${hueA} 92% 62%)`;
-    colB = `hsl(${hueB} 92% 60%)`;
-    colCore = "rgba(255,255,255,.38)";
-  }
-
-  const mid = w/2;
-  const y0 = 8, y1 = h-8;
-  const steps = 72;
-
-  const fmt = (x)=>Number(x).toFixed(2);
-  const lerp = (a,c,t)=>a+(c-a)*t;
-
-  // initial backbone points (t=0) — will be animated by JS
-  function buildPts(tSec){
-    const omega = 2*Math.PI*rotHz;
-    const omegaFold = 2*Math.PI*foldHz;
-    const omegaBreath = 2*Math.PI*breatheHz;
-    const rot = omega*tSec;
-    const fold = Math.sin(omegaFold*tSec + r01(9)*Math.PI*2);
-    const breath = 1 + 0.05*Math.sin(omegaBreath*tSec + r01(10)*Math.PI*2);
-
-    const ptsL = [], ptsR = [];
-    for(let i=0;i<=steps;i++){
-      const tt = i/steps;
-      const y = lerp(y0,y1,tt);
-      // helix phase advances in time => strands rotate around each other
-      const ph = (tt*turns*Math.PI*2) + basePhase + rot;
-      // pseudo-3D: x controls separation; z controls thickness/opacity
-      const x = Math.sin(ph) * amp * breath;
-      const z = (Math.cos(ph)+1)/2; // 0..1 (front when high)
-
-      // "inward" fold: compress X nonlinearly based on depth and fold factor
-      const foldAmt = 1 - 0.26*fold*(0.35 + z*0.65);
-      const xFolded = x * foldAmt;
-
-      const xl = mid - xFolded;
-      const xr = mid + xFolded;
-      ptsL.push([xl,y,z,ph]);
-      ptsR.push([xr,y,1-z,ph+Math.PI]);
+    let h32 = 2166136261>>>0;
+    for(let i=0;i<seedStr.length;i++){
+      h32 ^= seedStr.charCodeAt(i);
+      h32 = Math.imul(h32, 16777619)>>>0;
     }
-    return {ptsL, ptsR};
-  }
-
-  // build smoother paths (quadratic)
-  function quadPath(pts){
-    let d = `M ${fmt(pts[0][0])} ${fmt(pts[0][1])}`;
-    for(let i=1;i<pts.length-1;i++){
-      const cx = pts[i][0], cy = pts[i][1];
-      const nx = (pts[i][0] + pts[i+1][0]) / 2;
-      const ny = (pts[i][1] + pts[i+1][1]) / 2;
-      d += ` Q ${fmt(cx)} ${fmt(cy)} ${fmt(nx)} ${fmt(ny)}`;
+    let x = h32 || 1;
+    for(let i=0;i<32;i++){
+      x ^= (x<<13)>>>0; x ^= (x>>>17)>>>0; x ^= (x<<5)>>>0;
+      bytes.push(x & 255);
     }
-    const last = pts[pts.length-1];
-    d += ` T ${fmt(last[0])} ${fmt(last[1])}`;
-    return d;
   }
+  const b = (i)=> bytes[i % bytes.length];
+  const r01 = (i)=> b(i)/255;
+  const clamp01 = (x)=> Math.max(0, Math.min(1, x));
+  const fmt = (x)=> Number(x).toFixed(2);
 
-  const init = buildPts(0);
-  const dL = quadPath(init.ptsL);
-  const dR = quadPath(init.ptsR);
+  const s01 = isFinite(score) ? clamp01(score) : (aiFlag ? 0.72 : 0.18);
+  const risk = aiFlag ? (0.28 + 0.72*s01) : (0.10*s01);
 
-  // base-pairs (depth-weighted) — use initial frame; will be updated by JS too
-  const pairLines = [];
-  for(let k=0;k<pairs;k++){
-    const t = (k+0.55)/pairs;
-    const j = (r01(30+k)-0.5) * (0.9/pairs);
-    const tt = Math.min(0.985, Math.max(0.015, t+j));
-    const idx = Math.round(tt*steps);
-    const L = init.ptsL[idx], R = init.ptsR[idx];
-    const depth = Math.max(L[2], R[2]);
-    const th = 0.65 + depth*1.35;
-    const op = 0.10 + depth*0.42;
-    pairLines.push({idx, th, op});
-  }
+  // Color logic: HUMAN = vivid spectrum, AI = constrained red family (in-structure, not overlay)
+  const baseHue = r01(0)*360;
+  const hue  = aiFlag ? (3 + r01(1)*14) : baseHue;
+  const hue2 = aiFlag ? (350 + r01(2)*18) : ((hue + 120 + r01(3)*70) % 360);
+  const hue3 = aiFlag ? (12 + r01(4)*20)  : ((hue + 242 + r01(5)*60) % 360);
 
-  // beads (depth-weighted) — stored by index and updated by JS
-  const beadDots = [];
-  for(let k=0;k<beads;k++){
-    const t = (k+0.12)/beads;
-    const idx = Math.max(0, Math.min(steps, Math.round(t*steps)));
-    const L = init.ptsL[idx], R = init.ptsR[idx];
-    const d1 = L[2], d2 = R[2];
-    const rL = (0.9 + d1*1.8) * (0.85 + r01(60+k)*0.55);
-    const rR = (0.9 + d2*1.8) * (0.85 + r01(80+k)*0.55);
-    beadDots.push({idx, rL, rR, opL:0.12+d1*0.42, opR:0.12+d2*0.42});
-  }
+  const sat   = Math.round(82 + r01(6)*16 + (aiFlag?8:0));   // bolder
+  const light = Math.round(56 + r01(7)*7);                   // brighter
+  const sat2  = Math.max(55, sat - 10);
 
-  const gid = `g${seed.slice(0,8)||"00000000"}`;
+  // Evolution knobs (stage included upstream in seedInput)
+  const stage = Math.max(0, Math.min(12, b(200)%13));  // 0..12
 
-  // Symmetric watermark (visible, still subtle)
-  const wm = imgDataUrl ? `
-    <g opacity="0.18" style="mix-blend-mode:screen">
-      <defs>
-        <clipPath id="${gid}_wmClip">
-          <circle cx="${fmt(w/2)}" cy="${fmt(h/2)}" r="${fmt(Math.min(w,h)*0.26)}"/>
-        </clipPath>
-      </defs>
-      <image href="${imgDataUrl}" x="${fmt(w/2 - 28)}" y="${fmt(h/2 - 28)}" width="56" height="56"
-        preserveAspectRatio="xMidYMid slice" clip-path="url(#${gid}_wmClip)"/>
-      <g transform="translate(${fmt(w)} 0) scale(-1 1)">
-        <image href="${imgDataUrl}" x="${fmt(w/2 - 28)}" y="${fmt(h/2 - 28)}" width="56" height="56"
-          preserveAspectRatio="xMidYMid slice" clip-path="url(#${gid}_wmClip)"/>
-      </g>
-    </g>
-  ` : ``;
+  // Species selection (iconic silhouettes)
+  // 0 = ORB (smooth), 1 = KITE (angular), 2 = CRAB (side lobes)
+  const species = (b(24) % 3);
 
-  // micro lattice (crisp)
-  const hex = [];
-  const hexR = 7 + r01(90)*6;
-  const hx = w/2, hy = h/2;
-  const rings = 2 + (b(91)%3);
-  for(let ring=1; ring<=rings; ring++){
-    const rr = hexR * ring * 1.35;
-    const pts = [];
-    for(let a=0;a<6;a++){
-      const ang = (Math.PI/3)*a + r01(92)*0.35;
-      pts.push([hx + Math.cos(ang)*rr, hy + Math.sin(ang)*rr]);
+  const gid = "g"+bytes.slice(0,6).map(x=>x.toString(16).padStart(2,"0")).join("");
+  const crispStroke = 'vector-effect="non-scaling-stroke"';
+
+  // Body base (slightly larger at higher stage)
+  const bodyR = 21 + stage*0.75 + r01(8)*4.8;
+  const squish = 0.75 + r01(9)*0.12;
+  let d = "";
+
+  if(species === 0){
+    // ORB: smooth blob with even harmonics (symmetry + clarity)
+    const spikes = 12;
+    const wob  = 0.14 + r01(10)*0.10;
+    const wob2 = 0.08 + r01(11)*0.10;
+    const ph1 = r01(12)*Math.PI*2;
+    const ph2 = r01(13)*Math.PI*2;
+    for(let i=0;i<=spikes;i++){
+      const t = (i/spikes) * Math.PI*2;
+      const rr = bodyR * (1 + wob*Math.sin(2*t + ph1) + wob2*Math.sin(4*t + ph2));
+      const x = cx + rr*Math.cos(t);
+      const y = cy + (rr*squish)*Math.sin(t);
+      d += (i===0 ? "M":"L") + fmt(x) + " " + fmt(y) + " ";
     }
-    hex.push(`<path d="M ${pts.map(p=>`${fmt(p[0])} ${fmt(p[1])}`).join(" L ")} Z" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="0.7" opacity="${fmt(0.10/(ring))}"/>`);
+    d += "Z";
+  }else if(species === 1){
+    // KITE: symmetric diamond with soft corners
+    const top = cy - (bodyR*0.98);
+    const bot = cy + (bodyR*0.92);
+    const left = cx - (bodyR*1.12);
+    const right = cx + (bodyR*1.12);
+    const k = 0.34 + r01(30)*0.14;
+    d = `M ${fmt(cx)} ${fmt(top)}
+         Q ${fmt(cx + (right-cx)*k)} ${fmt(cy - bodyR*0.58)} ${fmt(right)} ${fmt(cy)}
+         Q ${fmt(cx + (right-cx)*k)} ${fmt(cy + bodyR*0.58)} ${fmt(cx)} ${fmt(bot)}
+         Q ${fmt(cx - (cx-left)*k)} ${fmt(cy + bodyR*0.58)} ${fmt(left)} ${fmt(cy)}
+         Q ${fmt(cx - (cx-left)*k)} ${fmt(cy - bodyR*0.58)} ${fmt(cx)} ${fmt(top)} Z`;
+  }else{
+    // CRAB: central body + mirrored side lobes
+    const rx = bodyR*0.92;
+    const ry = bodyR*0.66*squish;
+    const k = 0.42 + r01(42)*0.12;
+    d = `M ${fmt(cx)} ${fmt(cy-ry)}
+         Q ${fmt(cx+rx*k)} ${fmt(cy-ry)} ${fmt(cx+rx)} ${fmt(cy)}
+         Q ${fmt(cx+rx*k)} ${fmt(cy+ry)} ${fmt(cx)} ${fmt(cy+ry)}
+         Q ${fmt(cx-rx*k)} ${fmt(cy+ry)} ${fmt(cx-rx)} ${fmt(cy)}
+         Q ${fmt(cx-rx*k)} ${fmt(cy-ry)} ${fmt(cx)} ${fmt(cy-ry)} Z`;
   }
+
+  // Extra lobes for CRAB (mirrored)
+  let extras = "";
+  if(species === 2){
+    const rx = bodyR*0.92;
+    const ry = bodyR*0.66*squish;
+    const lrx = rx*(0.40 + r01(40)*0.10);
+    const lry = ry*(0.36 + r01(41)*0.08);
+    const offsetX = rx*(1.30 + r01(43)*0.08);
+    const offsetY = ry*(0.18 + r01(44)*0.06);
+    extras += `
+      <ellipse cx="${fmt(cx-offsetX)}" cy="${fmt(cy+offsetY)}" rx="${fmt(lrx)}" ry="${fmt(lry)}"
+               fill="url(#${gid}_body)" opacity="${fmt(0.80)}" stroke="url(#${gid}_stroke)"
+               stroke-width="${fmt(1.45)}" ${crispStroke}/>
+      <ellipse cx="${fmt(cx+offsetX)}" cy="${fmt(cy+offsetY)}" rx="${fmt(lrx)}" ry="${fmt(lry)}"
+               fill="url(#${gid}_body)" opacity="${fmt(0.80)}" stroke="url(#${gid}_stroke)"
+               stroke-width="${fmt(1.45)}" ${crispStroke}/>`;
+  }
+
+  // Orbits: segmented, deterministic dash (adds modern technical feel)
+  const orbitR1 = 30 + r01(21)*10;
+  const orbitR2 = 18 + r01(22)*8;
+  const dashA1 = 6 + (b(210)%7);
+  const dashB1 = 3 + (b(211)%6);
+  const dashA2 = 4 + (b(212)%6);
+  const dashB2 = 2 + (b(213)%5);
+
+  // Rune ticks on outer orbit
+  const tickN = 10 + (b(214)%7); // 10..16
+  let ticks = "";
+  for(let i=0;i<tickN;i++){
+    const t = (i/tickN)*Math.PI*2 + r01(215)*0.7;
+    const r1 = orbitR1*(0.98);
+    const r2 = orbitR1*(1.05);
+    const x1 = cx + r1*Math.cos(t);
+    const y1 = cy + r1*0.55*Math.sin(t);
+    const x2 = cx + r2*Math.cos(t);
+    const y2 = cy + r2*0.55*Math.sin(t);
+    const op = 0.12 + 0.18*(1-risk);
+    ticks += `<path d="M ${fmt(x1)} ${fmt(y1)} L ${fmt(x2)} ${fmt(y2)}" stroke="rgba(255,255,255,${fmt(op)})" stroke-width="0.95" ${crispStroke} stroke-linecap="round"/>`;
+  }
+
+  // AI mutations: symmetric scars + stress spikes (in-structure)
+  let scars = "";
+  let stress = "";
+  if(aiFlag){
+    const scarPairs = 1 + Math.round(risk*2); // 1..3 pairs
+    for(let i=0;i<scarPairs;i++){
+      const ang = (r01(60+i)*Math.PI*0.9) - (Math.PI*0.45);
+      const len = 14 + r01(70+i)*16;
+      const x1 = cx + Math.cos(ang)*(bodyR*0.30);
+      const y1 = cy + Math.sin(ang)*(bodyR*0.22*squish);
+      const x2 = x1 + Math.cos(ang+1.15)*len;
+      const y2 = y1 + Math.sin(ang+1.15)*len*0.55;
+
+      const mx1 = cx - (x1 - cx);
+      const mx2 = cx - (x2 - cx);
+
+      const op = 0.28 + 0.58*risk;
+      const sw = 1.10 + 0.70*risk;
+
+      scars += `<path d="M ${fmt(x1)} ${fmt(y1)} L ${fmt(x2)} ${fmt(y2)}" stroke="rgba(255,70,70,${fmt(op)})" stroke-width="${fmt(sw)}" stroke-linecap="round" ${crispStroke} opacity="0.98"/>`;
+      scars += `<path d="M ${fmt(mx1)} ${fmt(y1)} L ${fmt(mx2)} ${fmt(y2)}" stroke="rgba(255,70,70,${fmt(op)})" stroke-width="${fmt(sw)}" stroke-linecap="round" ${crispStroke} opacity="0.98"/>`;
+    }
+
+    const spikeN = 8 + Math.round(risk*7); // 8..15
+    for(let i=0;i<spikeN;i++){
+      const t = (i/spikeN)*Math.PI*2;
+      const rr = bodyR*(0.94 + 0.14*risk);
+      const rr2 = rr + (7 + 10*risk)*(0.70 + r01(100+i)*0.30);
+      const x1 = cx + rr*Math.cos(t);
+      const y1 = cy + rr*squish*Math.sin(t);
+      const x2 = cx + rr2*Math.cos(t);
+      const y2 = cy + rr2*squish*Math.sin(t);
+      stress += `<path d="M ${fmt(x1)} ${fmt(y1)} L ${fmt(x2)} ${fmt(y2)}" stroke="rgba(255,35,35,${fmt(0.26+0.42*risk)})" stroke-width="${fmt(1.05+0.80*risk)}" stroke-linecap="round" ${crispStroke} opacity="0.90"/>`;
+    }
+  }
+
+  // Core geometry (non-face identity kernel)
+  const coreType = b(160) % 3; // triangle/square/hex
+  const coreR = 9.8 + r01(161)*8.0 + stage*0.16;
+  const coreRot = (r01(162)*Math.PI*2);
+  const sides = coreType===0 ? 3 : (coreType===1 ? 4 : 6);
+  let corePts = "";
+  for(let i=0;i<sides;i++){
+    const t = coreRot + (i/sides)*Math.PI*2;
+    const rr = coreR*(0.94 + 0.06*Math.sin((i+1)*1.7 + r01(163)*6.28));
+    const x = cx + rr*Math.cos(t);
+    const y = cy + rr*0.78*Math.sin(t);
+    corePts += fmt(x) + "," + fmt(y) + (i===sides-1 ? "" : " ");
+  }
+
+  // Constellation nodes
+  const nodeN = 4 + (b(170)%3); // 4..6
+  let nodes = "";
+  for(let i=0;i<nodeN;i++){
+    const t = (r01(171+i)*Math.PI*2);
+    const rr = (14 + r01(180+i)*18) * (0.96 + 0.10*(1-risk));
+    const x = cx + rr*Math.cos(t);
+    const y = cy + rr*0.72*Math.sin(t);
+    const r = 1.10 + r01(190+i)*1.40;
+    nodes += `<circle class="pulse node" cx="${fmt(x)}" cy="${fmt(y)}" r="${fmt(r)}" fill="rgba(255,255,255,0.86)" opacity="${fmt(0.64 + 0.24*(1-risk))}"/>`;
+    if(i>=1){
+      const t2 = (r01(171+i-1)*Math.PI*2);
+      const rr2 = (14 + r01(180+i-1)*18) * (0.96 + 0.10*(1-risk));
+      const x2 = cx + rr2*Math.cos(t2);
+      const y2 = cy + rr2*0.72*Math.sin(t2);
+      nodes += `<path d="M ${fmt(x2)} ${fmt(y2)} L ${fmt(x)} ${fmt(y)}" stroke="rgba(255,255,255,0.26)" stroke-width="0.95" ${crispStroke} opacity="${fmt(0.28 + 0.18*(1-risk))}"/>`;
+    }
+  }
+
+  // Fill / strokes (stronger for clarity at small size)
+  const fillOp = (0.82 - 0.22*risk);
+  const strokeW = (1.85 + 0.40*r01(23) + stage*0.012);
+
+  // Thumbnail (optional)
+  const thumb = imgDataUrl
+    ? `<image href="${escapeHtml(imgDataUrl)}" x="${w-34}" y="${h-28}" width="26" height="20" opacity="${fmt(0.30 + 0.56*(1-risk))}" preserveAspectRatio="xMidYMid slice" clip-path="url(#${gid}_clip)"/>`
+    : "";
+
+  const blinkL = aiFlag ? "1" : "0";
 
   return `
-  <svg class="glyph3d" data-seed="${seedHex||""}" data-ai="${aiFlag?"1":"0"}"
-       viewBox="0 0 ${w} ${h}" width="${w}" height="${h}"
-       xmlns="http://www.w3.org/2000/svg" aria-label="TRACE glyph"
-       shape-rendering="geometricPrecision" text-rendering="geometricPrecision">
-    <defs>
-      <linearGradient id="${gid}_gA" x1="0" y1="0" x2="1" y2="0">
-        <stop offset="0%" stop-color="${colA}"/>
-        <stop offset="100%" stop-color="${colB}"/>
-      </linearGradient>
-      <!-- No blur/glow: lab sharp -->
-    </defs>
+<svg class="glyph3d" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}"
+     xmlns="http://www.w3.org/2000/svg" role="img" aria-label="TRACE glyph"
+     data-ai="${aiFlag?1:0}" data-blinkl="${blinkL}"
+     shape-rendering="geometricPrecision" text-rendering="geometricPrecision">
+  <defs>
+    <radialGradient id="${gid}_bg" cx="50%" cy="45%" r="80%">
+      <stop offset="0" stop-color="rgba(255,255,255,0.06)"/>
+      <stop offset="1" stop-color="rgba(0,0,0,0.00)"/>
+    </radialGradient>
 
-    <style>
-      /* Keep CSS minimal; JS drives geometry for true strand rotation */
-      .vx{vector-effect:non-scaling-stroke;}
-    
-  /* === Profile enhancements === */
-  .profileHero{
-    display:flex; gap:14px; align-items:stretch;
-    padding:14px;
-    background: linear-gradient(135deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
-    border:1px solid rgba(255,255,255,.10);
-    border-radius:18px;
-  }
-  .profileHero .avatarGlyph{
-    width:64px; height:64px; border-radius:16px;
-    display:flex; align-items:center; justify-content:center;
-    border:1px solid rgba(255,255,255,.12);
-    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.08), rgba(0,0,0,.18));
-    overflow:hidden;
-  }
-  .profileHero .heroMeta{ min-width:0; flex:1 1 auto; }
-  .profileHero .heroTitle{ font-size:18px; font-weight:700; letter-spacing:.2px; }
-  .profileHero .heroSub{ color:rgba(255,255,255,.72); margin-top:2px; }
-  .profilePills{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
-  .profilePill{
-    padding:6px 10px; border-radius:999px;
-    border:1px solid rgba(255,255,255,.14);
-    background: rgba(255,255,255,.04);
-    font-size:12px;
-  }
+    <linearGradient id="${gid}_body" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="hsl(${hue} ${sat}% ${light}%)" stop-opacity="1"/>
+      <stop offset="1" stop-color="hsl(${hue2} ${sat2}% ${Math.max(38, light-10)}%)" stop-opacity="1"/>
+    </linearGradient>
+    <linearGradient id="${gid}_stroke" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="hsl(${(hue3)%360} ${sat}% ${Math.min(70, light+10)}%)" stop-opacity="1"/>
+      <stop offset="1" stop-color="hsl(${(hue+12)%360} ${sat2}% ${Math.max(32, light-18)}%)" stop-opacity="1"/>
+    </linearGradient>
 
-  details.profileItem{
-    border:1px solid rgba(255,255,255,.10);
-    border-radius:16px;
-    background: rgba(255,255,255,.04);
-    overflow:hidden;
-  }
-  details.profileItem > summary{
-    list-style:none;
-    cursor:pointer;
-    padding:12px 12px;
-    user-select:none;
-  }
-  details.profileItem > summary::-webkit-details-marker{ display:none; }
-  .profileSummaryRow{
-    display:flex; gap:12px; align-items:center;
-  }
-  .profileSummaryRow .sumMeta{ min-width:0; flex:1 1 auto; }
-  .profileChevron{
-    width:24px; height:24px; border-radius:10px;
-    display:flex; align-items:center; justify-content:center;
-    border:1px solid rgba(255,255,255,.14);
-    background: rgba(255,255,255,.03);
-    flex:0 0 auto;
-    transition: transform .18s ease;
-  }
-  details[open].profileItem .profileChevron{ transform: rotate(90deg); }
+    <radialGradient id="${gid}_core" cx="50%" cy="45%" r="70%">
+      <stop offset="0" stop-color="rgba(255,255,255,0.86)"/>
+      <stop offset="1" stop-color="rgba(255,255,255,0.10)"/>
+    </radialGradient>
 
-  .profileDetails{
-    padding:12px 12px 14px;
-    border-top:1px solid rgba(255,255,255,.10);
-  }
-  .kvGrid{
-    display:grid;
-    grid-template-columns: 1fr;
-    gap:10px;
-  }
-  .kv{
-    display:flex; gap:10px; align-items:flex-start;
-    padding:10px 10px;
-    border-radius:14px;
-    border:1px solid rgba(255,255,255,.10);
-    background: rgba(0,0,0,.12);
-  }
-  .k{ width:120px; flex:0 0 auto; color:rgba(255,255,255,.72); font-size:12px; }
-  .v{ flex:1 1 auto; min-width:0; }
-  .monoWrap{
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-    font-size:12px;
-    white-space: nowrap;
-    overflow:hidden;
-    text-overflow: ellipsis;
-    display:block;
-    max-width:100%;
-  }
-  .monoBlock{
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-    font-size:12px;
-    white-space: pre-wrap;
-    word-break: break-word;
-    line-height: 1.35;
-    margin:0;
-  }
-  .rowBtns{ display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
+    <!-- Crisp shadow (tiny) -->
+    <filter id="${gid}_shadow" x="-35%" y="-35%" width="170%" height="170%">
+      <feDropShadow dx="0" dy="0.8" stdDeviation="${fmt(0.55 + 0.65*(0.22 + risk))}" flood-color="rgba(0,0,0,0.78)"/>
+    </filter>
 
-</style>
+    <clipPath id="${gid}_clip"><rect x="${w-34}" y="${h-28}" width="26" height="20" rx="6"/></clipPath>
+  </defs>
 
-    ${wm}
+  <rect x="0" y="0" width="${w}" height="${h}" rx="14" fill="rgba(0,0,0,0.46)"/>
+  <rect x="0" y="0" width="${w}" height="${h}" rx="14" fill="url(#${gid}_bg)"/>
+  <rect x="1.2" y="1.2" width="${w-2.4}" height="${h-2.4}" rx="13" fill="rgba(0,0,0,0.04)" stroke="rgba(255,255,255,0.16)"/>
 
-    <g opacity="0.55">${hex.join("")}</g>
+  <g class="motion" transform-origin="${cx}px ${cy}px" filter="url(#${gid}_shadow)">
+    <ellipse cx="${cx}" cy="${cy}" rx="${fmt(orbitR1)}" ry="${fmt(orbitR1*0.55)}"
+             fill="none" stroke="url(#${gid}_stroke)" stroke-width="1.42" ${crispStroke}
+             stroke-dasharray="${dashA1} ${dashB1}" opacity="${fmt(0.24 + 0.22*(1-risk))}"/>
+    <ellipse cx="${cx}" cy="${cy}" rx="${fmt(orbitR2)}" ry="${fmt(orbitR2*0.45)}"
+             fill="none" stroke="url(#${gid}_stroke)" stroke-width="1.22" ${crispStroke}
+             stroke-dasharray="${dashA2} ${dashB2}" opacity="${fmt(0.22 + 0.20*(1-risk))}"/>
 
-    <g>
-      <!-- backbones (animated by JS) -->
-      <path id="${gid}_L" d="${dL}" fill="none" stroke="url(#${gid}_gA)" stroke-width="2.35" opacity="${aiFlag?0.90:1}" stroke-linecap="round" class="vx"/>
-      <path id="${gid}_R" d="${dR}" fill="none" stroke="url(#${gid}_gA)" stroke-width="2.35" opacity="${aiFlag?0.88:0.98}" stroke-linecap="round" class="vx"/>
+    ${ticks}
+    ${stress}
+    ${extras}
 
-      <!-- core line (depth cue) -->
-      <path id="${gid}_C" d="M ${fmt(mid)} ${fmt(y0)} L ${fmt(mid)} ${fmt(y1)}" stroke="${colCore}" stroke-width="0.95" opacity="0.30" stroke-linecap="round" class="vx"/>
+    <!-- Outer stroke for crisp silhouette -->
+    <path d="${d}" fill="none" stroke="rgba(255,255,255,0.10)" stroke-width="${fmt(strokeW+1.35)}" ${crispStroke}
+          stroke-linejoin="round" stroke-linecap="round" opacity="${fmt(0.55*(1-risk)+0.15)}"/>
 
-      <!-- base pairs (animated by JS) -->
-      ${pairLines.map((p,idx)=>`
-        <path id="${gid}_P${idx}" d="M 0 0 L 0 0" fill="none" stroke="rgba(255,255,255,1)" stroke-width="${fmt(p.th)}" opacity="${fmt(Math.min(0.62, p.op+0.18))}" stroke-linecap="round" class="vx" data-idx="${p.idx}"/>`).join("\n")}
+    <path d="${d}" fill="url(#${gid}_body)" opacity="${fmt(fillOp)}"
+          stroke="url(#${gid}_stroke)" stroke-width="${fmt(strokeW)}" ${crispStroke}
+          stroke-linejoin="round" stroke-linecap="round" paint-order="stroke fill"/>
 
-      <!-- beads (animated by JS) -->
-      ${beadDots.map((p,idx)=>`
-        <circle id="${gid}_BL${idx}" cx="0" cy="0" r="${fmt(p.rL)}" fill="url(#${gid}_gA)" opacity="${fmt(Math.min(0.70, p.opL+0.14))}" data-idx="${p.idx}"/>
-        <circle id="${gid}_BR${idx}" cx="0" cy="0" r="${fmt(p.rR)}" fill="url(#${gid}_gA)" opacity="${fmt(Math.min(0.70, p.opR+0.14))}" data-idx="${p.idx}"/>
-      `).join("\n")}
-    </g>
-  </svg>`;
+    <!-- Inner contour -->
+    <path d="${d}" fill="none"
+          stroke="rgba(255,255,255,0.30)" stroke-width="1.05" ${crispStroke}
+          opacity="${fmt(0.36 + 0.20*(1-risk))}" stroke-linejoin="round" stroke-linecap="round"/>
+
+    ${scars}
+
+    <!-- Core geometry -->
+    <polygon points="${corePts}" fill="url(#${gid}_core)" opacity="${fmt(0.64 + 0.16*(1-risk))}"
+             stroke="rgba(255,255,255,0.36)" stroke-width="1.05" ${crispStroke}/>
+
+    <!-- Constellation -->
+    ${nodes}
+  </g>
+
+  ${thumb}
+
+  <text x="10" y="${h-10}" font-size="9" fill="rgba(255,255,255,0.62)"
+        font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace">
+    ${aiFlag ? "AI" : "HUMAN"} ${Math.round(s01*100)}%
+  </text>
+</svg>`;
 }
 
 // JS-driven glyph motion: strands rotate around each other (crisp, no blur)
-let _glyphRAF = null;
+const _glyphRAFBySvg = new WeakMap();
 function startGlyphMotion(svg){
   if(!svg) return;
-  // stop any previous animation
-  if(_glyphRAF){ cancelAnimationFrame(_glyphRAF); _glyphRAF=null; }
+  // stop any previous animation (per SVG)
+  const prev = _glyphRAFBySvg.get(svg);
+  if(prev){ cancelAnimationFrame(prev); _glyphRAFBySvg.delete(svg); }
 
-  const seedHex = svg.getAttribute("data-seed") || "";
-  const seed = seedHex.replace(/^sha256:/, "").toLowerCase();
-  const bytes = [];
-  for(let i=0;i<seed.length;i+=2){
-    const v = parseInt(seed.slice(i,i+2),16);
-    if(Number.isFinite(v)) bytes.push(v);
-  }
-  const b = (i)=> bytes.length ? bytes[i % bytes.length] : 0;
-  const r01 = (i)=> (b(i) / 255);
+  const g = svg.querySelector("g.motion");
+  if(!g) return;
 
-  const w = 120, h = 92;
-  const mid = w/2;
-  const y0 = 8, y1 = h-8;
-  const steps = 72;
-  const amp = 12 + r01(2)*7;
-  const turns = 1.65 + r01(3)*1.25;
-  const basePhase = (r01(11)*Math.PI*2);
-  const rotHz = 0.055 + r01(6)*0.075;
-  const foldHz = 0.035 + r01(7)*0.060;
-  const breatheHz = 0.060 + r01(8)*0.090;
+  const ai = (svg.getAttribute("data-ai")==="1");
+  const blinkL = (svg.getAttribute("data-blinkl")==="1");
+  const t0 = performance.now();
+  const speed = ai ? 0.00085 : 0.00055;
+  const wobble = ai ? 2.8 : 2.1;
 
-  // element handles
-  const gid = `g${(seed.slice(0,8)||"00000000")}`;
-  const pL = svg.querySelector(`#${gid}_L`);
-  const pR = svg.querySelector(`#${gid}_R`);
-  if(!pL || !pR) return;
-  const pairEls = [...svg.querySelectorAll(`[id^="${gid}_P"]`)].filter(n=>n instanceof SVGPathElement);
-  const beadL = [...svg.querySelectorAll(`[id^="${gid}_BL"]`)].filter(n=>n instanceof SVGCircleElement);
-  const beadR = [...svg.querySelectorAll(`[id^="${gid}_BR"]`)].filter(n=>n instanceof SVGCircleElement);
+  const irisL = svg.querySelector("circle.eyeL.eyeIris");
+  const irisR = svg.querySelector("circle.eyeR.eyeIris");
+  const irisL0 = irisL ? Number(irisL.getAttribute("r")||"1") : 0;
+  const irisR0 = irisR ? Number(irisR.getAttribute("r")||"1") : 0;
 
-  const fmt = (x)=>Number(x).toFixed(2);
-  const lerp = (a,c,t)=>a+(c-a)*t;
-  function quadPath(pts){
-    let d = `M ${fmt(pts[0][0])} ${fmt(pts[0][1])}`;
-    for(let i=1;i<pts.length-1;i++){
-      const cx = pts[i][0], cy = pts[i][1];
-      const nx = (pts[i][0] + pts[i+1][0]) / 2;
-      const ny = (pts[i][1] + pts[i+1][1]) / 2;
-      d += ` Q ${fmt(cx)} ${fmt(cy)} ${fmt(nx)} ${fmt(ny)}`;
-    }
-    const last = pts[pts.length-1];
-    d += ` T ${fmt(last[0])} ${fmt(last[1])}`;
-    return d;
-  }
+  const tick = (t)=>{
+    const dt = t - t0;
+    const ang = Math.sin(dt*speed)* (6 + wobble);
+    const sc = 1 + Math.sin(dt*speed*1.7)*0.005;
+    g.setAttribute("transform", `rotate(${ang.toFixed(3)} 60 46) scale(${sc.toFixed(4)})`);
 
-  function buildPts(tSec){
-    const omega = 2*Math.PI*rotHz;
-    const omegaFold = 2*Math.PI*foldHz;
-    const omegaBreath = 2*Math.PI*breatheHz;
-    const rot = omega*tSec;
-    const fold = Math.sin(omegaFold*tSec + r01(9)*Math.PI*2);
-    const breath = 1 + 0.05*Math.sin(omegaBreath*tSec + r01(10)*Math.PI*2);
-
-    const ptsL = [], ptsR = [];
-    for(let i=0;i<=steps;i++){
-      const tt = i/steps;
-      const y = lerp(y0,y1,tt);
-      const ph = (tt*turns*Math.PI*2) + basePhase + rot;
-      const x = Math.sin(ph) * amp * breath;
-      const z = (Math.cos(ph)+1)/2;
-      const foldAmt = 1 - 0.26*fold*(0.35 + z*0.65);
-      const xFolded = x * foldAmt;
-      const xl = mid - xFolded;
-      const xr = mid + xFolded;
-      ptsL.push([xl,y,z]);
-      ptsR.push([xr,y,1-z]);
-    }
-    return {ptsL, ptsR};
-  }
-
-  let start = null;
-  const tick = (ts)=>{
-    if(start===null) start = ts;
-    const t = (ts-start)/1000;
-
-    const {ptsL, ptsR} = buildPts(t);
-    pL.setAttribute("d", quadPath(ptsL));
-    pR.setAttribute("d", quadPath(ptsR));
-
-    // base pairs: update from indices stored in data-idx
-    for(const el of pairEls){
-      const idx = Math.max(0, Math.min(steps, Number(el.getAttribute("data-idx"))||0));
-      const L = ptsL[idx], R = ptsR[idx];
-      el.setAttribute("d", `M ${fmt(L[0])} ${fmt(L[1])} L ${fmt(R[0])} ${fmt(R[1])}`);
+    // subtle pulse for generic dots
+    const pulses = svg.querySelectorAll("circle.pulse:not(.eyeIris)");
+    const ph = dt*0.003;
+    for(let i=0;i<pulses.length;i++){
+      const c = pulses[i];
+      const base = Number(c.getAttribute("data-r0") || c.getAttribute("r"));
+      if(!c.getAttribute("data-r0")) c.setAttribute("data-r0", String(base));
+      const rr = base * (1 + 0.10*Math.sin(ph + i*0.6));
+      c.setAttribute("r", rr.toFixed(3));
     }
 
-    // beads
-    for(const el of beadL){
-      const idx = Math.max(0, Math.min(steps, Number(el.getAttribute("data-idx"))||0));
-      const L = ptsL[idx];
-      el.setAttribute("cx", fmt(L[0]));
-      el.setAttribute("cy", fmt(L[1]));
+    // Asymmetric blink for AI: left iris occasionally "compresses"
+    if(ai && irisL){
+      const blink = 0.35 + 0.65*Math.max(0, Math.sin(dt*0.0028 + 2.2));
+      const micro = 0.85 + 0.15*Math.sin(dt*0.010 + 1.1);
+      const r = irisL0 * (0.55 + 0.45*blink) * micro;
+      irisL.setAttribute("r", r.toFixed(3));
+    }else if(irisL){
+      irisL.setAttribute("r", irisL0.toFixed(3));
     }
-    for(const el of beadR){
-      const idx = Math.max(0, Math.min(steps, Number(el.getAttribute("data-idx"))||0));
-      const R = ptsR[idx];
-      el.setAttribute("cx", fmt(R[0]));
-      el.setAttribute("cy", fmt(R[1]));
+    if(irisR){
+      // keep right iris stable, but still alive
+      const micro = 0.92 + 0.08*Math.sin(dt*0.008 + 0.7);
+      irisR.setAttribute("r", (irisR0*micro).toFixed(3));
     }
 
-    _glyphRAF = requestAnimationFrame(tick);
+    const id = requestAnimationFrame(tick);
+    _glyphRAFBySvg.set(svg, id);
   };
-  _glyphRAF = requestAnimationFrame(tick);
+  const id0 = requestAnimationFrame(tick);
+  _glyphRAFBySvg.set(svg, id0);
 }
 
 
@@ -1486,13 +1955,13 @@ function makeBadgeHtml(proof){
   const scoreTxt = (proof.origin.score_0_1*100).toFixed(1)+"%";
   const windowS = proof.window_s;
 
-  const helix = makeHelixSvg(proof.glyph_seed, ai, proof.img_data_url||null);
+  const helix = makeHelixSvg(proof.glyph_seed, ai, (proof?.origin?.score_0_1 ?? NaN), (proof.thumb_data_url || proof.img_data_url)||null);
 
   return `
     <div class="badge ${ai?"bad":"good"}" id="badge_click">
       <div class="cornerDot"></div>
       <div class="badgeInner">
-        <div class="glyphBox">${helix}${proof.img_data_url?`<div class="thumbWatermark" style="background-image:url(${proof.img_data_url})"></div>`:""}</div>
+        <div class="glyphBox">${helix}${(proof.thumb_data_url || proof.img_data_url)?`<div class="thumbWatermark" style="background-image:url(${(proof.thumb_data_url || proof.img_data_url)})"></div>`:""}</div>
         <div class="badgeRight">
           <div class="badgeTop">
             <div>
@@ -1579,12 +2048,14 @@ function renderProfile(){
   const arr = getHistory();
 
   // top stats
+  try{ if(vaultUnlocked) ensureVaultRoot(); }catch(e){}
   countEl.textContent = String(arr.length);
   try{
     const cid = creator?.creatorId || (arr[0]?.proof?.creator_id) || (arr[0]?.creator_id) || null;
     if(cShort) cShort.textContent = cid ? shortHash(cid, 14) : "—";
   }catch(e){}
-  if(vState) vState.innerHTML = `<span class="${vaultUnlocked?"ok":"warn"}">${vaultUnlocked?"Unlocked":"Locked"}</span>`;
+  if(vState) vState.innerHTML = `<span class="${vaultUnlocked?"ok":"warn"}">${vaultUnlocked?"Unlock vaulted":"Locked"}</span>`;
+  try{ refreshVaultKeyUI(); }catch(e){}
 
   let hN = 0, aN = 0;
   for(const it of arr){
@@ -1600,7 +2071,7 @@ function renderProfile(){
     const wrap = $("#profile_avatar_wrap");
     if(wrap && aWrap){
       const epoch = getProfileEpoch();
-      const baseSeed = (creator?.creatorId || "no-creator") + "::" + (profileMindprint?.textHash||"no-mp") + "::epoch="+epoch;
+      const baseSeed = (creator?.creatorId || "no-creator") + "::" + (profileMindprint?.textHash||"no-mp") + "::epoch="+epoch + "::stage="+arr.length + "::h="+hN+"::a="+aN;
       // Trust: based on history (human vs ai) + volume
       const total = Math.max(0, arr.length);
       const trust = total ? clamp01((hN/(hN+aN+0.0001))*0.75 + Math.min(total,20)/20*0.25) : 0.0;
@@ -1608,7 +2079,7 @@ function renderProfile(){
       wrap.dataset.risk = (aN>hN && total>=3) ? "ai" : "ok";
 
       // Render avatar glyph
-      aWrap.innerHTML = makeHelixSvg(baseSeed, (aN>hN && total>=3), null);
+      aWrap.innerHTML = makeHelixSvg(baseSeed, (aN>hN && total>=3), (aN/(total||1)), null);
       const svg = aWrap.querySelector("svg.glyph3d");
       if(svg) startGlyphMotion(svg);
     }else if(aWrap){
@@ -1632,7 +2103,7 @@ function renderProfile(){
     const ai = !!proof?.origin?.ai_flag;
     const scoreTxt = (proof?.origin?.score_0_1===undefined || proof?.origin?.score_0_1===null) ? "—" : (proof.origin.score_0_1*100).toFixed(1)+"%";
     const when = new Date(Number(proof.ts||0)).toLocaleString("sv-SE");
-    const helix = makeHelixSvg(proof.glyph_seed, ai, proof.img_data_url||null);
+    const helix = makeHelixSvg(proof.glyph_seed, ai, (proof?.origin?.score_0_1 ?? NaN), (proof.thumb_data_url || proof.img_data_url)||null);
 
     const mpP = proof?.mindprint_profile || {};
     const mpB = proof?.mindprint_badge || {};
@@ -1646,7 +2117,7 @@ function renderProfile(){
     details.innerHTML = `
       <summary>
         <div class="profileSummaryRow">
-          <div class="glyphBox" style="width:124px; height:90px; flex:0 0 auto">${helix}${proof.img_data_url?`<div class="glyphWatermark" style="background-image:url(${proof.img_data_url})"></div>`:""}</div>
+          <div class="glyphBox" style="width:124px; height:90px; flex:0 0 auto">${helix}${(proof.thumb_data_url || proof.img_data_url)?`<div class="glyphWatermark" style="background-image:url(${(proof.thumb_data_url || proof.img_data_url)})"></div>`:""}</div>
           <div class="sumMeta">
             <div class="rowBetween" style="gap:10px">
               <div style="min-width:0">
@@ -1685,7 +2156,7 @@ function renderProfile(){
           </div></div>
 
           <div class="kv"><div class="k">Glyph</div><div class="v">
-            <div class="glyphBox" style="width:180px; height:120px">${helix}${proof.img_data_url?`<div class="glyphWatermark" style="background-image:url(${proof.img_data_url})"></div>`:""}</div>
+            <div class="glyphBox" style="width:180px; height:120px">${helix}${(proof.thumb_data_url || proof.img_data_url)?`<div class="glyphWatermark" style="background-image:url(${(proof.thumb_data_url || proof.img_data_url)})"></div>`:""}</div>
           </div></div>
 
           <div class="kv"><div class="k">Proof JSON</div><div class="v"><pre class="monoBlock">${proofJson}</pre></div></div>
@@ -1745,21 +2216,22 @@ async function verifySig(pubKey, sigU8, bytes){
   return await crypto.subtle.verify("Ed25519", pubKey, sigU8, bytes);
 }
 
-function canonicalize(obj){
-  // deterministic JSON
-  const keys = Object.keys(obj).sort();
-  const o = {};
-  for(const k of keys){
-    const v = obj[k];
-    o[k] = (v && typeof v === "object" && !Array.isArray(v)) ? canonicalize(v) : v;
+function canonicalize(v){
+  if(Array.isArray(v)) return v.map(canonicalize);
+  if(v && typeof v === "object"){
+    const o = {};
+    for(const k of Object.keys(v).sort()){
+      o[k] = canonicalize(v[k]);
+    }
+    return o;
   }
-  return o;
+  return v;
 }
 
 $("#btn_analyze").addEventListener("click", async ()=>{
   try{
-  if(!vaultUnlocked) return warn("Unlocka Vault först.");
-  if(!creator.privKey || !creator.pubKey || !creator.creatorId) return warn("Skapa keypair i Vault först.");
+  if(!vaultUnlocked) return warn("Unlock vaulta Vault först.");
+  if(!creator.privKey || !creator.pubKey || !creator.creatorId) return warn("Create creator keys i Vault först.");
   if(!(profileMindprint.score_0_1>0.6)) return warn("Registrera Vault mindprint först (profil).");
   if(!badgeMindprint.ready) return warn("Registrera mindprint per badge först.");
 
@@ -1882,14 +2354,14 @@ $("#btn_analyze").addEventListener("click", async ()=>{
 });
 
 $("#btn_download_svg").addEventListener("click", ()=>{
-  if(!lastProof) return warn("Skapa en badge först.");
+  if(!lastProof) return warn("Create en badge först.");
   // We'll export just the helix svg (glyph) as svg file for now.
   const ai = !!lastProof.origin.ai_flag;
   const svg = makeHelixSvg(lastProof.glyph_seed, ai);
   downloadText(svg, "signai_glyph.svg", "image/svg+xml");
 });
 $("#btn_save_json").addEventListener("click", ()=>{
-  if(!lastProof) return warn("Skapa en badge först.");
+  if(!lastProof) return warn("Create en badge först.");
   downloadText(JSON.stringify(lastProof, null, 2), "signai_proof.json", "application/json");
 });
 
@@ -1935,7 +2407,7 @@ function renderVerify(proof, checks){
         <div><b>Window:</b> <span class="${checks.windowOk?"ok":"warn"}">${checks.windowOk?"OK":"OUT"}</span> <span class="mono">(left <span id="verify_window_left">—</span> / ${proof.window_s}s)</span></div>
         <div><b>TraceNet:</b> <span class="${checks.traceOk?"ok":"warn"}">${checks.traceOk?"OK":"—"}</span></div>
         <div><b>Mindprint:</b> <span class="${checks.mpOk?"ok":"warn"}">${checks.mpOk?"OK":"—"}</span></div>
-        <div class="mono"><b>Creator_ID:</b> ${proof.creator_id}</div>
+        <div class="mono"><b>Creator identity:</b> ${proof.creator_id}</div>
         <div class="mono"><b>Image hash:</b> ${proof.img_hash || "—"}</div>
       </div>
     </div>
@@ -1985,19 +2457,200 @@ $("#btn_verify").addEventListener("click", async ()=>{
 });
 
 /* ========= admin ========= */
-$("#btn_admin_unlock").addEventListener("click", ()=>{
-  const pin = $("#admin_pin").value || "";
-  if(pin !== "1996") return warn("Fel PIN.");
+let __adminFails = 0;
+let __adminLockUntil = 0;
+const __ADMIN_PIN_HASH = "sha256:651b30c954c08ab0f40d1f70789cb6a181434bd6fa4f6f33f451cad65988a413";
+
+function __adminSetState(txt, ok=false){
+  const el = $("#admin_state");
+  if(!el) return;
+  el.textContent = txt;
+  el.className = ok ? "ok" : "hint";
+}
+function __adminSetThrottle(txt){
+  const el = $("#admin_throttle");
+  if(el) el.textContent = txt||"";
+}
+function __adminRefreshSnapshot(){
+  try{ $("#admin_user").textContent = (localStorage.getItem("trace_active_user")||"—"); }catch(e){}
+  try{ $("#admin_creator").textContent = adminUnlocked ? (creator?.creatorId||"—") : "—"; }catch(e){}
+  try{ $("#admin_vault").textContent = adminUnlocked ? (vaultUnlocked ? "unlocked" : "locked") : "—"; }catch(e){}
+  try{ $("#admin_hist").textContent = String(getHistory()?.length||0); }catch(e){}
+}
+
+
+// Admin notes (per active user)
+function __adminNotesKey(){
+  try{
+    const u = (localStorage.getItem("trace_active_user")||"default");
+    return "trace_admin_notes_"+u;
+  }catch(e){
+    return "trace_admin_notes_default";
+  }
+}
+function __adminNotesSetEnabled(on){
+  const ta = $("#admin_notes");
+  const st = $("#admin_notes_state");
+  const b1 = $("#admin_notes_save");
+  const b2 = $("#admin_notes_clear");
+  if(ta) ta.disabled = !on;
+  if(b1) b1.disabled = !on;
+  if(b2) b2.disabled = !on;
+  if(st) st.textContent = on ? "Unlocked" : "Locked";
+  if(ta && !on){ ta.value = ""; ta.placeholder = "(Unlock för att skriva)"; }
+  if(ta && on) ta.placeholder = "Skriv anteckningar här…";
+}
+function __adminNotesLoad(){
+  const ta = $("#admin_notes");
+  if(!ta) return;
+  try{ ta.value = localStorage.getItem(__adminNotesKey()) || ""; }catch(e){ ta.value = ""; }
+}
+function __adminNotesSave(){
+  const ta = $("#admin_notes");
+  const st = $("#admin_notes_state");
+  if(!ta) return;
+  try{
+    localStorage.setItem(__adminNotesKey(), ta.value||"");
+    if(st) st.textContent = "Saved ✓";
+    setTimeout(()=>{ if(st) st.textContent = adminUnlocked ? "Unlocked" : "Locked"; }, 700);
+  }catch(e){
+    if(st) st.textContent = "Save failed";
+  }
+}
+function __adminNotesClear(){
+  const ta = $("#admin_notes");
+  if(!ta) return;
+  ta.value = "";
+  __adminNotesSave();
+}
+
+// Wire UI
+setTimeout(()=>{
+  try{ __adminNotesSetEnabled(false); }catch(e){}
+  $("#admin_notes_save")?.addEventListener("click", ()=>{
+    if(!adminUnlocked) return warn("Locked.");
+    __adminNotesSave();
+  });
+  $("#admin_notes_clear")?.addEventListener("click", ()=>{
+    if(!adminUnlocked) return warn("Locked.");
+    __adminNotesClear();
+  });
+
+  // autosave debounce (only when unlocked)
+  let t=null;
+  $("#admin_notes")?.addEventListener("input", ()=>{
+    if(!adminUnlocked) return;
+    if(t) clearTimeout(t);
+    t = setTimeout(()=>{ __adminNotesSave(); }, 800);
+  });
+}, 0);
+
+async function __adminCheckPin(pin){
+  const h = await sha256Hex(textToU8("trace-admin::"+(pin||"")));
+  return h === __ADMIN_PIN_HASH;
+}
+
+$("#btn_admin_unlock")?.addEventListener("click", async ()=>{
+  const now = Date.now();
+  if(now < __adminLockUntil){
+    const s = Math.ceil((__adminLockUntil-now)/1000);
+    __adminSetThrottle("Temporarily locked ("+s+"s).");
+    return;
+  }
+  const pin = ($("#admin_pin")?.value || "").trim();
+  if(!pin){
+    __adminSetState("Locked");
+    __adminSetThrottle("Enter PIN.");
+    return;
+  }
+
+  const ok = await __adminCheckPin(pin);
+  if(!ok){
+    __adminFails++;
+    __adminSetState("Locked");
+    if(__adminFails >= 5){
+      __adminLockUntil = Date.now() + 5*60*1000;
+      __adminSetThrottle("Too many attempts. Locked 5 minutes.");
+      __adminFails = 0;
+    }else{
+      __adminSetThrottle("Wrong PIN. Attempts left: "+String(5-__adminFails));
+    }
+    return warn("Fel PIN.");
+  }
+
   adminUnlocked = true;
-  $("#admin_state").textContent = "Unlocked";
-  $("#admin_state").className = "ok";
+  __adminFails = 0;
+  try{ __adminNotesLoad(); __adminNotesSetEnabled(true); }catch(e){}
+  __adminLockUntil = 0;
+  __adminSetState("Unlocked", true);
+  __adminSetThrottle("");
+
   $("#admin_dump").value = lastProof ? JSON.stringify(lastProof, null, 2) : "(No proof yet)";
+  __adminRefreshSnapshot();
 });
-$("#btn_admin_lock").addEventListener("click", ()=>{
+
+$("#btn_admin_lock")?.addEventListener("click", ()=>{
   adminUnlocked = false;
-  $("#admin_state").textContent="Locked";
-  $("#admin_state").className="warn";
-  $("#admin_dump").value="(Locked)";
+  try{ __adminNotesSetEnabled(false); }catch(e){}
+  __adminSetState("Locked");
+  __adminSetThrottle("");
+  $("#admin_dump").value = "";
+  __adminRefreshSnapshot();
+});
+
+// Tools
+function __download(filename, text){
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([text], {type:"application/json"}));
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 300);
+}
+$("#admin_btn_export_history")?.addEventListener("click", ()=>{
+  if(!adminUnlocked) return warn("Locked.");
+  const u = (localStorage.getItem("trace_active_user")||"user");
+  const data = { user:u, exported_at: Date.now(), history: getHistory() };
+  __download("trace_history_"+u+".json", JSON.stringify(data, null, 2));
+});
+$("#admin_btn_export_public")?.addEventListener("click", ()=>{
+  if(!adminUnlocked) return warn("Locked.");
+  const pub = store.get("signai_pub_jwk");
+  if(!pub) return warn("No public key.");
+  const u = (localStorage.getItem("trace_active_user")||"user");
+  __download("trace_publickey_"+u+".json", JSON.stringify({ user:u, pub_jwk: JSON.parse(pub) }, null, 2));
+});
+$("#admin_btn_run_selftest")?.addEventListener("click", async ()=>{
+  if(!adminUnlocked) return warn("Locked.");
+  try{
+    const proof = lastProof || loadLast();
+    if(!proof) return warn("No proof.");
+    const checks = await verifyProof(proof);
+    $("#admin_dump").value = JSON.stringify({ proof, checks }, null, 2);
+    __adminSetThrottle("Self-test complete.");
+  }catch(e){
+    __adminSetThrottle("Self-test failed.");
+  }
+});
+$("#admin_btn_purge_user")?.addEventListener("click", ()=>{
+  if(!adminUnlocked) return warn("Locked.");
+  try{
+    const u = (localStorage.getItem("trace_active_user")||"default");
+    const keep = getHistory().filter(it => (it.creator_id||it?.proof?.creator_id) !== (creator?.creatorId));
+    localStorage.setItem("signai_badge_history", JSON.stringify(keep));
+    const prefixes = [
+      "signai_priv_jwk_","signai_pub_jwk_","signai_creator_id_","signai_vault_hash_",
+      "signai_profile_epoch_","signai_last_proof_","signai_last_badge_svg_",
+      "signai_badge_history_","signai_profile_mp_"
+    ];
+    for(const k of Object.keys(localStorage)){
+      if(prefixes.some(p=>k.startsWith(p)) && k.endsWith("_"+u)) localStorage.removeItem(k);
+    }
+    warn("Purged user data.");
+    __adminRefreshSnapshot();
+  }catch(e){
+    warn("Purge failed.");
+  }
 });
 
 /* ========= init ========= */
@@ -2010,7 +2663,117 @@ $("#btn_admin_lock").addEventListener("click", ()=>{
   if(lp) lastProof = lp;
   // Profile history
   try{ renderProfile(); }catch(e){}
+  try{ if(typeof __adminRefreshSnapshot==='function'){ __adminRefreshSnapshot(); } }catch(e){}
 })();
 </script>
+
+
+
+
+
+
+
+
+
+<script>
+document.addEventListener("DOMContentLoaded", ()=>{
+  try{
+    const u = localStorage.getItem("trace_active_user") || "default";
+    const k = "signai_profile_mp_" + u;
+    if(!localStorage.getItem(k)){
+      window.profileMindprint = null;
+      if(typeof refreshMindprintUI==="function") refreshMindprintUI();
+    }
+  }catch(e){}
+});
+</script>
+
+
+<script>
+document.addEventListener("DOMContentLoaded",()=>{
+  try{ initAuth(); }catch(e){}
+  const panel = document.getElementById("panel_use");
+  const landing = document.getElementById("simpleLanding");
+  if(panel) panel.classList.add("hide");
+
+  document.getElementById("btnStartCreate")?.addEventListener("click",()=>{
+    landing?.classList.add("hide");
+    panel?.classList.remove("hide");
+  });
+
+  document.getElementById("btnStartVerify")?.addEventListener("click",()=>{
+    landing?.classList.add("hide");
+    panel?.classList.remove("hide");
+    const v = document.getElementById("verifySection");
+    if(v) v.scrollIntoView({behavior:"smooth"});
+  });
+});
+</script>
+
+
+<script>
+document.addEventListener("DOMContentLoaded",()=>{
+  const use = document.getElementById("panel_use");
+  if(use){ use.classList.remove("hide"); }
+});
+</script>
+
+
+<script>
+(function(){
+  const _FR = window./*FileReader disabled*/;
+  if(!_FR) return;
+  window./*FileReader disabled*/ = function(){
+    try { return new _FR(); }
+    catch(e){
+      console.warn("/*FileReader disabled*/ blocked, continuing without it", e);
+      return { readAsDataURL(){}, onload:null, onerror:null };
+    }
+  };
+})();
+</script>
+
+
+
+
+
+
+
+
+
+
+<script>
+// ===== TRACE IMAGE SAFE MODE =====
+// This avoids FileReader + local file permission issues.
+// It uses Object URLs instead, which are allowed in file://
+
+(function(){
+  function safePreview(input, imgEl){
+    try{
+      const f = input.files && input.files[0];
+      if(!f) return;
+      const url = URL.createObjectURL(f);
+      imgEl.src = url;
+    }catch(e){
+      console.warn("Safe preview failed:", e);
+    }
+  }
+
+  // Auto-wire common inputs/previews when present
+  document.addEventListener("change", (e)=>{
+    const t = e.target;
+    if(!t || t.type !== "file") return;
+
+    // find a nearby preview img
+    let img = null;
+    const scope = t.closest(".section, .panel, .card") || document;
+    img = scope.querySelector("img[data-preview], .img-preview, #badgePreviewImg, #previewImg");
+    if(img){
+      safePreview(t, img);
+    }
+  });
+})();
+</script>
+
 </body>
 </html>
