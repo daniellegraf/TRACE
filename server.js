@@ -21,13 +21,16 @@ const upload = multer({ storage: multer.memoryStorage() });
  * Authorization: Bearer <token>
  * Body: { url, version }
  */
-const WINSTON_TOKEN = process.env.WINSTONAI_API_KEY;
+const WINSTON_TOKEN_RAW = process.env.WINSTONAI_API_KEY || "";
 
-// temp uploads (Render supports /tmp)
+// Guard against accidentally storing "Bearer xxx" in env
+const WINSTON_TOKEN = WINSTON_TOKEN_RAW.trim().toLowerCase().startsWith("bearer ")
+  ? WINSTON_TOKEN_RAW.trim().slice(7).trim()
+  : WINSTON_TOKEN_RAW.trim();
+
 const uploadDir = "/tmp/uploads";
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
-// Serve public images so Winston can fetch the URL
 app.use(
   "/uploads",
   express.static(uploadDir, {
@@ -38,7 +41,13 @@ app.use(
 );
 
 app.get("/", (req, res) => res.send("SignAi backend running"));
-app.get("/health", (req, res) => res.json({ ok: true, ts: Date.now() }));
+app.get("/health", (req, res) =>
+  res.json({
+    ok: true,
+    ts: Date.now(),
+    has_token: !!WINSTON_TOKEN,
+  })
+);
 
 function pickExt(mime) {
   const m = String(mime || "").toLowerCase();
@@ -48,43 +57,37 @@ function pickExt(mime) {
   return "jpg";
 }
 
+function publicBase(req) {
+  // Render/CF sometimes sets x-forwarded-host; host is fine but we prefer forwarded.
+  const host = req.headers["x-forwarded-host"] || req.get("host");
+  // Always return https for Winston
+  return `https://${host}`;
+}
+
 function makePublicUrl(req, filename) {
-  // Force https for external accessibility (Winston fetches this)
-  const host = req.get("host");
-  return `https://${host}/uploads/${filename}`;
+  return `${publicBase(req)}/uploads/${encodeURIComponent(filename)}`;
 }
 
 function normalizeScore(x) {
   if (x === null || x === undefined) return null;
-
   if (typeof x === "string") {
     const cleaned = x.replace("%", "").trim();
     const n = parseFloat(cleaned);
     if (!Number.isFinite(n)) return null;
     x = n;
   }
-
   if (typeof x !== "number" || !Number.isFinite(x)) return null;
-
   if (x > 1 && x <= 100) return x / 100;
   if (x >= 0 && x <= 1) return x;
-
   return null;
 }
 
 function extractWinstonResult(obj) {
   if (!obj || typeof obj !== "object") return null;
-
   const ai = normalizeScore(obj.ai_probability);
   const human = normalizeScore(obj.human_probability);
   const humanScore = normalizeScore(obj.score); // docs: human score 0..100
-
-  return {
-    ai_probability: ai,
-    human_probability: human,
-    human_score: humanScore,
-    raw: obj,
-  };
+  return { ai_probability: ai, human_probability: human, human_score: humanScore, raw: obj };
 }
 
 async function sleep(ms) {
@@ -93,11 +96,7 @@ async function sleep(ms) {
 
 async function callWinstonImage(imageUrl) {
   if (!WINSTON_TOKEN) {
-    return {
-      ok: false,
-      status: 500,
-      data: { error: "Missing WINSTONAI_API_KEY in environment" },
-    };
+    return { ok: false, status: 500, data: { error: "Missing WINSTONAI_API_KEY" } };
   }
 
   const endpoint = "https://api.gowinston.ai/v2/image-detection";
@@ -115,14 +114,13 @@ async function callWinstonImage(imageUrl) {
     });
 
     const data = await resp.json().catch(() => null);
-
     if (resp.ok) return { ok: true, status: 200, data };
 
     const status = resp.status || 0;
 
-    // Retry only on transient errors
+    // Retry only on transient conditions
     if ((status === 429 || status === 503 || status === 500) && attempt < maxAttempts) {
-      await sleep(350 * attempt);
+      await sleep(400 * attempt);
       continue;
     }
 
@@ -138,7 +136,17 @@ function labelFromAiScore(aiScore) {
   return "Mixed";
 }
 
+async function canServerFetch(url) {
+  try {
+    const r = await fetch(url, { method: "GET" });
+    return { ok: r.ok, status: r.status };
+  } catch (e) {
+    return { ok: false, status: 0, error: String(e?.message || e) };
+  }
+}
+
 app.post("/detect-image", upload.single("image"), async (req, res) => {
+  const rid = crypto.randomBytes(6).toString("hex");
   let filePath = null;
 
   try {
@@ -149,42 +157,44 @@ app.post("/detect-image", upload.single("image"), async (req, res) => {
     const ext = pickExt(req.file.mimetype);
     const filename = crypto.randomBytes(16).toString("hex") + "." + ext;
     filePath = path.join(uploadDir, filename);
-
     fs.writeFileSync(filePath, req.file.buffer);
 
     const imageUrl = makePublicUrl(req, filename);
 
+    // Sanity: can THIS server fetch the public URL?
+    const selfFetch = await canServerFetch(imageUrl);
+
+    // Small delay helps in rare cases where edge caches lag
+    await sleep(60);
+
     const w = await callWinstonImage(imageUrl);
-    console.log("Winston status:", w.status, "image:", imageUrl);
+
+    console.log(`[${rid}] selfFetch=`, selfFetch, "winston_status=", w.status, "url=", imageUrl);
 
     if (!w.ok) {
-      const desc =
-        w.data?.description ||
-        w.data?.error ||
-        w.data?.message ||
-        (typeof w.data === "string" ? w.data : null);
+      const desc = w.data?.description || w.data?.error || w.data?.message || null;
 
-      return res.status(502).json({
+      // Pass THROUGH Winston status for clarity (instead of always 502)
+      const status = (w.status && w.status >= 400 && w.status <= 599) ? w.status : 502;
+
+      return res.status(status).json({
         ok: false,
         ai_score: 0.5,
         label: "Winston error",
+        request_id: rid,
         upstream_status: w.status,
-        upstream_description: desc || null,
+        upstream_description: desc,
         image_url: imageUrl,
+        server_can_fetch: selfFetch,
         raw: w.data,
       });
     }
 
-    const parsed = extractWinstonResult(w.data);
+    const parsed = extractWinstonResult(w.data) || { ai_probability: null, human_probability: null, human_score: null };
 
     let aiScore = parsed.ai_probability;
-
-    if (aiScore === null && parsed.human_probability !== null) {
-      aiScore = 1 - parsed.human_probability;
-    }
-    if (aiScore === null && parsed.human_score !== null) {
-      aiScore = 1 - parsed.human_score;
-    }
+    if (aiScore === null && parsed.human_probability !== null) aiScore = 1 - parsed.human_probability;
+    if (aiScore === null && parsed.human_score !== null) aiScore = 1 - parsed.human_score;
     if (aiScore === null) aiScore = 0.5;
 
     const label = labelFromAiScore(aiScore);
@@ -193,7 +203,9 @@ app.post("/detect-image", upload.single("image"), async (req, res) => {
       ok: true,
       ai_score: aiScore,
       label,
+      request_id: rid,
       image_url: imageUrl,
+      server_can_fetch: selfFetch,
       parsed: {
         ai_probability: parsed.ai_probability,
         human_probability: parsed.human_probability,
@@ -207,10 +219,16 @@ app.post("/detect-image", upload.single("image"), async (req, res) => {
       raw: w.data,
     });
   } catch (err) {
-    console.error("Server error:", err);
-    return res.status(500).json({ ok: false, ai_score: 0.5, label: "Server error", error: err.message });
+    console.error(`[${rid}] Server error:`, err);
+    return res.status(500).json({
+      ok: false,
+      ai_score: 0.5,
+      label: "Server error",
+      request_id: rid,
+      error: err.message,
+    });
   } finally {
-    // Keep for 10 minutes then cleanup (Winston fetch can be slightly delayed)
+    // Keep for 10 minutes so Winston fetch can't race cleanup.
     if (filePath) {
       setTimeout(() => {
         try {
@@ -221,7 +239,7 @@ app.post("/detect-image", upload.single("image"), async (req, res) => {
   }
 });
 
-// Periodic cleanup so /tmp doesn't grow forever
+// Periodic cleanup
 setInterval(() => {
   try {
     const files = fs.readdirSync(uploadDir);
@@ -237,6 +255,4 @@ setInterval(() => {
 }, 15 * 60 * 1000);
 
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => {
-  console.log("Backend running on port", PORT);
-});
+app.listen(PORT, () => console.log("Backend running on port", PORT));
