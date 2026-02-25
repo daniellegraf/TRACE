@@ -181,33 +181,45 @@
   .glyphBox{ }
   .glyphBox svg.glyph3d{
     display:block;
-    position:absolute;
-    inset:0;
-    width:100%;
-    height:100%;
-    z-index:2;
     shape-rendering: geometricPrecision;
     text-rendering: geometricPrecision;
     image-rendering: auto;
-    filter:none;
-  }
+    filter: none;
+    position:relative;
+    z-index:1;
+
+    width:100%;
+    height:100%;}
 .glyphBox{position:relative; overflow:hidden;}
-  .glyphBox{position:relative; overflow:hidden; background:#000;}
-  .glyphBox .thumbBg{
+  .glyphBox .thumbWatermark{
     position:absolute;
-    width:40px;
-    height:40px;
-    right:10px;
-    top:10px;
-    border-radius:10px;
+    width:34px; height:34px;
+    right:6px; top:6px;
+    left:auto; bottom:auto;
+    transform:rotate(12deg);
+    border-radius:50%;
     background-size:cover;
     background-position:center;
-    opacity:.22;
-    filter:saturate(1.15) contrast(1.08);
+    opacity:.36;
+    filter: none;
+    box-shadow:0 0 0 1px rgba(255,255,255,.10), 0 0 18px rgba(0,0,0,.35) inset;
     mix-blend-mode:screen;
-    z-index:1;
+    z-index:2;
     pointer-events:none;
-    box-shadow: 0 0 0 1px rgba(255,255,255,.10) inset, 0 10px 24px rgba(0,0,0,.45);
+  }
+
+  .glyphWatermark{
+    position:absolute;
+    inset:0;
+    border-radius:inherit;
+    background-size:cover;
+    background-position:center;
+    background-repeat:no-repeat;
+    opacity:.28;
+    mix-blend-mode:screen;
+    filter:saturate(1.05) contrast(1.05);
+    pointer-events:none;
+    z-index:0;
   }
   .glyphHint{
     position:absolute; left:12px; bottom:10px;
@@ -429,12 +441,284 @@
   }
   .rowBtns{ display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
 
+
+  .thumbWatermark.clickable{
+    pointer-events:auto;
+    cursor:pointer;
+    opacity:.48;
+  }
+  .thumbWatermark.clickable:hover{ opacity:.56; }
+
+  /* Image preview modal */
+  .imgModal{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.72);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:9999;
+  }
+  .imgModal.hide{ display:none; }
+  .imgModalCard{
+    width:min(92vw, 880px);
+    max-height:88vh;
+    background:rgba(15,16,20,.94);
+    border:1px solid rgba(255,255,255,.10);
+    border-radius:18px;
+    overflow:hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,.55);
+  }
+  .imgModalTop{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:12px 14px;
+    border-bottom:1px solid rgba(255,255,255,.08);
+  }
+  .imgModalTop .title{ font-weight:700; letter-spacing:.04em; }
+  .imgModalTop .meta{ color:rgba(255,255,255,.62); font-size:12px; }
+  .imgModalTop .spacer{ flex:1; }
+  .imgModalTop .btn{ padding:8px 10px; border-radius:12px; }
+  .imgModalBody{
+    padding:12px;
+    background: radial-gradient(120% 140% at 50% 0%, rgba(120,180,255,.08), rgba(0,0,0,0));
+  }
+  .imgModalImg{
+    width:100%;
+    height:auto;
+    max-height:72vh;
+    object-fit:contain;
+    border-radius:14px;
+    background:#000;
+    display:block;
+  }
+
+
+  /* ---- UX polish ---- */
+  .pageIntro{color:var(--muted); margin-top:-6px; line-height:1.55}
+  .verifyGrid{display:grid; grid-template-columns: 1fr; gap:14px; margin-top:14px}
+  @media(min-width:900px){ .verifyGrid{grid-template-columns: 1.1fr .9fr; align-items:start;} }
+
+  .fileHidden{display:none}
+  .dropzone{
+    border:1px dashed rgba(255,255,255,.18);
+    background: rgba(255,255,255,.03);
+    border-radius:16px;
+    padding:14px;
+    cursor:pointer;
+    user-select:none;
+  }
+  .dropzone:focus{outline:2px solid rgba(120,180,255,.35); outline-offset:2px}
+  .dropzone.drag{
+    border-color: rgba(120,180,255,.55);
+    background: rgba(120,180,255,.06);
+  }
+  .dzTitle{font-weight:800}
+  .dzSub{color:rgba(255,255,255,.62); font-size:13px; margin-top:4px}
+
+  #verify_paste{min-height:140px; resize:vertical}
+  #verify_raw{min-height:220px; resize:vertical}
+
+  .details{border:1px solid rgba(255,255,255,.10); border-radius:16px; padding:10px 12px; background: rgba(255,255,255,.02)}
+  .details summary{cursor:pointer; color:rgba(255,255,255,.78); font-weight:700}
+  .details[open] summary{margin-bottom:10px}
+
+  .statusPill{
+    display:inline-flex; align-items:center; gap:8px;
+    padding:6px 10px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.14);
+    background: rgba(255,255,255,.04);
+    font-weight:800;
+    letter-spacing:.08em;
+    font-size:12px;
+  }
+  .statusPill.ok{border-color: rgba(53,240,163,.55); background: rgba(53,240,163,.10)}
+  .statusPill.warn{border-color: rgba(255,205,92,.55); background: rgba(255,205,92,.10)}
+  .statusPill.err{border-color: rgba(255,74,107,.55); background: rgba(255,74,107,.10)}
+
+
+  .banner{
+    padding:12px 14px;
+    border-radius:16px;
+    border:1px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.04);
+    margin:12px 0 6px;
+    line-height:1.45;
+  }
+  .banner.warn{border-color: rgba(255,205,92,.45); background: rgba(255,205,92,.08)}
+  .banner.ok{border-color: rgba(53,240,163,.45); background: rgba(53,240,163,.08)}
+  .banner.hide{display:none}
+
+  /* Make the Use screen feel more like a real product page */
+  .brandSub{opacity:.75}
+  .cardTitle{letter-spacing:.02em}
+  .grid{gap:16px}
+  .panel h2{margin-bottom:6px}
+  .panel p{max-width:72ch}
+  textarea, input[type="number"], input[type="file"]{border-radius:16px}
+  .btn{border-radius:16px}
+  .row{gap:10px}
+
+
+  .quickSteps{
+    display:flex; flex-wrap:wrap; gap:10px;
+    margin:10px 0 14px;
+  }
+  .qs{
+    display:inline-flex; align-items:center; gap:10px;
+    padding:8px 12px;
+    border:1px solid rgba(255,255,255,.10);
+    background: rgba(255,255,255,.03);
+    border-radius:999px;
+    color:rgba(255,255,255,.80);
+    font-weight:650;
+  }
+  .qs b{
+    display:inline-grid; place-items:center;
+    width:20px; height:20px;
+    border-radius:999px;
+    background: rgba(120,180,255,.18);
+    border:1px solid rgba(120,180,255,.28);
+    font-size:12px;
+  }
+
 </style>
 
 <script>
 function getActiveUser(){
-  return localStorage.getItem("trace_active_user") || "default";
+  return LS.getItem("trace_active_user") || "default";
 }
+</script>
+
+
+<script>
+(function(){
+  function resetProfileMindprintForUser(){
+    const u = LS.getItem("trace_active_user") || "default";
+    const k = "signai_profile_mp_" + u;
+    try{
+      const saved = LS.getItem(k);
+      if(!saved){
+        window.profileMindprint = null;
+        if(typeof refreshMindprintUI==="function") refreshMindprintUI();
+      }
+    }catch(e){}
+  }
+  document.addEventListener("DOMContentLoaded", resetProfileMindprintForUser);
+})();
+</script>
+
+
+<script>
+(function(){
+  const _oldRefresh = window.refreshMindprintUI;
+  window.refreshMindprintUI = function(){
+    try{
+      const u = LS.getItem("trace_active_user") || "default";
+      const k = "signai_profile_mp_" + u;
+      const stored = LS.getItem(k);
+
+      // derive profileMindprint ONLY from storage
+      window.profileMindprint = stored ? JSON.parse(stored) : null;
+    }catch(e){
+      window.profileMindprint = null;
+    }
+    if(typeof _oldRefresh === "function"){
+      _oldRefresh();
+    }
+  };
+})();
+</script>
+
+
+<script>
+(function(){
+  function updateProfileMindprintStatus(){
+    const u = LS.getItem("trace_active_user") || "default";
+    const k = "signai_profile_mp_" + u;
+    const has = !!LS.getItem(k);
+
+    const label = document.querySelector("#vault_mp_status");
+    if(label){
+      if(has){
+        label.textContent = "registered ✓";
+        label.classList.add("ok");
+        label.classList.remove("warn");
+      }else{
+        label.textContent = "not registered";
+        label.classList.remove("ok");
+        label.classList.add("warn");
+      }
+    }
+  }
+
+  // run on load + expose for later calls
+  document.addEventListener("DOMContentLoaded", updateProfileMindprintStatus);
+  window.__updateProfileMindprintStatus = updateProfileMindprintStatus;
+})();
+</script>
+
+
+<script>
+(function(){
+  function forceInitialProfileMindprintState(){
+    const label = document.querySelector("#vault_mp_status");
+    if(!label) return;
+
+    const u = LS.getItem("trace_active_user") || "default";
+    const k = "signai_profile_mp_" + u;
+    const has = !!LS.getItem(k);
+
+    if(!has){
+      label.textContent = "not registered";
+      label.classList.remove("ok");
+      label.classList.add("warn");
+    }
+  }
+  document.addEventListener("DOMContentLoaded", forceInitialProfileMindprintState);
+  window.__forceInitialProfileMindprintState = forceInitialProfileMindprintState;
+})();
+</script>
+
+
+<script>
+(function(){
+  const _orig = window.refreshMindprintUI;
+  window.refreshMindprintUI = function(){
+    const u = LS.getItem("trace_active_user") || "default";
+    const k = "signai_profile_mp_" + u;
+    const stored = LS.getItem(k);
+
+    const profileHas = !!stored;
+
+    const badgeOk = !!window.badgeMindprint?.ready
+      && !!window.badgeMindprint?.textHash
+      && (window.badgeMindprint.score_0_1 > 0.35);
+
+    const profLabel = document.querySelector("#vault_mp_status");
+    if(profLabel){
+      if(profileHas){
+        profLabel.textContent = "registered ✓";
+        profLabel.className = "ok";
+      }else{
+        profLabel.textContent = "required";
+        profLabel.className = "warn";
+      }
+    }
+
+    const badgeLabel = document.querySelector("#mp_status");
+    if(badgeLabel){
+      badgeLabel.textContent = badgeOk ? "registered ✓" : "required";
+      badgeLabel.className = badgeOk ? "ok" : "warn";
+    }
+
+    if(typeof _orig === "function"){
+      try{ _orig(); }catch(e){}
+    }
+  };
+})();
 </script>
 
 
@@ -505,21 +789,27 @@ function getActiveUser(){
       </div>
       <div>
         <div class="brandTitle">TRACE</div>
-        <div class="brandSub">BETA 1.0 · H.O.P 8.0 · Local-first · WebCrypto Ed25519</div>
+        <div class="brandSub">Local-first · Works offline · Badges + profile glyph evolution</div>
       </div>
     </div>
     <div class="tabs">
-      <div class="tab active" id="tab_use"><span class="pillDot"></span>🧬 Use</div>
+      <div class="tab active" id="tab_use"><span class="pillDot"></span>🧾 Create</div>
       <div class="tab" id="tab_verify"><span class="pillDot"></span>✅ Verify</div>
       <div class="tab" id="tab_profile"><span class="pillDot"></span>👤 Profile</div>
-      <div class="tab" id="tab_admin"><span class="pillDot"></span>🛠️ Admin</div>
+      <div class="tab" id="tab_admin"><span class="pillDot"></span>🛠️ Owner</div>
     </div>
   </div>
 
   <!-- USE -->
   <div class="panel" id="panel_use">
-    <h2>Create — mint badge</h2>
-    <p>Create (or unlock) your local creator profile, register mindprints, run Winston AI origin-scan (image only), and generate a signed badge. Everything is stored locally in your browser.</p>
+    <h2>Create badge</h2>
+    <div class="quickSteps">
+      <div class="qs"><b>1</b> Unlock vault</div>
+      <div class="qs"><b>2</b> Write mindprints</div>
+      <div class="qs"><b>3</b> Add text / image</div>
+      <div class="qs"><b>4</b> Create badge</div>
+    </div>
+    <p class="pageIntro">Skapa en badge med text + (valfri) bild. Din profilglyph evolverar över tid baserat på din badge-historik.</p>
 
     <div class="grid">
       <!-- Vault (small) -->
@@ -567,6 +857,8 @@ function getActiveUser(){
           </div>
           <div class="stat">Ready: <b id="ready_flag" class="warn">No</b></div>
         </div>
+        <div class="banner warn hide" id="compat_banner"><b>Work-computer mode</b> — din webbläsare blockerar signering/lagring. Du kan fortfarande rendera badges, men de blir <b>UNSIGNED</b> i Verify.</div>
+
 
         <div style="height:10px"></div>
 
@@ -584,17 +876,28 @@ function getActiveUser(){
         <div class="hint" id="img_hint">No image selected.</div>
 
         <div style="height:10px"></div>
-        <div class="cardTitle" style="font-size:13px">Content Origin (Winston AI — image only)</div>
+        <div class="cardTitle" style="font-size:13px">Origin scan (image only)</div>
         <div class="stat" id="origin_out">Not analyzed yet.</div>
-        <div class="hint">Winston AI is always called. If no response (credits/CORS/offline) ⇒ fail-closed = AI flag.</div>
+        <div class="hint">Bildscannen körs när du har en bild. Om din jobbdator blockerar anropet (CORS/offline) används en säker fallback.</div>
 
         <div style="height:10px"></div>
-        <div class="row">
-          <div class="stat">Window (s) <input id="window_s" type="number" min="5" max="120" value="24" style="width:86px; margin-left:8px"></div>
-          <button class="btn primary" id="btn_analyze">Analyze & create badge</button>
-          <button class="btn" id="btn_download_svg">Download SVG</button>
-          <button class="btn" id="btn_save_json">Save proof (.json)</button>
-        </div>
+        
+<div class="row" style="flex-wrap:wrap">
+  <button class="btn primary" id="btn_analyze" type="button">Create badge</button>
+  <button class="btn" id="btn_download_svg" type="button">Download SVG</button>
+  <button class="btn" id="btn_save_json" type="button">Save proof (.json)</button>
+</div>
+
+<details class="details" style="margin-top:10px">
+  <summary>Advanced — timing</summary>
+  <div class="row" style="margin-top:10px; align-items:center; flex-wrap:wrap">
+    <div class="stat">Verification window (s)
+      <input id="window_s" type="number" min="5" max="120" value="24" style="width:92px; margin-left:8px">
+    </div>
+    <div class="hint" style="margin:0">Hur länge en badge räknas som “fresh”.</div>
+  </div>
+</details>
+
 
         <div class="badgeWrap" id="badge_wrap"></div>
         <div class="hint" id="badge_hint" style="margin-top:8px">Tip: click the badge to jump to Verify instantly.</div>
@@ -606,25 +909,57 @@ function getActiveUser(){
 
   <!-- VERIFY -->
   <div class="panel hide" id="panel_verify">
-    <h2>Verify — TRACE / TraceNet</h2>
-    <p>Upload a proof (.json) to verify signature + window + mindprints. If you just clicked your badge, the latest proof is used automatically.</p>
+    <h2>Verify</h2>
+    <p class="pageIntro">Verifiera en badge genom att ladda upp en <span class="mono">proof.json</span> eller klistra in JSON. Signatur, tidsfönster och mindprints kontrolleras lokalt i din webbläsare.</p>
 
-    <div class="card">
-      <div class="row">
-        <input id="file_proof" type="file" accept=".json,application/json"/>
-        <button class="btn primary" id="btn_verify">Verify uploaded proof</button>
-        <button class="btn" id="btn_load_last">Load last proof</button>
+    <div class="verifyGrid">
+      <!-- Input -->
+      <div class="card">
+        <div class="cardTitle">Proof</div>
+
+        <div class="dropzone" id="verify_dropzone" role="button" tabindex="0" aria-label="Upload proof JSON">
+          <div class="dzTitle">Släpp <b>.json</b> här eller klicka för att välja fil</div>
+          <div class="dzSub">Tips: Om du klickade en badge nyss kan du trycka <b>Load last</b>.</div>
+          <input id="file_proof" class="fileHidden" type="file" accept=".json,application/json"/>
+        </div>
+
+        <div class="row" style="margin-top:12px; gap:10px; flex-wrap:wrap">
+          <button class="btn primary" id="btn_verify" type="button">Verify file</button>
+          <button class="btn" id="btn_load_last" type="button">Load last</button>
+          <button class="btn ghost" id="btn_verify_clear" type="button">Clear</button>
+        </div>
+
+        <div style="height:12px"></div>
+
+        <div class="hint" style="margin-bottom:8px">Eller klistra in proof JSON:</div>
+        <textarea id="verify_paste" class="mono" placeholder="{ ... }" spellcheck="false"></textarea>
+        <div class="row" style="margin-top:10px; gap:10px; flex-wrap:wrap">
+          <button class="btn" id="btn_verify_paste" type="button">Verify pasted JSON</button>
+        </div>
+
+        <details class="details" style="margin-top:12px">
+          <summary>Visa rå JSON</summary>
+          <textarea id="verify_raw" class="mono" placeholder="Raw proof JSON (read-only)" readonly></textarea>
+        </details>
       </div>
-      <div style="height:10px"></div>
-      <div class="stat">Result: <b id="verify_out">—</b></div>
-      <div id="verify_box"></div>
-      <div style="height:10px"></div>
-      <textarea id="verify_raw" class="mono" placeholder="Raw proof JSON (read-only)" readonly></textarea>
+
+      <!-- Output -->
+      <div class="card">
+        <div class="cardTitle">Result</div>
+        <div class="verifyStatus">
+          <div class="stat">Status: <span class="statusPill" id="verify_status_pill">—</span></div>
+          <div class="stat">Result: <b id="verify_out">—</b></div>
+        </div>
+        <div id="verify_box" style="margin-top:10px"></div>
+
+        <div class="hint" style="margin-top:12px">
+          Säkerhet: verifieringen körs lokalt. En proof kan alltid delas/konverteras, men du kan inte “verifiera bort” en falsk signatur.
+        </div>
+      </div>
     </div>
   </div>
 
-
-  <!-- PROFILE -->
+<!-- PROFILE -->
   <div class="panel hide" id="panel_profile">
     <h2>Profile — your history</h2>
     <p>Here you see the badges you created on this device (local-first). Click a badge to jump to Verify.</p>
@@ -675,6 +1010,46 @@ function getActiveUser(){
     <p>Teknisk vy är låst. Ange PIN för att visa känsliga fält och verktyg.</p>
 
     <div class="grid">
+      <div class="card" id="admin_winston_card">
+        <div class="cardTitle">Origin scan proxy (Winston)</div>
+        <div class="hint" style="margin-bottom:10px">
+          För att Winston ska fungera i browser (CORS/policy) kan du köra via din backend: <span class="mono">POST /detect-image</span>.
+          Detta är <b>Owner only</b>.
+        </div>
+
+        <div class="row" style="flex-wrap:wrap; gap:10px">
+          <input id="admin_winston_proxy" type="text" placeholder="https://din-backend.onrender.com/detect-image"
+                 style="min-width:320px; flex:1 1 420px"/>
+          <button class="btn primary" id="btn_winston_save" type="button">Save</button>
+          <button class="btn ghost" id="btn_winston_test" type="button">Test with selected image</button>
+        </div>
+        <div class="hint" id="winston_state" style="min-height:18px; margin-top:8px"></div>
+      </div>
+
+
+
+      <div class="card" id="admin_glyph_card">
+        <div class="cardTitle">Glyph engine</div>
+        <div class="hint" style="margin-bottom:10px">
+          Välj vilken glyph-stil som ska vara <b>default</b> för nya badges + profilsymbol.
+          (Historik behåller sin stil om den sparats i proof.)
+        </div>
+        <div class="row" style="flex-wrap:wrap">
+          <select id="admin_glyph_style" style="min-width:240px;border-radius:14px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);color:var(--text);padding:10px 12px;outline:none">
+            <option value="orbit_ring">Orbit Ring (default)</option>
+            <option value="spiro_flow">Spiro Flow</option>
+            <option value="helix_clean">Helix Clean</option>
+            <option value="dna_braid">DNA Braid</option>
+            <option value="minimal_pulse">Minimal Pulse</option>
+          </select>
+          <button class="btn primary" id="admin_glyph_apply" type="button">Set default</button>
+          <span class="hint" id="admin_glyph_state" style="min-height:18px"></span>
+        </div>
+        <div class="hint" style="margin-top:8px">
+          Storage: <b id="admin_storage_state">—</b> · Om policy blockerar lagring kör vi i “session-mode” men du kan fortfarande rendera badges.
+        </div>
+      </div>
+
       <div class="card">
         <div class="cardTitle">Access</div>
         <div class="row">
@@ -731,13 +1106,48 @@ function getActiveUser(){
 <script>
 /* ========= tiny helpers ========= */
 const $ = (q)=>document.querySelector(q);
+
+// ---- Safe storage wrapper (works even if localStorage is blocked) ----
+const LS = (()=>{
+  const mem = new Map();
+  let ok = false;
+  try{
+    const k="__trace_ls_test__";
+    window.LS.setItem(k,"1");
+    window.LS.removeItem(k);
+    ok = true;
+  }catch(e){ ok = false; }
+
+  function getItem(k){
+    if(ok){ try{ return window.LS.getItem(k); }catch(e){} }
+    return mem.has(k) ? mem.get(k) : null;
+  }
+  function setItem(k,v){
+    if(ok){ try{ window.LS.setItem(k,String(v)); return; }catch(e){ ok=false; } }
+    mem.set(k, String(v));
+  }
+  function removeItem(k){
+    if(ok){ try{ window.LS.removeItem(k); return; }catch(e){ ok=false; } }
+    mem.delete(k);
+  }
+  function keys(){
+    if(ok){ try{ return Object.keys(window.localStorage); }catch(e){ ok=false; } }
+    return Array.from(mem.keys());
+  }
+  function available(){ return ok; }
+
+  return { getItem, setItem, removeItem, keys, available };
+})();
+
+// Expose a small banner for blocked-storage environments
+window.__TRACE_STORAGE_OK__ = LS.available();
 const USER_SCOPED_KEYS = new Set([
   "signai_priv_jwk","signai_pub_jwk","signai_creator_id","signai_vault_hash",
   "signai_profile_epoch","signai_last_proof","signai_last_badge_svg","signai_vault_root","signai_vault_root_hash",
   "signai_badge_history","signai_profile_mp"
 ]);
 function currentUser(){
-  try{ return localStorage.getItem("trace_auth_user") || "default"; }
+  try{ return LS.getItem("trace_auth_user") || "default"; }
   catch(e){ return "default"; }
 }
 function scopedKey(k){
@@ -749,9 +1159,9 @@ function scopedKey(k){
   return k;
 }
 const store = {
-  get:(k)=>{ try{return localStorage.getItem(scopedKey(k));}catch(e){return null;} },
-  set:(k,v)=>{ try{localStorage.setItem(scopedKey(k),v);}catch(e){} },
-  del:(k)=>{ try{localStorage.removeItem(scopedKey(k));}catch(e){} }
+  get:(k)=>{ try{return LS.getItem(scopedKey(k));}catch(e){return null;} },
+  set:(k,v)=>{ try{LS.setItem(scopedKey(k),v);}catch(e){} },
+  del:(k)=>{ try{LS.removeItem(scopedKey(k));}catch(e){} }
 };
 
 
@@ -765,19 +1175,12 @@ function safeJsonStore(key, obj){
   }
 }
 function slimProofForStorage(proof){
-  // Keep storage small: preserve thumb_data_url, drop huge full-size img_data_url
+  // Avoid storing massive data URLs/signatures repeatedly.
   try{
     const p = JSON.parse(JSON.stringify(proof||{}));
-
-    // Always prefer keeping thumbnails (small) for history previews
-    if(typeof p.thumb_data_url !== "string" || !p.thumb_data_url.startsWith("data:")){
-      p.thumb_data_url = null;
-    }
-
-    // Drop full image if it's large (localStorage quota protection)
     if(typeof p.img_data_url==="string" && p.img_data_url.length>45000){
-      p.img_data_url = null;
-      p.img_data_url_dropped = true;
+      // keep a short marker; full proof still available in-memory for the latest badge
+      p.img_data_url = p.img_data_url.slice(0,120) + "…";
     }
     return p;
   }catch(e){
@@ -855,11 +1258,11 @@ async function sha256Hex(u8){
 
 /* ========= auth (beta) ========= */
 function loadUsers(){
-  try{ return JSON.parse(localStorage.getItem("trace_users")||"{}"); }
+  try{ return JSON.parse(LS.getItem("trace_users")||"{}"); }
   catch(e){ return {}; }
 }
 function saveUsers(u){
-  try{ localStorage.setItem("trace_users", JSON.stringify(u)); }catch(e){}
+  try{ LS.setItem("trace_users", JSON.stringify(u)); }catch(e){}
 }
 async function hashCred(u,p){
   return await sha256Hex(textToU8("trace-auth::"+(u||"")+"::"+(p||"")));
@@ -940,8 +1343,8 @@ async function initAuth(){
       }
       users[u] = { passHash:h, created:Date.now() };
       saveUsers(users);
-      localStorage.setItem("trace_auth_user", u);
-      localStorage.setItem("trace_active_user", u);
+      LS.setItem("trace_auth_user", u);
+      LS.setItem("trace_active_user", u);
       try{ await ensureVaultRoot(); }catch(e){}
       try{ if(typeof __adminNotesLoad==="function" && adminUnlocked){ __adminNotesLoad(); } }catch(e){}
       hint.textContent = "Profil skapad ✓";
@@ -964,8 +1367,8 @@ async function initAuth(){
       return;
     }
 
-    localStorage.setItem("trace_auth_user", u);
-    localStorage.setItem("trace_active_user", u);
+    LS.setItem("trace_auth_user", u);
+    LS.setItem("trace_active_user", u);
     try{ await ensureVaultRoot(); }catch(e){}
     try{ if(typeof __adminNotesLoad==="function" && adminUnlocked){ __adminNotesLoad(); } }catch(e){}
     hint.textContent = "Välkommen tillbaka ✓";
@@ -980,8 +1383,53 @@ async function initAuth(){
   };
 }
 
-async function fileToDataUrl(file){
-  // Normal path
+async function fileToDataUrl(file, maxDim=1600, jpegQ=0.86){
+  // Work-computer friendly: prefer ObjectURL + canvas (avoids some FileReader/local-file policy issues).
+  try{
+    if(file){
+      const url = URL.createObjectURL(file);
+      try{
+        const img = new Image();
+        img.decoding = "async";
+        img.loading = "eager";
+        img.src = url;
+        await new Promise((res, rej)=>{ img.onload=()=>res(true); img.onerror=()=>rej(new Error("img load failed")); });
+
+        const iw = img.naturalWidth || img.width;
+        const ih = img.naturalHeight || img.height;
+        if(iw && ih){
+          const cap = Math.max(480, Math.min(2200, Number(maxDim)||1600));
+          const long = Math.max(iw, ih);
+          let ow=iw, oh=ih;
+          if(long > cap){
+            const s = cap / long;
+            ow = Math.max(1, Math.round(iw*s));
+            oh = Math.max(1, Math.round(ih*s));
+          }
+          const c = document.createElement("canvas");
+          c.width = ow; c.height = oh;
+          const ctx = c.getContext("2d");
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = "high";
+          // If PNG w/ transparency, paint black behind so it still looks ok as JPEG
+          ctx.fillStyle = "#000";
+          ctx.fillRect(0,0,ow,oh);
+          ctx.drawImage(img, 0,0, iw,ih, 0,0, ow,oh);
+
+          const asPng = (file.type === "image/png"); // keep png if you want exact alpha (still re-encoded)
+          const mime = asPng ? "image/png" : "image/jpeg";
+          const dataUrl = asPng ? c.toDataURL(mime) : c.toDataURL(mime, Number(jpegQ)||0.86);
+          return dataUrl;
+        }
+      }finally{
+        try{ URL.revokeObjectURL(url); }catch(e){}
+      }
+    }
+  }catch(e){
+    // fall through to FileReader
+  }
+
+  // Fallback: FileReader
   if (typeof FileReader !== "undefined") {
     return await new Promise((resolve, reject) => {
       try{
@@ -992,64 +1440,178 @@ async function fileToDataUrl(file){
       }catch(e){ reject(e); }
     });
   }
-
-  // Fallback (rare): convert ArrayBuffer to base64 in chunks
-  const ab = await file.arrayBuffer();
-  const bytes = new Uint8Array(ab);
-  let bin = "";
-  const CHUNK = 0x8000;
-  for (let i = 0; i < bytes.length; i += CHUNK) {
-    bin += String.fromCharCode(...bytes.subarray(i, i + CHUNK));
-  }
-  const b64 = btoa(bin);
-  return `data:${file.type || "application/octet-stream"};base64,${b64}`;
+  throw new Error("No way to read file");
 }
-async function fileToThumbDataUrl(file, maxSize=140, quality=0.82){
-  // Creates a small thumbnail data URL for badge history (keeps localStorage sane)
-  let objUrl = null;
-  try{
-    let src = null;
-    try{ objUrl = URL.createObjectURL(file); src = objUrl; }catch(e){ src = null; }
-    if(!src){
-      src = await fileToDataUrl(file);
+
+
+// Make a larger (but still non-original) preview for clicking.
+// Downscale + cover-crop + JPEG recompress (lossy). Not a byte-for-byte copy.
+// Make a "coded" watermark from an image dataURL.
+// More visible & recognizable, but NOT a clean copy of the original bytes.
+// This is intentionally low-res + posterized + deterministically pixel-scrambled (irreversible in practice).
+async function makeCodedWatermark(dataUrl, seedStr){
+  if(!dataUrl) return null;
+  const seed = String(seedStr||"");
+  // deterministic 32-bit hash (FNV-1a)
+  let h = 2166136261>>>0;
+  for(let i=0;i<seed.length;i++){
+    h ^= seed.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  function prng(){
+    // xorshift32
+    h ^= (h << 13)>>>0;
+    h ^= (h >>> 17)>>>0;
+    h ^= (h << 5)>>>0;
+    return (h>>>0) / 4294967296;
+  }
+
+  const img = new Image();
+  img.decoding = "async";
+  img.loading = "eager";
+  img.src = dataUrl;
+
+  await new Promise((res, rej)=>{
+    img.onload = ()=>res(true);
+    img.onerror = ()=>rej(new Error("watermark load failed"));
+  });
+
+  const S = 44;          // source sample size
+  const OUT = 128;       // output size (upscaled)
+  const c = document.createElement("canvas");
+  c.width = S; c.height = S;
+  const ctx = c.getContext("2d", { willReadFrequently:true });
+
+  // draw cover-cropped into SxS
+  const iw = img.naturalWidth || img.width;
+  const ih = img.naturalHeight || img.height;
+  const scale = Math.max(S/iw, S/ih);
+  const dw = iw*scale, dh = ih*scale;
+  const dx = (S - dw)/2, dy = (S - dh)/2;
+  ctx.imageSmoothingEnabled = true;
+  ctx.drawImage(img, dx, dy, dw, dh);
+
+  let id = ctx.getImageData(0,0,S,S);
+  const d = id.data;
+
+  // posterize + mild tint shift (keeps recognizable)
+  const poster = 24; // 0..255 step size (lower => more detail)
+  const tintR = 0.92 + prng()*0.20;
+  const tintG = 0.92 + prng()*0.20;
+  const tintB = 0.92 + prng()*0.20;
+
+  for(let i=0;i<d.length;i+=4){
+    let r=d[i], g=d[i+1], b=d[i+2];
+    // slight gamma lift for visibility
+    r = Math.min(255, Math.pow(r/255, 0.85)*255);
+    g = Math.min(255, Math.pow(g/255, 0.85)*255);
+    b = Math.min(255, Math.pow(b/255, 0.85)*255);
+    // posterize
+    r = Math.round(r/poster)*poster;
+    g = Math.round(g/poster)*poster;
+    b = Math.round(b/poster)*poster;
+    // tint
+    r = Math.min(255, r*tintR);
+    g = Math.min(255, g*tintG);
+    b = Math.min(255, b*tintB);
+    d[i]=r; d[i+1]=g; d[i+2]=b;
+  }
+
+  // deterministic pixel scramble (small local shifts)
+  const copy = new Uint8ClampedArray(d);
+  const maxShift = 2 + Math.floor(prng()*2); // 2..3 px
+  for(let y=0;y<S;y++){
+    for(let x=0;x<S;x++){
+      const sx = (x + Math.floor((prng()*2-1)*maxShift) + S) % S;
+      const sy = (y + Math.floor((prng()*2-1)*maxShift) + S) % S;
+      const i = (y*S + x)*4;
+      const j = (sy*S + sx)*4;
+      d[i]=copy[j]; d[i+1]=copy[j+1]; d[i+2]=copy[j+2]; d[i+3]=copy[j+3];
     }
-
-    const img = await new Promise((resolve, reject)=>{
-      const im = new Image();
-      im.onload = ()=> resolve(im);
-      im.onerror = (e)=> reject(e);
-      im.src = src;
-    });
-
-    const iw = (img.naturalWidth || img.width || 1);
-    const ih = (img.naturalHeight || img.height || 1);
-    const s = Math.max(1, Math.max(iw, ih));
-    const scale = Math.min(1, maxSize / s);
-    const w = Math.max(1, Math.round(iw * scale));
-    const h = Math.max(1, Math.round(ih * scale));
-
-    const canvas = document.createElement("canvas");
-    canvas.width = w;
-    canvas.height = h;
-    const ctx = canvas.getContext("2d", { alpha: true });
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = "high";
-    ctx.drawImage(img, 0, 0, w, h);
-
-    // Prefer WebP if supported
-    try{
-      const webp = canvas.toDataURL("image/webp", quality);
-      if(webp && webp.startsWith("data:image/webp")) return webp;
-    }catch(e){}
-
-    // Fall back to JPEG (small)
-    return canvas.toDataURL("image/jpeg", quality);
-  }catch(e){
-    return null;
-  }finally{
-    try{ if(objUrl) URL.revokeObjectURL(objUrl); }catch(e){}
   }
+
+  // subtle diagonal code-pattern overlay (seeded)
+  for(let y=0;y<S;y++){
+    for(let x=0;x<S;x++){
+      if(((x + y + (h&7)) % 7) === 0){
+        const i=(y*S+x)*4;
+        d[i]   = Math.min(255, d[i]   + 22);
+        d[i+1] = Math.min(255, d[i+1] + 18);
+        d[i+2] = Math.min(255, d[i+2] + 26);
+      }
+    }
+  }
+
+  ctx.putImageData(id,0,0);
+
+  // upscale to OUT with crisp edges (no smoothing)
+  const c2 = document.createElement("canvas");
+  c2.width = OUT; c2.height = OUT;
+  const ctx2 = c2.getContext("2d");
+  ctx2.imageSmoothingEnabled = false;
+  ctx2.drawImage(c, 0,0, OUT, OUT);
+
+  return c2.toDataURL("image/png");
 }
+
+async function makeSafePreview(dataUrl, maxDim=1024){
+  if(!dataUrl) return null;
+  const img = new Image();
+  img.decoding = "async";
+  img.loading = "eager";
+  img.src = dataUrl;
+
+  await new Promise((res, rej)=>{
+    img.onload = ()=>res(true);
+    img.onerror = ()=>rej(new Error("preview load failed"));
+  });
+
+  const iw = img.naturalWidth || img.width;
+  const ih = img.naturalHeight || img.height;
+  if(!iw || !ih) return null;
+
+  // Keep aspect ratio (no crop), but cap long edge so it's not too heavy.
+  const cap = Math.max(320, Math.min(1400, Number(maxDim)||1024));
+  let outW = iw, outH = ih;
+  const longEdge = Math.max(iw, ih);
+  if(longEdge > cap){
+    const s = cap / longEdge;
+    outW = Math.max(1, Math.round(iw * s));
+    outH = Math.max(1, Math.round(ih * s));
+  }
+
+  const c = document.createElement("canvas");
+  c.width = outW; c.height = outH;
+  const ctx = c.getContext("2d");
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
+  ctx.fillStyle = "#000";
+  ctx.fillRect(0,0,outW,outH);
+
+  // Draw full image scaled to fit exactly (same aspect, so no letterbox)
+  ctx.drawImage(img, 0,0, iw, ih, 0,0, outW, outH);
+
+  // Mild clarity bump (safe + fast)
+  try{
+    const id = ctx.getImageData(0,0,outW,outH);
+    const d = id.data;
+    for(let i=0;i<d.length;i+=4){
+      d[i]   = Math.min(255, d[i]   * 1.03);
+      d[i+1] = Math.min(255, d[i+1] * 1.03);
+      d[i+2] = Math.min(255, d[i+2] * 1.03);
+    }
+    ctx.putImageData(id,0,0);
+  }catch(e){}
+
+  // JPEG keeps size manageable; still not a clean copy of the original bytes.
+  return c.toDataURL("image/jpeg", 0.84);
+}
+
+
+
+
+  
+
 function textToU8(s){ return new TextEncoder().encode(s||""); }
 function clamp01(x){ return Math.max(0, Math.min(1, x)); }
 function nowMs(){ return Date.now(); }
@@ -1089,6 +1651,7 @@ let badgeMindprint = { textHash:null, rhythmHash:null, score_0_1:0, ready:false 
 let lastProof = null;
 let lastBadgeSvg = null;
 let adminUnlocked = false;
+  try{ __adminUpdateGlyphControls(); }catch(e){}
 
 /* v40: reset vault/password if user forgot (one-time) */
 (function resetOnce(){
@@ -1102,8 +1665,8 @@ let adminUnlocked = false;
           "signai_profile_epoch_","signai_last_proof_","signai_last_badge_svg_",
           "signai_badge_history_","signai_profile_mp_"
         ];
-        for(const k of Object.keys(localStorage)){
-          if(prefixes.some(p=>k.startsWith(p))) localStorage.removeItem(k);
+        for(const k of LS.keys()){
+          if(prefixes.some(p=>k.startsWith(p))) LS.removeItem(k);
         }
       }catch(e){}
       store.set("signai_reset_v40","1");
@@ -1141,6 +1704,14 @@ function setReadyUI(){
   $("#btn_analyze").style.opacity = ready ? "1" : ".55";
 }
 function warn(msg){ alert(msg); }
+
+function setCompatUI(){
+  const b = document.querySelector("#compat_banner");
+  if(!b) return;
+  const alg = store.get("signai_sig_alg") || "Ed25519";
+  const compat = (!window.isSecureContext || !crypto || !crypto.subtle || alg==="none");
+  b.classList.toggle("hide", !compat);
+}
 
 // Vault root (unique per profile). Beta: stored locally; reveal only when vault is unlocked.
 function _b64url(bytes){
@@ -1254,17 +1825,26 @@ async function tryUnlockVault(){
     }
   }catch(e){}
 
-  // load keys if exist
+  // load keys if exist (Ed25519 or ECDSA fallback)
   try{
     const privJ = store.get("signai_priv_jwk");
     const pubJ  = store.get("signai_pub_jwk");
-    if(privJ && pubJ){
-      creator.privKey = await crypto.subtle.importKey("jwk", JSON.parse(privJ), {name:"Ed25519"}, true, ["sign"]);
-      creator.pubKey  = await crypto.subtle.importKey("jwk", JSON.parse(pubJ), {name:"Ed25519"}, true, ["verify"]);
-      creator.creatorId = store.get("signai_creator_id") || null;
+    const alg = store.get("signai_sig_alg") || "Ed25519";
+    if(privJ && pubJ && window.isSecureContext && crypto && crypto.subtle && alg !== "none"){
+      if(alg === "ECDSA_P256_SHA256"){
+        creator.privKey = await crypto.subtle.importKey("jwk", JSON.parse(privJ), {name:"ECDSA", namedCurve:"P-256"}, true, ["sign"]);
+        creator.pubKey  = await crypto.subtle.importKey("jwk", JSON.parse(pubJ),  {name:"ECDSA", namedCurve:"P-256"}, true, ["verify"]);
+      }else{
+        creator.privKey = await crypto.subtle.importKey("jwk", JSON.parse(privJ), {name:"Ed25519"}, true, ["sign"]);
+        creator.pubKey  = await crypto.subtle.importKey("jwk", JSON.parse(pubJ),  {name:"Ed25519"}, true, ["verify"]);
+      }
+      creator.creatorId = store.get("signai_creator_id") || (await sha256Hex(textToU8(alg+"|"+pubJ)));
+    }else{
+      // compat
+      const root = store.get("signai_vault_root") || "";
+      creator.creatorId = store.get("signai_creator_id") || (await sha256Hex(textToU8("compat|"+getActiveUser()+"|"+root)));
     }
   }catch(e){ /* ignore */ }
-
   // load profile mindprint
   try{
     const mp = store.get("signai_profile_mp_"+getActiveUser());
@@ -1274,6 +1854,7 @@ async function tryUnlockVault(){
   setVaultUI();
   refreshMindprintUI();
   setReadyUI();
+  try{ setCompatUI(); }catch(e){}
 }
 
 function lockVault(){
@@ -1283,6 +1864,8 @@ function lockVault(){
   refreshMindprintUI();
   setVaultUI();
   setReadyUI();
+  try{ setCompatUI(); }catch(e){}
+  try{ setCompatUI(); }catch(e){}
 }
 
 $("#btn_unlock").addEventListener("click", tryUnlockVault);
@@ -1296,8 +1879,8 @@ $("#btn_reset").addEventListener("click", ()=>{
           "signai_profile_epoch_","signai_last_proof_","signai_last_badge_svg_",
           "signai_badge_history_","signai_profile_mp_"
         ];
-        for(const k of Object.keys(localStorage)){
-          if(prefixes.some(p=>k.startsWith(p))) localStorage.removeItem(k);
+        for(const k of LS.keys()){
+          if(prefixes.some(p=>k.startsWith(p))) LS.removeItem(k);
         }
       }catch(e){}
       vaultUnlocked=false;
@@ -1323,17 +1906,56 @@ async function ensureVaultUnlocked(){
 }
 async function createKeypair(){
   if(!(await ensureVaultUnlocked())) return;
-  const kp = await crypto.subtle.generateKey({name:"Ed25519"}, true, ["sign","verify"]);
+
+  // Work-computer / file:// safe: don't hard-fail if WebCrypto is blocked.
+  if(!window.isSecureContext || !crypto || !crypto.subtle){
+    store.set("signai_sig_alg", "none");
+    creator.pubKey = null;
+    creator.privKey = null;
+    // still give a stable creator_id for UI/history (NOT a cryptographic identity)
+    const root = store.get("signai_vault_root") || "";
+    creator.creatorId = await sha256Hex(textToU8("compat|"+getActiveUser()+"|"+root));
+    store.set("signai_creator_id", creator.creatorId);
+    warn("WebCrypto är blockat här (kräver https/localhost). Du kan fortfarande rendera badges i compat-läge (UNSIGNED).");
+    setVaultUI(); setReadyUI();
+    return;
+  }
+
+  let kp=null;
+  let alg="Ed25519";
+  try{
+    kp = await crypto.subtle.generateKey({name:"Ed25519"}, true, ["sign","verify"]);
+  }catch(e){
+    // Fallback for browsers/policies without Ed25519
+    alg = "ECDSA_P256_SHA256";
+    try{
+      kp = await crypto.subtle.generateKey({name:"ECDSA", namedCurve:"P-256"}, true, ["sign","verify"]);
+    }catch(e2){
+      store.set("signai_sig_alg", "none");
+      creator.pubKey = null; creator.privKey = null;
+      const root = store.get("signai_vault_root") || "";
+      creator.creatorId = await sha256Hex(textToU8("compat|"+getActiveUser()+"|"+root));
+      store.set("signai_creator_id", creator.creatorId);
+      warn("Kan inte skapa signeringsnycklar i denna miljö. Compat-läge (UNSIGNED) används.");
+      setVaultUI(); setReadyUI();
+      return;
+    }
+  }
+
   const pubJwk  = await crypto.subtle.exportKey("jwk", kp.publicKey);
   const privJwk = await crypto.subtle.exportKey("jwk", kp.privateKey);
   store.set("signai_pub_jwk", JSON.stringify(pubJwk));
   store.set("signai_priv_jwk", JSON.stringify(privJwk));
+  store.set("signai_sig_alg", alg);
+
   creator.pubKey = kp.publicKey;
   creator.privKey = kp.privateKey;
-  creator.creatorId = await sha256Hex(textToU8(JSON.stringify(pubJwk)));
+  creator.creatorId = await sha256Hex(textToU8(alg+"|"+JSON.stringify(pubJwk)));
   store.set("signai_creator_id", creator.creatorId);
+
   setVaultUI();
   setReadyUI();
+  try{ setCompatUI(); }catch(e){}
 }
 $("#btn_download_pub").addEventListener("click", ()=>{
   const pub = store.get("signai_pub_jwk");
@@ -1376,25 +1998,13 @@ function rhythmTracker(el, onDone, opts={}){
   let lastT = null;
   let intervals = [];
   let done = false;
-  let doneText = "";
 
   let startedAt = null;
   let timerId = null;
 
   function markDone(){
     done = true;
-    doneText = el.value || "";
     if(timerId) { clearTimeout(timerId); timerId = null; }
-
-  function resetCapture(){
-    done = false;
-    doneText = "";
-    lastT = null;
-    intervals = [];
-    startedAt = null;
-    if(timerId) { clearTimeout(timerId); timerId = null; }
-  }
-
   }
 
   async function computeAndDone(){
@@ -1432,11 +2042,7 @@ function rhythmTracker(el, onDone, opts={}){
   }
 
   el.addEventListener("keydown", ()=>{
-    if(done){
-      const cur = el.value || "";
-      if(cur !== doneText) resetCapture();
-      else return;
-    }
+    if(done) return;
     const t = nowMs();
     if(startedAt === null){
       startedAt = t;
@@ -1452,11 +2058,7 @@ function rhythmTracker(el, onDone, opts={}){
   });
 
   el.addEventListener("input", ()=>{
-    if(done){
-      const cur = el.value || "";
-      if(cur !== doneText) resetCapture();
-      else return;
-    }
+    if(done) return;
     const txt = el.value || "";
 
     // Auto-capture by characters (e.g. profile mindprint)
@@ -1475,41 +2077,14 @@ function rhythmTracker(el, onDone, opts={}){
   });
 }
 function refreshMindprintUI(){
-  const vaultLabel = $("#vault_mp_status");
-  const badgeLabel = $("#mp_status");
-  const vaultInput = $("#vault_mp");
-  const vaultHint  = $("#vault_mp_hint");
-
+  const profileOk = vaultUnlocked && !!profileMindprint?.textHash && (profileMindprint.score_0_1>0.6);
   const badgeOk = !!badgeMindprint?.ready && !!badgeMindprint?.textHash && (badgeMindprint.score_0_1>0.35);
 
-  // Badge mindprint (per badge)
-  if(badgeLabel){
-    badgeLabel.textContent = badgeOk ? "registered ✓" : "required";
-    badgeLabel.className = badgeOk ? "ok" : "warn";
-  }
+  $("#vault_mp_status").textContent = profileOk ? "registered ✓" : "required";
+  $("#vault_mp_status").className = profileOk ? "ok" : "warn";
 
-  // Profile/Vault mindprint
-  if(!vaultUnlocked){
-    if(vaultLabel){
-      vaultLabel.textContent = "locked";
-      vaultLabel.className = "warn";
-    }
-    if(vaultInput) vaultInput.disabled = true;
-    if(vaultHint){
-      vaultHint.textContent = "Unlock vault to register (or update) your profile mindprint.";
-      vaultHint.className = "hint";
-    }
-    setReadyUI();
-    return;
-  }
-
-  if(vaultInput) vaultInput.disabled = false;
-
-  const profileOk = !!profileMindprint?.textHash && (profileMindprint.score_0_1>0.6);
-  if(vaultLabel){
-    vaultLabel.textContent = profileOk ? "registered ✓" : "required";
-    vaultLabel.className = profileOk ? "ok" : "warn";
-  }
+  $("#mp_status").textContent = badgeOk ? "registered ✓" : "required";
+  $("#mp_status").className = badgeOk ? "ok" : "warn";
 
   setReadyUI();
 }
@@ -1551,492 +2126,531 @@ $("#file_img").addEventListener("change", ()=>{
 });
 
 async function attemptWinstonAI(file){
-  // Fail-closed default: AI
-  const fallback = { ok:false, score_0_1:1.0, ai_flag:true, reason:"winston_unavailable_or_no_credits" };
+  // Fail-closed default: AI (but expose reason clearly)
+  const fallback = { ok:false, score_0_1:1.0, ai_flag:true, reason:"winston_unavailable_or_failed" };
   if(!file) return { ok:false, score_0_1:0.0, ai_flag:false, reason:"no_image" };
 
+  // Proxy URL priority:
+  // 1) URL param (?proxy=...)
+  // 2) saved admin setting (winston_proxy_url)
+  // 3) hardcoded default (your Render backend)
+  let urlProxy = "";
   try{
-    const fd = new FormData();
-    fd.append("image", file);
+    const sp = new URLSearchParams(location.search || "");
+    urlProxy = (sp.get("proxy") || sp.get("proxy_url") || "").trim();
+  }catch(e){ urlProxy = ""; }
 
-    // Placeholder endpoint (CORS/credits will likely fail in file://). We still attempt.
-    const res = await fetch("https://api.winston.ai/origin", { method:"POST", body: fd });
-    if(!res.ok) return fallback;
-    const data = await res.json();
-    const score = Number(data?.score ?? data?.result?.score ?? data?.origin?.score ?? NaN);
-    if(!isFinite(score)) return fallback;
-    const s = clamp01(score);
-    return { ok:true, score_0_1:s, ai_flag:(s>=0.5), reason:"winston_ok" };
-  }catch(e){
-    return fallback;
+  const savedProxy = (store.get("winston_proxy_url") || "").trim();
+  const defaultProxy = "https://signai-tamy.onrender.com/detect-image";
+  const proxyUrl = urlProxy || savedProxy || defaultProxy;
+
+  // If we're running via file://, we MUST use a proxy (direct Winston is blocked).
+  if(location.protocol === "file:" && !proxyUrl){
+    return { ...fallback, reason:"proxy_not_configured_file_protocol" };
   }
+
+  // Build candidate list:
+  // - if a proxy is set, ONLY try the proxy (do not fall back to direct Winston — avoids confusion/noise).
+  // - if running on https origin and no proxy, try same-origin /detect-image.
+  const candidates = [];
+  if(proxyUrl) candidates.push(proxyUrl);
+  if(!proxyUrl && location.protocol !== "file:"){
+    candidates.push(location.origin + "/detect-image");
+  }
+
+  for(const endpoint of candidates){
+    try{
+      const fd = new FormData();
+      fd.append("image", file);
+
+      const res = await fetch(endpoint, { method:"POST", body: fd });
+
+      // read JSON (or text) for better diagnostics
+      let data = null;
+      let text = "";
+      try{
+        data = await res.json();
+      }catch(e){
+        try{ text = await res.text(); }catch(_){}
+      }
+
+      if(!res.ok){
+        const reason = "proxy_http_" + String(res.status || "error");
+        const detail = (data && (data.error || data.description || data.label)) ? (data.error || data.description || data.label) : (text ? text.slice(0,160) : "");
+        return { ...fallback, reason, status: res.status, detail, endpoint };
+      }
+
+      if(!data){
+        return { ...fallback, reason:"proxy_bad_json", endpoint };
+      }
+
+      // Proxy contract: {ai_score, label, ...}
+      let score = Number(data.ai_score);
+      if(!isFinite(score)){
+        score = Number(data.score ?? data?.result?.score ?? data?.origin?.score ?? NaN);
+      }
+      if(!isFinite(score)){
+        return { ...fallback, reason:"proxy_missing_ai_score", endpoint };
+      }
+
+      const s = clamp01(score);
+      return { ok:true, score_0_1: s, ai_flag:(s>=0.5), reason:"winston_proxy_ok", endpoint, raw:data };
+    }catch(e){
+      return { ...fallback, reason:"proxy_network_or_blocked", detail:String(e?.message||e), endpoint };
+    }
+  }
+
+  return { ...fallback, reason:"proxy_failed_or_blocked" };
 }
 
 /* ========= badge + proof ========= */
 
+/* ========= badge + proof ========= */
+
+/* ========= badge + proof ========= */
+
+/* ========= badge + proof ========= */
+
+
 function makeHelixSvg(seedInput, aiFlag, scoreOrImg, maybeImg, mode){
-  // TRACE glyph v6: cleaner "future_glyph" — few readable neon strands + deterministic morph
-  // mode: "badge" (default) or "avatar" (profile)
-  let score = NaN;
-  let imgDataUrl = null;
-  if(typeof scoreOrImg === "number") score = scoreOrImg;
-  else if(typeof scoreOrImg === "string") imgDataUrl = scoreOrImg;
-  if(typeof maybeImg === "string") imgDataUrl = maybeImg;
-  mode = mode || "badge";
+  // mode can be string ("badge"/"profile"/"primitive"/"avatar") or object {mode, style, evo, meta}
+  const _modeRaw = (mode && typeof mode === "object") ? (mode.mode || "badge") : (mode || "badge");
+  const isAvatar = (_modeRaw === "avatar");
+  const _mode = isAvatar ? "profile" : _modeRaw;
 
-  // Match real UI box ratios (prevents side-bars / "grey notch")
-  const w = (mode==="badge") ? 142 : 92;
-  const h = 92;
-  const cx = w/2, cy = h/2;
+  // Evolution controls (for smoother, less "random" progression)
+  const EVO  = (mode && typeof mode === "object" && mode.evo)  ? mode.evo  : null; // {stage, epoch, aiRatio, humanRatio, diversity, avgPayload, ...}
+  const META = (mode && typeof mode === "object" && mode.meta) ? mode.meta : null; // {payloadLen, hasImg, ...}
+
+  // style resolution: explicit -> live override -> stored default (override is admin-gated elsewhere)
+  const _style = (mode && typeof mode === "object" && mode.style)
+    ? mode.style
+    : (window.__traceGlyphStyleOverride || (typeof window.__traceGetGlyphStyle === "function" ? window.__traceGetGlyphStyle() : "orbit_ring"));
+  const STYLE = String(_style || "orbit_ring");
+
+  // Dimensions
+  const W = isAvatar ? 64 : 142;
+  const H = isAvatar ? 64 : 92;
+
+  // Primitive: fewer signals (no image + no score + not flagged)
+  const primitive = (_mode === "primitive") || (!maybeImg && (!isFinite(scoreOrImg) || scoreOrImg===null || scoreOrImg===undefined) && !aiFlag);
+
+  // ---- deterministic seed -> uint32 (FNV-1a) ----
+  // IMPORTANT: for profile/avatar evolution we keep the seed STABLE and feed progression via EVO,
+  // so the glyph changes smoothly instead of "jumping" due to a reseed.
+  const evoStable = !!(EVO && (_modeRaw === "avatar" || _modeRaw === "profile"));
+  const seedStr = String(seedInput ?? "")
+    + "|" + STYLE
+    + "|" + (evoStable ? "stable" : ("ai="+String(aiFlag?1:0)))
+    + "|" + (evoStable ? "" : ("score="+String(scoreOrImg ?? "")))
+    + "|" + (maybeImg ? ("img:"+maybeImg.length) : "noimg")
+    + "|" + _modeRaw;
+
+  let h = 2166136261 >>> 0;
+  for(let i=0;i<seedStr.length;i++){
+    h ^= seedStr.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  const S = h >>> 0;
+
+  // Small PRNG
+  function rnd(){
+    let x = (rnd.s = (rnd.s + 0x6D2B79F5) >>> 0);
+    x ^= x >>> 15; x = Math.imul(x, 1 | x);
+    x ^= x + Math.imul(x ^ (x >>> 7), 61 | x);
+    return ((x ^ (x >>> 14)) >>> 0) / 4294967296;
+  }
+  rnd.s = S;
+
+  const clamp01 = (x)=>Math.max(0, Math.min(1, Number(x)||0));
+  const lerp = (a,b,t)=>a + (b-a)*t;
+
+  // Evolution metrics
+  const stage = EVO ? (Number(EVO.stage)||0) : 0;
+  const epoch = EVO ? (Number(EVO.epoch)||0) : 0;
+  const aiR   = EVO ? clamp01(EVO.aiRatio) : (aiFlag ? 1 : 0);
+  const huR   = EVO ? clamp01(EVO.humanRatio) : (aiFlag ? 0 : 1);
+  const divR  = EVO ? clamp01(EVO.diversity) : 0;
+
+  // Complexity: logical progression (badges/history => more structure, more signals => more detail)
+  const badgeHasImg = META ? !!META.hasImg : !!maybeImg;
+  const payloadLen = META ? (Number(META.payloadLen)||0) : 0;
+
+  const baseComplex =
+    primitive ? 0.10 :
+    EVO ? ( // profile complexity: grows smoothly with stage, slightly with diversity/avgPayload
+      clamp01(Math.log1p(stage) / Math.log1p(42)) * 0.78
+      + clamp01(divR) * 0.12
+      + clamp01((Number(EVO.avgPayload)||0)/260) * 0.10
+    ) :
+    ( // badge complexity: more inputs -> more detail (still clean)
+      0.22
+      + (badgeHasImg ? 0.28 : 0.00)
+      + (isFinite(scoreOrImg) ? clamp01(scoreOrImg)*0.14 : 0.00)
+      + clamp01(payloadLen/260)*0.18
+      + (aiFlag ? 0.06 : 0.00)
+    );
+
+  const COMPLEX = clamp01(baseComplex);
+
+  // Thin strokes (keep look)
+  const STROKE = (primitive ? 0.62 : (isAvatar ? 0.86 : 0.74)) * (0.95 + COMPLEX*0.06);
+  const HALO   = (primitive ? 2.1  : (isAvatar ? 2.6  : 2.1));
+  const HALO_A = (primitive ? 0.045 : (isAvatar ? 0.065 : 0.050)) * (0.92 + COMPLEX*0.18);
+
+  // Seeded multi-color palette (clean neon) + smooth drift with stage (profile)
+  let baseHue = Math.floor(rnd()*360);
+  if(EVO){
+    baseHue = (baseHue + Math.floor(stage*11 + epoch*3 + divR*80)) % 360;
+  }else{
+    // badge: small drift from payload length (still deterministic)
+    baseHue = (baseHue + Math.floor((payloadLen%97)*1.3)) % 360;
+  }
+
+  const spread = 62 + Math.floor(rnd()*14);
+  const h1 = baseHue;
+  const h2 = (baseHue + spread + Math.floor(rnd()*18)) % 360;
+  const h3 = (baseHue + 2*spread + Math.floor(rnd()*18)) % 360;
+  const h4 = (baseHue + 240 + Math.floor(rnd()*18)) % 360;
+  const h5 = (baseHue + 300 + Math.floor(rnd()*18)) % 360;
+
+  const c1 = `hsl(${h1}, 96%, 62%)`;
+  const c2 = `hsl(${h2}, 96%, 64%)`;
+  const c3 = `hsl(${h3}, 96%, 62%)`;
+  const c4 = `hsl(${h4}, 96%, 63%)`;
+  const c5 = `hsl(${h5}, 96%, 62%)`;
+
+  const coreA = isAvatar ? 0.26 : 0.18;
+  const coreB = isAvatar ? 0.12 : 0.08;
+
+  const uid = (S.toString(16).padStart(8,"0"));
+  const g1 = `grad_${uid}_1`;
+  const g2 = `grad_${uid}_2`;
+  const g3 = `grad_${uid}_3`;
+
+  let svg = '';
+  svg += `<svg class="glyph3d" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="glyph" preserveAspectRatio="xMidYMid slice">`;
+  svg += `<defs>
+    <radialGradient id="core_${uid}" cx="50%" cy="50%" r="80%">
+      <stop offset="0%" stop-color="${c3}" stop-opacity="${coreA}"/>
+      <stop offset="42%" stop-color="${c1}" stop-opacity="${coreB}"/>
+      <stop offset="100%" stop-color="#000" stop-opacity="1"/>
+    </radialGradient>
+
+    <linearGradient id="${g1}" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="${W}" y2="${H}">
+      <stop offset="0%"   stop-color="${c1}"/>
+      <stop offset="28%"  stop-color="${c2}"/>
+      <stop offset="55%"  stop-color="${c3}"/>
+      <stop offset="80%"  stop-color="${c4}"/>
+      <stop offset="100%" stop-color="${c5}"/>
+    </linearGradient>
+
+    <linearGradient id="${g2}" gradientUnits="userSpaceOnUse" x1="${W}" y1="0" x2="0" y2="${H}">
+      <stop offset="0%"   stop-color="${c5}"/>
+      <stop offset="28%"  stop-color="${c4}"/>
+      <stop offset="55%"  stop-color="${c3}"/>
+      <stop offset="80%"  stop-color="${c2}"/>
+      <stop offset="100%" stop-color="${c1}"/>
+    </linearGradient>
+
+    <linearGradient id="${g3}" gradientUnits="userSpaceOnUse" x1="0" y1="${H}" x2="${W}" y2="0">
+      <stop offset="0%"   stop-color="${c2}"/>
+      <stop offset="28%"  stop-color="${c5}"/>
+      <stop offset="55%"  stop-color="${c3}"/>
+      <stop offset="80%"  stop-color="${c1}"/>
+      <stop offset="100%" stop-color="${c4}"/>
+    </linearGradient>
+
+    <filter id="glow_${uid}" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="${isAvatar ? 1.25 : 1.45}" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>`;
+
+  svg += `<rect x="0" y="0" width="${W}" height="${H}" fill="#000"/>`;
+  svg += `<rect x="0" y="0" width="${W}" height="${H}" fill="url(#core_${uid})" opacity="0.95"/>`;
+
+  svg += `<g class="motion" data-seed="${S}" data-w="${W}" data-h="${H}" data-mode="${_modeRaw}" data-style="${STYLE}">`;
+
+  const cx = W/2, cy = H/2;
+  const minR = Math.min(W,H);
+  const R = isAvatar ? minR*0.36 : minR*0.38;
+
+  function pickGrad(i){
+    return (i % 3 === 0) ? g1 : (i % 3 === 1 ? g2 : g3);
+  }
+
+  function addStrand(kind, params, opacity=0.90, gradId=null){
+    const pA = params.map(v=>Number(v).toFixed(6)).join(",");
+    const gid = gradId || pickGrad((addStrand.i = (addStrand.i||0) + 1));
+    svg += `<path class="strand" data-kind="${kind}" data-p="${pA}" fill="none" stroke="url(#${gid})" stroke-width="${STROKE}" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow_${uid})" opacity="${opacity}" d="M0 0"/>`;
+    svg += `<path class="strandHalo" data-kind="${kind}" data-p="${pA}" fill="none" stroke="${c1}" stroke-width="${HALO}" stroke-linecap="round" stroke-linejoin="round" opacity="${HALO_A}" d="M0 0"/>`;
+  }
+
   const phi = 1.61803398875;
-  const golden = 2*Math.PI*(1 - 1/phi); // golden angle
+  const golden = 2.399963229728653;
+  const drift = (EVO ? (stage*0.18 + epoch*0.07) : 0); // smooth phase drift, not reseeding
 
-  // ---- seed bytes (hex sha256 or fallback string hash)
-  const seedStr = String(seedInput || "");
-  const seedHex = seedStr.startsWith("sha256:") ? seedStr.slice(7) : seedStr;
-  let bytes = [];
-  const isHex64 = /^[0-9a-fA-F]{64}$/.test(seedHex);
-  if(isHex64){
-    for(let i=0;i<seedHex.length;i+=2) bytes.push(parseInt(seedHex.slice(i,i+2),16));
+  // --- Styles: same families, but complexity grows logically instead of random jumps ---
+  if(STYLE === "orbit_ring"){
+    // Always create up to 3 rings, but fade-in + tighten with COMPLEX
+    const t1 = clamp01((COMPLEX-0.18)/0.62);
+    const t2 = clamp01((COMPLEX-0.55)/0.40);
+
+    // main ring
+    {
+      const phase = rnd()*Math.PI*2 + drift*0.25;
+      const a = R*(0.96);
+      const b = R*(0.67);
+      const wob = lerp(0.014, 0.030, COMPLEX);
+      const freq = 2.0 + COMPLEX*1.25;
+      const tilt = (rnd()-0.5)*0.18 + (aiR-0.5)*0.10;
+      addStrand("orbit", [phase,a,b,wob,freq,tilt], 0.92, g1);
+    }
+
+    // secondary ring (fades in)
+    {
+      const phase = rnd()*Math.PI*2 + golden + drift*0.22;
+      const a = R*(0.84);
+      const b = R*(0.58);
+      const wob = lerp(0.010, 0.024, COMPLEX);
+      const freq = 2.4 + COMPLEX*1.55;
+      const tilt = (rnd()-0.5)*0.16 - (aiR-0.5)*0.08;
+      addStrand("orbit_inner", [phase,a,b,wob,freq,tilt], 0.18 + 0.70*t1, g2);
+    }
+
+    // tertiary thin orbit (late-stage, very faint)
+    {
+      const phase = rnd()*Math.PI*2 + golden*2 + drift*0.18;
+      const a = R*(0.62);
+      const b = R*(0.44);
+      const wob = lerp(0.008, 0.016, COMPLEX);
+      const freq = 3.0 + COMPLEX*1.85;
+      const tilt = (rnd()-0.5)*0.12;
+      addStrand("orbit_inner", [phase,a,b,wob,freq,tilt], 0.08 + 0.55*t2, g3);
+    }
+  }else if(STYLE === "spiro_flow"){
+    // Spirograph: add layers as COMPLEX grows (opacity ramps, not hard jumps)
+    const t2 = clamp01((COMPLEX-0.18)/0.62);
+    const t3 = clamp01((COMPLEX-0.68)/0.30);
+
+    const bigR  = 36 + rnd()*12 + COMPLEX*6;
+    const smallr= 10 + rnd()*7;
+    const d     = 14 + rnd()*18 + COMPLEX*6;
+    const rot   = (rnd()-0.5)*0.85 + (huR-0.5)*0.12;
+    const phase = rnd()*Math.PI*2 + drift*0.14;
+    const scale = (isAvatar? 1.02 : 1.07) * (0.98 + COMPLEX*0.08);
+
+    addStrand("spiro", [bigR, smallr, d, phase, rot, scale], 0.93, g1);
+
+    // secondary spiro (fades in)
+    addStrand("spiro2", [bigR*0.92, smallr*1.08, d*0.72, phase+phi, rot*0.62, scale*0.98], 0.10 + 0.70*t2, g2);
+
+    // tertiary micro-spiro (late-stage)
+    if(t3>0.02){
+      addStrand("spiro2", [bigR*0.62, smallr*0.88, d*0.48, phase+phi*2.0, rot*0.38, scale*0.92], 0.02 + 0.45*t3, g3);
+    }
+  }else if(STYLE === "helix_clean"){
+    // Helix snakes: 1 -> 2 -> 3 with smooth opacity ramp
+    const t2 = clamp01((COMPLEX-0.20)/0.60);
+    const t3 = clamp01((COMPLEX-0.72)/0.28);
+
+    const basePhase = rnd()*Math.PI*2 + drift*0.20;
+    const twist = 1.02 + rnd()*0.22 + (aiR*0.08);
+    const wob1  = 0.09 + rnd()*0.08 + COMPLEX*0.03;
+    const wob2  = 0.028 + rnd()*0.040;
+    const k1    = 2.0 + rnd()*1.0;
+    const k2    = 5.0 + rnd()*2.2;
+
+    addStrand("helix", [basePhase,twist,wob1,wob2,k1,k2], 0.90, g1);
+    addStrand("helix", [basePhase+golden,twist*0.98,wob1*0.92,wob2*1.05,k1*1.08,k2*0.96], 0.10 + 0.72*t2, g2);
+
+    if(t3>0.02){
+      addStrand("helix", [basePhase+golden*2,twist*1.03,wob1*0.80,wob2*0.90,k1*0.92,k2*1.10], 0.02 + 0.50*t3, g3);
+    }
+  }else if(STYLE === "dna_braid"){
+    const t2 = clamp01((COMPLEX-0.24)/0.56);
+
+    const phase = rnd()*Math.PI*2 + drift*0.24;
+    const turns = 2.5 + rnd()*1.35 + COMPLEX*0.6;
+    const sep   = R*(0.40);
+    const amp   = R*(0.30);
+
+    addStrand("dna", [phase, turns, sep, amp, +1, 0], 0.90, g1);
+    addStrand("dna", [phase, turns, sep, amp, -1, 0], 0.12 + 0.74*t2, g2);
+    addStrand("dna_back", [phase+1.2, turns*0.72, sep*0.55, amp*0.18, 0, 0], 0.10 + 0.46*t2, g3);
+  }else if(STYLE === "minimal_pulse"){
+    const t2 = clamp01((COMPLEX-0.55)/0.40);
+
+    const phase = rnd()*Math.PI*2 + drift*0.20;
+    const a = R*0.82;
+    const b = R*0.54;
+    addStrand("pulse", [phase,a,b, (rnd()<0.5?1:-1), 0, 0], 0.92, g1);
+
+    // late-stage: faint orbit halo around pulse (still minimal)
+    if(t2>0.02){
+      const ph2 = phase + golden*0.6;
+      addStrand("orbit_inner", [ph2,R*0.56,R*0.40,0.010,3.0,(rnd()-0.5)*0.10], 0.02 + 0.38*t2, g2);
+    }
   }else{
-    let h32 = 2166136261>>>0;
-    for(let i=0;i<seedStr.length;i++){
-      h32 ^= seedStr.charCodeAt(i);
-      h32 = Math.imul(h32, 16777619)>>>0;
-    }
-    let x = h32 || 1;
-    for(let i=0;i<32;i++){
-      x ^= (x<<13)>>>0; x ^= (x>>>17)>>>0; x ^= (x<<5)>>>0;
-      bytes.push(x & 255);
-    }
-  }
-  const b = (i)=> bytes[i % bytes.length];
-  const r01 = (i)=> b(i)/255;
-  const clamp01 = (x)=> Math.max(0, Math.min(1, x));
-
-  const s01 = isFinite(score) ? clamp01(score) : (aiFlag ? 0.72 : 0.18);
-  const hasImg = !!imgDataUrl;
-
-  // If NO image and default human => render more primitive (fewer features)
-  const primitive = (mode==="badge") && (!hasImg) && (!aiFlag) && (isFinite(score) ? (s01 < 0.05) : true);
-
-  // Strand counts (keep readable)
-  let strandCount = (mode==="avatar") ? (primitive ? 1 : 2) : (primitive ? 1 : (hasImg ? 3 : 2));
-  // keep AI tight / readable
-  if(aiFlag && mode!=="avatar") strandCount = Math.min(3, strandCount);
-
-  // Constellation nodes (badge only)
-  const nodeCount = (mode==="avatar" || primitive) ? 0 : (hasImg ? 10 : 7);
-
-  // Color palette (seeded micro-variation, but controlled)
-  // HUMAN: cyan ↔ magenta ↔ amber. AI: warm amber/orange/red.
-  const jitter = (x, j)=> x + (r01(j)-0.5)*10;
-  let h1, h2, h3;
-  if(aiFlag){
-    h1 = jitter(20, 3);
-    h2 = jitter(34, 4);
-    h3 = jitter(10, 5);
-  }else{
-    h1 = jitter(192, 3);
-    h2 = jitter(312, 4);
-    h3 = jitter(44,  5);
-  }
-  const sat = primitive ? 54 : 84;
-  const light = primitive ? 60 : 62;
-
-  const gid = "g"+bytes.slice(0,6).map(x=>x.toString(16).padStart(2,"0")).join("");
-
-  const hsl = (hh, ss, ll, aa=1)=> `hsla(${hh.toFixed(1)}, ${ss}%, ${ll}%, ${aa})`;
-
-  // defs (strand gradients + optional avatar core)
-  const gradDefs = [];
-  for(let i=0;i<strandCount;i++){
-    // golden-angle shift keeps harmony but avoids "same-y"
-    const shift = (i- (strandCount-1)/2) * (aiFlag ? 7 : 11) + (r01(20+i)-0.5)*5;
-    const a = hsl(h1+shift, sat, light, 0.97);
-    const b2 = hsl(h2+shift, sat, light, 0.97);
-    const c  = hsl(h3+shift, sat, light, 0.97);
-    gradDefs.push(`
-      <linearGradient id="${gid}_grad${i}" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0%"  stop-color="${a}"/>
-        <stop offset="50%" stop-color="${b2}"/>
-        <stop offset="100%" stop-color="${c}"/>
-      </linearGradient>
-    `);
-  }
-  if(mode==="avatar"){
-    const ca = hsl(aiFlag?30:205, 84, 60, 0.55);
-    const cb = hsl(aiFlag?10:315, 84, 60, 0.00);
-    gradDefs.push(`
-      <radialGradient id="${gid}_core" cx="50%" cy="45%" r="70%">
-        <stop offset="0%"   stop-color="${ca}"/>
-        <stop offset="70%"  stop-color="${cb}"/>
-        <stop offset="100%" stop-color="rgba(0,0,0,0)"/>
-      </radialGradient>
-    `);
+    const phase = rnd()*Math.PI*2 + drift*0.18;
+    addStrand("orbit", [phase,R*0.92,R*0.66,0.026,2.2,(rnd()-0.5)*0.22], 0.90, g1);
   }
 
-  // Build points (deterministic “snake” motion). Time=0 for initial render.
-  function buildPoints(params, tSec){
-    const N = params.N;
-    const pts = [];
-    for(let k=0;k<N;k++){
-      const t = (k/N) * Math.PI*2;
-
-      // radial wobble (bounded, readable)
-      const wob =
-          params.w1*Math.sin(params.f1*t + params.p1 + tSec*params.s1)
-        + params.w2*Math.sin(params.f2*t*phi + params.p2 + tSec*params.s2)
-        + params.w3*Math.sin(params.f5*t + params.p6 + tSec*params.s6);
-
-      // angular twist (two-layer for uniqueness without scribble)
-      const twist =
-          params.tw1*Math.sin(phi*t + params.p3 + tSec*params.s3)
-        + params.tw2*Math.sin(2*phi*t + params.p7 + tSec*params.s7);
-
-      const rr = params.r0 * (1 + wob);
-      const ang = t + twist;
-
-      // gentle drift (life) — we re-center after
-      const driftX = params.d1*Math.sin(params.f3*t + params.p4 + tSec*params.s4);
-      const driftY = params.d2*Math.cos(params.f4*t + params.p5 + tSec*params.s5);
-
-      const x = cx + rr*Math.cos(ang) + driftX;
-      const y = cy + rr*Math.sin(ang)*params.aspect + driftY;
-      pts.push([x,y]);
-    }
-
-    // ---- Centering + fit (prevents off-center / asymmetry in the box)
-    let mx=0,my=0;
-    for(const p of pts){ mx+=p[0]; my+=p[1]; }
-    mx/=pts.length; my/=pts.length;
-    const dx = cx - mx, dy = cy - my;
-    for(const p of pts){ p[0]+=dx; p[1]+=dy; }
-
-    // Fit within a safe margin
-    let minx=1e9,miny=1e9,maxx=-1e9,maxy=-1e9;
-    for(const p of pts){
-      if(p[0]<minx) minx=p[0]; if(p[0]>maxx) maxx=p[0];
-      if(p[1]<miny) miny=p[1]; if(p[1]>maxy) maxy=p[1];
-    }
-    const margin = (mode==="avatar") ? 6.0 : 6.0;
-    const sx = (w - 2*margin) / Math.max(1e-6, (maxx-minx));
-    const sy = (h - 2*margin) / Math.max(1e-6, (maxy-miny));
-    const sc = Math.min(1, sx, sy);
-    if(sc < 1){
-      for(const p of pts){
-        p[0] = cx + (p[0]-cx)*sc;
-        p[1] = cy + (p[1]-cy)*sc;
-      }
-    }
-    return pts;
-  }
-
-  function catmullRomClosedPath(pts){
-    const n = pts.length;
-    if(n<4) return "";
-    const alpha = 1.0;
-    const p = (i)=> pts[(i+n)%n];
-    let d = `M ${p(0)[0].toFixed(2)} ${p(0)[1].toFixed(2)}`;
-    for(let i=0;i<n;i++){
-      const p0 = p(i-1), p1 = p(i), p2 = p(i+1), p3 = p(i+2);
-      const c1x = p1[0] + (p2[0]-p0[0])*(alpha/6);
-      const c1y = p1[1] + (p2[1]-p0[1])*(alpha/6);
-      const c2x = p2[0] - (p3[0]-p1[0])*(alpha/6);
-      const c2y = p2[1] - (p3[1]-p1[1])*(alpha/6);
-      d += ` C ${c1x.toFixed(2)} ${c1y.toFixed(2)}, ${c2x.toFixed(2)} ${c2y.toFixed(2)}, ${p2[0].toFixed(2)} ${p2[1].toFixed(2)}`;
-    }
-    d += " Z";
-    return d;
-  }
-
-  const baseR = Math.min(cx, cy) * (mode==="avatar" ? 0.90 : 0.88);
-  const energy = primitive ? 0.55 : (0.85 + 0.55*s01);
-  const baseSpeed = (aiFlag ? 0.80 : 0.60) * (primitive ? 0.55 : 1.0) * (hasImg ? 1.0 : 0.90);
-
-  // Badge uses a flatter ellipse; avatar closer to a circle
-  const aspect = (mode==="avatar")
-    ? (0.98 + (r01(9)-0.5)*0.04)
-    : (0.80 + (r01(9)-0.5)*0.04);
-
-  const strands = [];
-  for(let i=0;i<strandCount;i++){
-    // pleasing phase offsets: seed + golden angle
-    const baseP = (Math.PI*2*r01(30)) + i*golden;
-
-    const p1 = baseP + Math.PI*2*r01(30+i*11);
-    const p2 = baseP + Math.PI*2*r01(31+i*11);
-    const p3 = baseP + Math.PI*2*r01(32+i*11);
-    const p4 = baseP + Math.PI*2*r01(33+i*11);
-    const p5 = baseP + Math.PI*2*r01(34+i*11);
-    const p6 = baseP + Math.PI*2*r01(35+i*11);
-    const p7 = baseP + Math.PI*2*r01(36+i*11);
-
-    // frequencies (biased toward clean harmonic relationships)
-    const f1 = 2 + (b(60+i*7)%4);     // 2..5
-    const f2 = 3 + (b(61+i*7)%5);     // 3..7
-    const f5 = 5 + (b(62+i*7)%5);     // 5..9
-    const f3 = 1 + (b(63+i*7)%3);     // 1..3
-    const f4 = 2 + (b(64+i*7)%3);     // 2..4
-
-    // amplitudes (bounded for clarity)
-    const w1 = (primitive ? 0.065 : 0.085)*energy + r01(80+i)*0.030;
-    const w2 = (primitive ? 0.030 : 0.050)*energy + r01(81+i)*0.020;
-    const w3 = (primitive ? 0.000 : 0.016)*energy + r01(82+i)*0.012;
-
-    const tw1 = (primitive ? 0.140 : 0.175) + r01(90+i)*0.100;
-    const tw2 = (primitive ? 0.000 : 0.060) + r01(91+i)*0.085;
-
-    // drift gives "snake" life; avatar gets slightly more volume
-    const d1 = (mode==="avatar" ? 0.92 : 0.70) * (0.40 + 0.60*r01(100+i));
-    const d2 = (mode==="avatar" ? 0.84 : 0.62) * (0.40 + 0.60*r01(110+i));
-
-    const s1 = baseSpeed * (0.70 + 0.80*r01(120+i));
-    const s2 = baseSpeed * (0.60 + 0.90*r01(121+i));
-    const s3 = baseSpeed * (0.55 + 0.95*r01(122+i));
-    const s4 = baseSpeed * (0.65 + 0.80*r01(123+i));
-    const s5 = baseSpeed * (0.60 + 0.85*r01(124+i));
-    const s6 = baseSpeed * (0.55 + 0.95*r01(125+i));
-    const s7 = baseSpeed * (0.50 + 1.05*r01(126+i));
-
-    // radius layering (balanced)
-    const layer = (strandCount===1) ? 0 : (i/(strandCount-1) - 0.5);
-    const r0 = baseR * (0.92 + layer*0.10 + (r01(40+i)-0.5)*0.05);
-
-    const params = { i, N: (mode==="avatar" ? 150 : 170), r0, aspect, f1,f2,f3,f4,f5, w1,w2,w3, tw1,tw2, d1,d2, p1,p2,p3,p4,p5,p6,p7, s1,s2,s3,s4,s5,s6,s7 };
-    const d0 = catmullRomClosedPath(buildPoints(params, 0));
-
-    const dataAttrs =
-      `data-i="${i}" data-n="${params.N}" data-r0="${r0.toFixed(3)}" data-aspect="${aspect.toFixed(4)}"` +
-      ` data-f1="${f1}" data-f2="${f2}" data-f3="${f3}" data-f4="${f4}" data-f5="${f5}"` +
-      ` data-w1="${w1.toFixed(5)}" data-w2="${w2.toFixed(5)}" data-w3="${w3.toFixed(5)}"` +
-      ` data-tw1="${tw1.toFixed(5)}" data-tw2="${tw2.toFixed(5)}"` +
-      ` data-d1="${d1.toFixed(5)}" data-d2="${d2.toFixed(5)}"` +
-      ` data-p1="${p1.toFixed(5)}" data-p2="${p2.toFixed(5)}" data-p3="${p3.toFixed(5)}" data-p4="${p4.toFixed(5)}" data-p5="${p5.toFixed(5)}" data-p6="${p6.toFixed(5)}" data-p7="${p7.toFixed(5)}"` +
-      ` data-s1="${s1.toFixed(6)}" data-s2="${s2.toFixed(6)}" data-s3="${s3.toFixed(6)}" data-s4="${s4.toFixed(6)}" data-s5="${s5.toFixed(6)}" data-s6="${s6.toFixed(6)}" data-s7="${s7.toFixed(6)}"`;
-
-    const grad = `url(#${gid}_grad${i})`;
-
-    const glow1 = primitive ? 6.2 : (mode==="avatar" ? 9.8 : 9.2);
-    const glow2 = primitive ? 4.0 : (mode==="avatar" ? 6.3 : 6.0);
-    const coreW = (mode==="avatar" ? 2.35 : 2.15) + (primitive ? -0.25 : 0);
-
-    const glowA1 = primitive ? 0.10 : 0.10;
-    const glowA2 = primitive ? 0.18 : 0.18;
-
-    strands.push(`
-      <g class="strand" ${dataAttrs}>
-        <path class="strandGlow1" d="${d0}" fill="none" stroke="${grad}" stroke-width="${glow1}" stroke-linecap="round" stroke-linejoin="round" opacity="${glowA1}"/>
-        <path class="strandGlow2" d="${d0}" fill="none" stroke="${grad}" stroke-width="${glow2}" stroke-linecap="round" stroke-linejoin="round" opacity="${glowA2}"/>
-        <path class="strandCore"  d="${d0}" fill="none" stroke="${grad}" stroke-width="${coreW}" stroke-linecap="round" stroke-linejoin="round" opacity="0.92"/>
-      </g>
-    `);
-  }
-
-  // Constellation nodes (badge only, sparse)
-  let nodes = "";
-  if(nodeCount>0){
-    const pts = [];
-    const startAng = Math.PI*2*r01(200);
-    const ringR = baseR * 1.03;
-    for(let i=0;i<nodeCount;i++){
-      const ang = startAng + i*golden + (r01(210+i)-0.5)*0.15;
-      const rr = ringR*(0.92 + 0.12*r01(220+i));
-      pts.push([cx + rr*Math.cos(ang), cy + rr*Math.sin(ang)*aspect]);
-    }
-    // links: each node to next + occasional skip link
-    const links = [];
-    for(let i=0;i<nodeCount;i++){
-      links.push([i,(i+1)%nodeCount]);
-      if(b(230+i)%4===0) links.push([i,(i+3)%nodeCount]);
-    }
-    const linkSvg = links.map(([i,j])=>{
-      const a = pts[i], c = pts[j];
-      return `<line x1="${a[0].toFixed(2)}" y1="${a[1].toFixed(2)}" x2="${c[0].toFixed(2)}" y2="${c[1].toFixed(2)}" stroke="rgba(210,240,255,0.15)" stroke-width="1.0"/>`;
-    }).join("");
-    const dotSvg = pts.map((p,i)=>{
-      const r = 1.35 + 0.85*r01(240+i);
-      return `<circle class="pulse node" cx="${p[0].toFixed(2)}" cy="${p[1].toFixed(2)}" r="${r.toFixed(2)}" fill="rgba(235,250,255,0.92)"/>`;
-    }).join("");
-    nodes = `<g class="nodes">${linkSvg}${dotSvg}</g>`;
-  }
-
-  // Label (stable — NOT inside motion group)
-  const pct = aiFlag ? Math.round(s01*100) : Math.round((1-s01)*100);
-  const label = `${aiFlag ? "AI" : "HUMAN"} ${pct}%`;
-  const showLabel = (mode!=="avatar");
-
-  // Avatar gets a subtle volumetric core (behind motion)
-  const avatarBack = (mode==="avatar")
-    ? `<g class="avatarBack">
-         <circle cx="${cx}" cy="${cy}" r="${(baseR*0.78).toFixed(2)}" fill="url(#${gid}_core)" opacity="0.70"/>
-         <circle cx="${cx}" cy="${cy}" r="${(baseR*1.04).toFixed(2)}" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="1.0"/>
-       </g>`
-    : "";
-
-  return `
-<svg class="glyph3d" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" preserveAspectRatio="xMidYMid meet"
-     data-ai="${aiFlag ? "1" : "0"}" data-mode="${mode}" data-primitive="${primitive ? "1":"0"}" data-w="${w}" data-h="${h}">
-  <defs>
-    ${gradDefs.join("")}
-  </defs>
-
-  ${avatarBack}
-
-  <g class="motion" transform-origin="${cx}px ${cy}px">
-    ${strands.join("")}
-    ${nodes}
-  </g>
-
-  ${showLabel ? `
-  <text class="glyphLabel" x="10" y="${h-10}" font-size="9"
-        fill="rgba(255,255,255,0.82)" stroke="rgba(0,0,0,0.65)" stroke-width="2.3"
-        paint-order="stroke" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace">
-    ${label}
-  </text>` : ``}
-</svg>`;
+  svg += `</g></svg>`;
+  return svg;
 }
 
-// JS-driven glyph motion: strands rotate around each other (crisp, no blur)
-// JS-driven glyph motion: "snake" strand morph (label stays still)
-const _glyphRAFBySvg = new WeakMap();
 function startGlyphMotion(svg){
   if(!svg) return;
+  const g = svg.querySelector("g.motion");
+  if(!g) return;
 
-  // stop any previous animation (per SVG)
-  const prev = _glyphRAFBySvg.get(svg);
-  if(prev){ cancelAnimationFrame(prev); _glyphRAFBySvg.delete(svg); }
+  const W = +g.dataset.w || 142;
+  const H = +g.dataset.h || 92;
+  const cx = W/2, cy = H/2;
+  const minR = Math.min(W,H);
+  const R = (g.dataset.mode==="avatar") ? minR*0.36 : minR*0.38;
 
-  const phi = 1.61803398875;
+  const seed = (+g.dataset.seed) >>> 0;
+  const mode = g.dataset.mode || "badge";
+  const style = g.dataset.style || "orbit_ring";
 
-  // derive dimensions from viewBox (supports badge 142x92, avatar 92x92)
-  const vb = (svg.viewBox && svg.viewBox.baseVal) ? svg.viewBox.baseVal : null;
-  const w = (vb && vb.width) ? vb.width : (Number(svg.getAttribute("data-w"))||120);
-  const h = (vb && vb.height) ? vb.height : (Number(svg.getAttribute("data-h"))||92);
-  const cx = w/2, cy = h/2;
+  const speedMap = {
+    orbit_ring: 0.55,
+    spiro_flow: 0.70,
+    helix_clean:0.78,
+    dna_braid:  0.62,
+    minimal_pulse:0.48
+  };
+  const baseSpeed = speedMap[style] ?? 0.65;
+  const speed = (mode==="avatar") ? baseSpeed*0.78 : baseSpeed;
 
-  const groups = Array.from(svg.querySelectorAll("g.strand"));
-  if(!groups.length) return;
+  const strands = Array.from(svg.querySelectorAll("path.strand"));
+  const halos   = Array.from(svg.querySelectorAll("path.strandHalo"));
 
-  const mode = svg.getAttribute("data-mode") || "badge";
-  const primitive = (svg.getAttribute("data-primitive")==="1");
-  const ai = (svg.getAttribute("data-ai")==="1");
-
-  // parse params once
-  const strands = groups.map(g=>{
-    const d = g.dataset;
-    const num = (k, fallback=0)=> {
-      const v = d[k];
-      const n = Number(v);
-      return Number.isFinite(n) ? n : fallback;
-    };
-    return {
-      g,
-      N: Math.max(32, Math.min(260, Math.floor(num("n", 170)))),
-      r0: num("r0", Math.min(cx,cy)*0.85),
-      aspect: num("aspect", 0.82),
-      f1: num("f1", 3), f2: num("f2", 5), f3: num("f3", 2), f4: num("f4", 3), f5: num("f5", 7),
-      w1: num("w1", 0.09), w2: num("w2", 0.05), w3: num("w3", 0.02),
-      tw1: num("tw1", 0.18), tw2: num("tw2", 0.08),
-      d1: num("d1", 0.7), d2: num("d2", 0.62),
-      p1: num("p1", 0.0), p2: num("p2", 0.0), p3: num("p3", 0.0),
-      p4: num("p4", 0.0), p5: num("p5", 0.0), p6: num("p6", 0.0), p7: num("p7", 0.0),
-      s1: num("s1", 0.6), s2: num("s2", 0.6), s3: num("s3", 0.6),
-      s4: num("s4", 0.6), s5: num("s5", 0.6), s6: num("s6", 0.6), s7: num("s7", 0.6),
-      paths: Array.from(g.querySelectorAll("path"))
-    };
-  });
-
-  function buildPoints(params, tSec){
-    const N = params.N;
-    const pts = [];
-    for(let k=0;k<N;k++){
-      const t = (k/N) * Math.PI*2;
-
-      const wob =
-          params.w1*Math.sin(params.f1*t + params.p1 + tSec*params.s1)
-        + params.w2*Math.sin(params.f2*t*phi + params.p2 + tSec*params.s2)
-        + params.w3*Math.sin(params.f5*t + params.p6 + tSec*params.s6);
-
-      const twist =
-          params.tw1*Math.sin(phi*t + params.p3 + tSec*params.s3)
-        + params.tw2*Math.sin(2*phi*t + params.p7 + tSec*params.s7);
-
-      const rr = params.r0 * (1 + wob);
-      const ang = t + twist;
-
-      const driftX = params.d1*Math.sin(params.f3*t + params.p4 + tSec*params.s4);
-      const driftY = params.d2*Math.cos(params.f4*t + params.p5 + tSec*params.s5);
-
-      const x = cx + rr*Math.cos(ang) + driftX;
-      const y = cy + rr*Math.sin(ang)*params.aspect + driftY;
-      pts.push([x,y]);
+  function dOrbit(params, t, inner=false){
+    const [phase,a,b,wob,freq,tilt] = params;
+    const steps = (mode==="avatar") ? 180 : 210;
+    let d="";
+    for(let i=0;i<=steps;i++){
+      const u = (i/steps) * Math.PI*2;
+      const breath = 1 + Math.sin(t*0.9 + phase)* (inner?0.006:0.010);
+      const ww = wob * Math.sin(u*freq + t*0.85 + phase);
+      const rrA = a * breath * (1+ww);
+      const rrB = b * breath * (1+ww*0.85);
+      // ellipse with a tiny tilt skew
+      const x = cx + Math.cos(u + tilt*Math.sin(t*0.6+phase))*rrA;
+      const y = cy + Math.sin(u)*rrB;
+      d += (i===0?"M":"L") + x.toFixed(2) + " " + y.toFixed(2) + " ";
     }
-
-    // center + fit (keeps symmetry in the box)
-    let mx=0,my=0;
-    for(const p of pts){ mx+=p[0]; my+=p[1]; }
-    mx/=pts.length; my/=pts.length;
-    const dx = cx - mx, dy = cy - my;
-    for(const p of pts){ p[0]+=dx; p[1]+=dy; }
-
-    let minx=1e9,miny=1e9,maxx=-1e9,maxy=-1e9;
-    for(const p of pts){
-      if(p[0]<minx) minx=p[0]; if(p[0]>maxx) maxx=p[0];
-      if(p[1]<miny) miny=p[1]; if(p[1]>maxy) maxy=p[1];
-    }
-    const margin = (mode==="avatar") ? 6.0 : 6.0;
-    const sx = (w - 2*margin) / Math.max(1e-6, (maxx-minx));
-    const sy = (h - 2*margin) / Math.max(1e-6, (maxy-miny));
-    const sc = Math.min(1, sx, sy);
-    if(sc < 1){
-      for(const p of pts){
-        p[0] = cx + (p[0]-cx)*sc;
-        p[1] = cy + (p[1]-cy)*sc;
-      }
-    }
-    return pts;
-  }
-
-  function catmullRomClosedPath(pts){
-    const n = pts.length;
-    if(n<4) return "";
-    const alpha = 1.0;
-    const p = (i)=> pts[(i+n)%n];
-    let d = `M ${p(0)[0].toFixed(2)} ${p(0)[1].toFixed(2)}`;
-    for(let i=0;i<n;i++){
-      const p0 = p(i-1), p1 = p(i), p2 = p(i+1), p3 = p(i+2);
-      const c1x = p1[0] + (p2[0]-p0[0])*(alpha/6);
-      const c1y = p1[1] + (p2[1]-p0[1])*(alpha/6);
-      const c2x = p2[0] - (p3[0]-p1[0])*(alpha/6);
-      const c2y = p2[1] - (p3[1]-p1[1])*(alpha/6);
-      d += ` C ${c1x.toFixed(2)} ${c1y.toFixed(2)}, ${c2x.toFixed(2)} ${c2y.toFixed(2)}, ${p2[0].toFixed(2)} ${p2[1].toFixed(2)}`;
-    }
-    d += " Z";
     return d;
   }
 
-  const t0 = performance.now();
-  const baseWobble = primitive ? 0.75 : 1.0;
-  const speedScale = (ai ? 1.08 : 1.0) * (primitive ? 0.80 : 1.0);
-
-  function frame(now){
-    const tSec = ((now - t0)/1000) * speedScale;
-
-    for(const s of strands){
-      const pts = buildPoints(s, tSec * baseWobble);
-      const d = catmullRomClosedPath(pts);
-      for(const p of s.paths){
-        p.setAttribute("d", d);
-      }
+  function dHelix(params, t){
+    const [phase, twist, wob1, wob2, k1, k2] = params;
+    const turns = (mode==="avatar") ? 5.1 : 5.6;
+    const steps = (mode==="avatar") ? 200 : 220;
+    let d = "";
+    for(let s=0;s<=steps;s++){
+      const u = (s/steps) * Math.PI*2*turns;
+      const wob = wob1*Math.sin(u*k1 + phase + t*0.95) + wob2*Math.sin(u*k2 + phase*1.7 - t*1.15);
+      const rr  = R*(0.93 + wob);
+      const x = cx + Math.cos(u*twist + phase)*rr;
+      const y = cy + Math.sin(u + phase*0.6)*rr*0.70 + Math.sin(u*0.5 + phase)*R*0.030;
+      d += (s===0 ? "M" : "L") + x.toFixed(2) + " " + y.toFixed(2) + " ";
     }
-
-    const id = requestAnimationFrame(frame);
-    _glyphRAFBySvg.set(svg, id);
+    return d;
   }
 
-  const id = requestAnimationFrame(frame);
-  _glyphRAFBySvg.set(svg, id);
+  function dSpiro(params, t, alt=false){
+    let [RR, r, d, phase, rot, scale] = params;
+    const steps = (mode==="avatar") ? 520 : 620;
+    const k = (RR - r) / r;
+    let path = "";
+    const sc = (Math.min(W,H)/2) / 52 * scale;
+    const tt = t * (alt?0.75:1.0);
+    for(let i=0;i<=steps;i++){
+      const u = (i/steps) * Math.PI*2 * (alt?7.0:8.0);
+      const x0 = (RR-r)*Math.cos(u+tt*0.22) + d*Math.cos(k*u + phase - tt*0.35);
+      const y0 = (RR-r)*Math.sin(u+tt*0.22) - d*Math.sin(k*u + phase - tt*0.35);
+      // rotate
+      const xr = x0*Math.cos(rot) - y0*Math.sin(rot);
+      const yr = x0*Math.sin(rot) + y0*Math.cos(rot);
+      const x = cx + xr*sc;
+      const y = cy + yr*sc;
+      path += (i===0?"M":"L") + x.toFixed(2) + " " + y.toFixed(2) + " ";
+    }
+    return path;
+  }
+
+  function dDNA(params, t){
+    const [phase, turns, sep, amp, sign] = params;
+    const steps = (mode==="avatar") ? 160 : 190;
+    const height = (mode==="avatar") ? H*0.82 : H*0.86;
+    const y0 = cy - height/2;
+    let d="";
+    for(let i=0;i<=steps;i++){
+      const u = i/steps;
+      const y = y0 + u*height;
+      const a = (u*turns*Math.PI*2) + phase + t*0.85;
+      const x = cx + sign*sep*Math.cos(a) + (sep*0.18)*Math.sin(a*0.5);
+      const xx = x + (sign*0.6)*Math.sin(t*0.6+phase)*0.5;
+      const yy = y + amp*0.02*Math.sin(a*0.7);
+      d += (i===0?"M":"L") + xx.toFixed(2) + " " + yy.toFixed(2) + " ";
+    }
+    return d;
+  }
+
+  function dPulse(params, t){
+    const [phase,a,b,flip] = params;
+    const steps = (mode==="avatar") ? 240 : 280;
+    let d="";
+    const p = 1 + Math.sin(t*0.9 + phase)*0.020;
+    for(let i=0;i<=steps;i++){
+      const u = (i/steps) * Math.PI*2;
+      // Bernoulli lemniscate-ish (clean infinity)
+      const denom = 1 + Math.sin(u)**2;
+      const x0 = (a * Math.cos(u) / denom) * p;
+      const y0 = (b * Math.sin(u) * Math.cos(u) / denom) * p;
+      const x = cx + x0;
+      const y = cy + y0*flip;
+      d += (i===0?"M":"L") + x.toFixed(2) + " " + y.toFixed(2) + " ";
+    }
+    return d;
+  }
+
+  function build(kind, params, t){
+    switch(kind){
+      case "orbit": return dOrbit(params, t, false);
+      case "orbit_inner": return dOrbit(params, t, true);
+      case "helix": return dHelix(params, t);
+      case "spiro": return dSpiro(params, t, false);
+      case "spiro2": return dSpiro(params, t, true);
+      case "dna": return dDNA(params, t);
+      case "dna_back": return dDNA(params, t*0.65);
+      case "pulse": return dPulse(params, t);
+      default: return dHelix(params, t);
+    }
+  }
+
+  let raf = 0;
+  function tick(ms){
+    const t = (ms/1000) * speed + (seed % 997)/997;
+    for(let i=0;i<strands.length;i++){
+      const kind = strands[i].dataset.kind || "helix";
+      const p = (strands[i].dataset.p || "").split(",").map(Number);
+      const d = build(kind, p, t + i*0.14);
+      strands[i].setAttribute("d", d);
+      if(halos[i]) halos[i].setAttribute("d", d);
+    }
+    raf = requestAnimationFrame(tick);
+  }
+  cancelAnimationFrame(raf);
+  raf = requestAnimationFrame(tick);
 }
 
 function makeBadgeHtml(proof){
@@ -2044,13 +2658,13 @@ function makeBadgeHtml(proof){
   const scoreTxt = (proof.origin.score_0_1*100).toFixed(1)+"%";
   const windowS = proof.window_s;
 
-  const helix = makeHelixSvg(proof.glyph_seed, ai, (proof?.origin?.score_0_1 ?? NaN), (proof.thumb_data_url || proof.img_data_url)||null);
+  const helix = makeHelixSvg(proof.glyph_seed, ai, (proof?.origin?.score_0_1 ?? NaN), (proof.thumb_data_url || proof.img_data_url)||null, {mode:"badge", style: (window.__traceGlyphStyleOverride || proof.glyph_style || (typeof window.__traceGetGlyphStyle==="function"?window.__traceGetGlyphStyle():"orbit_ring")), meta:{payloadLen:(proof.payload_text||"").length, hasImg:!!proof.img_hash}});
 
   return `
     <div class="badge ${ai?"bad":"good"}" id="badge_click">
       <div class="cornerDot"></div>
       <div class="badgeInner">
-        <div class="glyphBox">${(proof.thumb_data_url || proof.img_data_url)?`<div class="thumbBg" style="background-image:url(${(proof.thumb_data_url || proof.img_data_url)})"></div>`:""}${helix}</div>
+        <div class="glyphBox" data-imgkey="${escapeHtml(proof.badge_key||"")}" title="View image">${helix}${(proof.wm_data_url || proof.thumb_data_url || proof.img_data_url)?`<div class="thumbWatermark clickable" data-imgkey="${escapeHtml(proof.badge_key||"")}" title="View image" style="background-image:url(${(proof.wm_data_url || proof.thumb_data_url || proof.img_data_url)})"></div>`:""}</div>
         <div class="badgeRight">
           <div class="badgeTop">
             <div>
@@ -2111,8 +2725,9 @@ function addToHistory(proof){
       window_s: slim.window_s,
       origin: slim.origin,
       img_hash: slim.img_hash || null,
-      thumb_data_url: slim.thumb_data_url || null,
       img_data_url: slim.img_data_url || null,
+      wm_data_url: slim.wm_data_url || null,
+      img_preview_url: slim.img_preview_url || null,
       proof: slim
     };
 
@@ -2161,20 +2776,38 @@ function renderProfile(){
     const wrap = $("#profile_avatar_wrap");
     if(wrap && aWrap){
       const epoch = getProfileEpoch();
-      const baseSeed = (creator?.creatorId || "no-creator") + "::" + (profileMindprint?.textHash||"no-mp") + "::epoch="+epoch + "::stage="+arr.length + "::h="+hN+"::a="+aN;
+      const baseSeed = (creator?.creatorId || "no-creator") + "::" + (profileMindprint?.textHash||"no-mp") + "::core";
       // Trust: based on history (human vs ai) + volume
       const total = Math.max(0, arr.length);
       const trust = total ? clamp01((hN/(hN+aN+0.0001))*0.75 + Math.min(total,20)/20*0.25) : 0.0;
       wrap.style.setProperty("--trust", String(trust));
+      // Evolution: derive smooth "genome" from history (not a re-seed)
+      let __uniqImg = new Set();
+      let __imgCount = 0;
+      let __lenSum = 0;
+      for(const it of arr){
+        const p = it.proof || it;
+        if(p?.img_hash){ __uniqImg.add(String(p.img_hash)); __imgCount++; }
+        __lenSum += (p?.payload_text ? String(p.payload_text).length : 0);
+      }
+      const evo = {
+        stage: total,
+        epoch,
+        aiRatio: total ? (aN/(hN+aN+0.0001)) : 0,
+        humanRatio: total ? (hN/(hN+aN+0.0001)) : 0,
+        diversity: total ? (__uniqImg.size/Math.max(1,total)) : 0,
+        avgPayload: total ? (__lenSum/Math.max(1,total)) : 0
+      };
+
       wrap.dataset.risk = (aN>hN && total>=3) ? "ai" : "ok";
 
       // Render avatar glyph
-      aWrap.innerHTML = makeHelixSvg(baseSeed, (aN>hN && total>=3), (aN/(total||1)), null, "avatar");
+      aWrap.innerHTML = makeHelixSvg(baseSeed, (aN>hN && total>=3), (aN/(total||1)), null, {mode:"avatar", style:(window.__traceGlyphStyleOverride || (typeof window.__traceGetGlyphStyle==="function"?window.__traceGetGlyphStyle():"orbit_ring")), evo});
       const svg = aWrap.querySelector("svg.glyph3d");
       if(svg) startGlyphMotion(svg);
     }else if(aWrap){
       const seed = (creator?.creatorId || "no-creator") + "::profile";
-      aWrap.innerHTML = makeHelixSvg(seed, false, null, null, "avatar");
+      aWrap.innerHTML = makeHelixSvg(seed, false, null, null, {mode:"avatar", style:(window.__traceGlyphStyleOverride || (typeof window.__traceGetGlyphStyle==="function"?window.__traceGetGlyphStyle():"orbit_ring"))});
       const svg = aWrap.querySelector("svg.glyph3d");
       if(svg) startGlyphMotion(svg);
     }
@@ -2193,7 +2826,7 @@ function renderProfile(){
     const ai = !!proof?.origin?.ai_flag;
     const scoreTxt = (proof?.origin?.score_0_1===undefined || proof?.origin?.score_0_1===null) ? "—" : (proof.origin.score_0_1*100).toFixed(1)+"%";
     const when = new Date(Number(proof.ts||0)).toLocaleString("sv-SE");
-    const helix = makeHelixSvg(proof.glyph_seed, ai, (proof?.origin?.score_0_1 ?? NaN), (proof.thumb_data_url || proof.img_data_url)||null);
+    const helix = makeHelixSvg(proof.glyph_seed, ai, (proof?.origin?.score_0_1 ?? NaN), (proof.thumb_data_url || proof.img_data_url)||null, {mode:"badge", style: (window.__traceGlyphStyleOverride || proof.glyph_style || (typeof window.__traceGetGlyphStyle==="function"?window.__traceGetGlyphStyle():"orbit_ring")), meta:{payloadLen:(proof.payload_text||"").length, hasImg:!!proof.img_hash}});
 
     const mpP = proof?.mindprint_profile || {};
     const mpB = proof?.mindprint_badge || {};
@@ -2207,7 +2840,7 @@ function renderProfile(){
     details.innerHTML = `
       <summary>
         <div class="profileSummaryRow">
-          <div class="glyphBox" style="width:124px; height:90px; flex:0 0 auto">${(proof.thumb_data_url || proof.img_data_url)?`<div class="thumbBg" style="background-image:url(${(proof.thumb_data_url || proof.img_data_url)})"></div>`:""}${helix}</div>
+          <div class="glyphBox" data-imgkey="${escapeHtml(proof.badge_key||"")}" style="width:124px; height:90px; flex:0 0 auto">${helix}${(proof.wm_data_url || proof.thumb_data_url || proof.img_data_url)?`<div class="glyphWatermark" style="background-image:url(${(proof.wm_data_url || proof.thumb_data_url || proof.img_data_url)})"></div><div class="thumbWatermark clickable" data-imgkey="${escapeHtml(proof.badge_key||"")}" title="View image" style="background-image:url(${(proof.wm_data_url || proof.thumb_data_url || proof.img_data_url)})"></div>`:""}</div>
           <div class="sumMeta">
             <div class="rowBetween" style="gap:10px">
               <div style="min-width:0">
@@ -2246,7 +2879,7 @@ function renderProfile(){
           </div></div>
 
           <div class="kv"><div class="k">Glyph</div><div class="v">
-            <div class="glyphBox" style="width:180px; height:120px">${(proof.thumb_data_url || proof.img_data_url)?`<div class="thumbBg" style="background-image:url(${(proof.thumb_data_url || proof.img_data_url)})"></div>`:""}${helix}</div>
+            <div class="glyphBox" style="width:180px; height:120px">${helix}${(proof.wm_data_url || proof.thumb_data_url || proof.img_data_url)?`<div class="glyphWatermark" style="background-image:url(${(proof.wm_data_url || proof.thumb_data_url || proof.img_data_url)})"></div><div class="thumbWatermark clickable" data-imgkey="${escapeHtml(proof.badge_key||"")}" title="View image" style="background-image:url(${(proof.wm_data_url || proof.thumb_data_url || proof.img_data_url)})"></div>`:""}</div>
           </div></div>
 
           <div class="kv"><div class="k">Proof JSON</div><div class="v"><pre class="monoBlock">${proofJson}</pre></div></div>
@@ -2298,11 +2931,21 @@ function loadLast(){
 }
 
 /* ========= analyze + create ========= */
-async function signBytes(privKey, bytes){
+async function signBytes(privKey, bytes, alg){
+  if(!window.isSecureContext || !crypto || !crypto.subtle) throw new Error("WebCrypto unavailable (need https/localhost)");
+  if(alg === "ECDSA_P256_SHA256"){
+    const sig = await crypto.subtle.sign({name:"ECDSA", hash:"SHA-256"}, privKey, bytes);
+    return new Uint8Array(sig);
+  }
+  // default Ed25519
   const sig = await crypto.subtle.sign("Ed25519", privKey, bytes);
   return new Uint8Array(sig);
 }
-async function verifySig(pubKey, sigU8, bytes){
+async function verifySig(pubKey, sigU8, bytes, alg){
+  if(!crypto || !crypto.subtle) return false;
+  if(alg === "ECDSA_P256_SHA256"){
+    return await crypto.subtle.verify({name:"ECDSA", hash:"SHA-256"}, pubKey, sigU8, bytes);
+  }
   return await crypto.subtle.verify("Ed25519", pubKey, sigU8, bytes);
 }
 
@@ -2321,7 +2964,16 @@ function canonicalize(v){
 $("#btn_analyze").addEventListener("click", async ()=>{
   try{
   if(!vaultUnlocked) return warn("Unlock vaulta Vault först.");
-  if(!creator.privKey || !creator.pubKey || !creator.creatorId) return warn("Create creator keys i Vault först.");
+  let __compatUnsigned = false;
+  if(!creator.privKey || !creator.pubKey || !creator.creatorId){
+    __compatUnsigned = true;
+    // stable-ish ID for UI/history in compat mode
+    if(!creator.creatorId){
+      const root = store.get("signai_vault_root") || "";
+      creator.creatorId = await sha256Hex(textToU8("compat|"+getActiveUser()+"|"+root));
+      store.set("signai_creator_id", creator.creatorId);
+    }
+  }
   if(!(profileMindprint.score_0_1>0.6)) return warn("Registrera Vault mindprint först (profil).");
   if(!badgeMindprint.ready) return warn("Registrera mindprint per badge först.");
 
@@ -2337,7 +2989,18 @@ $("#btn_analyze").addEventListener("click", async ()=>{
     origin.ai_flag = true;
   }
 
-  $("#origin_out").textContent = origin.ai_flag ? `AI flagged (≥ 50%) · score ${(origin.score_0_1*100).toFixed(1)}%` : `Looks human · score ${(origin.score_0_1*100).toFixed(1)}%`;
+  // UI: make Winston status explicit
+  const sPct = (origin.score_0_1*100).toFixed(1)+"%";
+  if(origin.reason === "no_image"){
+    $("#origin_out").textContent = "No image · origin scan skipped.";
+  }else if(origin.ok){
+    const via = origin.endpoint ? (" · via " + origin.endpoint) : "";
+    $("#origin_out").textContent = origin.ai_flag ? `Winston OK · AI flagged (≥ 50%) · score ${sPct}${via}` : `Winston OK · Looks human · score ${sPct}${via}`;
+  }else{
+    const extra = origin.status ? (" · HTTP "+origin.status) : "";
+    const det = origin.detail ? (" · "+String(origin.detail).slice(0,120)) : "";
+    $("#origin_out").textContent = `Winston FAILED (${origin.reason})${extra}${det} · AI flagged (fail-closed)`;
+  }
 
   const windowS = Number($("#window_s").value || 24);
   const ts = Date.now();
@@ -2353,16 +3016,21 @@ $("#btn_analyze").addEventListener("click", async ()=>{
   // image hash (optional)
   let imgHash = null;
   let baseImgDataUrl = null;
-  let thumbDataUrl = null;
   if(selectedImageFile){
-    const ab = await selectedImageFile.arrayBuffer();
-    imgHash = await sha256Hex(new Uint8Array(ab));
+    try{
+      const ab = await selectedImageFile.arrayBuffer();
+      imgHash = await sha256Hex(new Uint8Array(ab));
+    }catch(e){
+      imgHash = null;
+    }
     try{ baseImgDataUrl = await fileToDataUrl(selectedImageFile); }catch(e){}
-    try{ thumbDataUrl = await fileToThumbDataUrl(selectedImageFile, 140, 0.82); }catch(e){}
   }
 
   // glyph seed combines: creatorId + profileMP + badgeMP + imgHash + origin score
+  const glyphStyle = (((adminUnlocked && window.__traceGlyphStyleOverride) ? window.__traceGlyphStyleOverride : null) || (typeof window.__traceGetGlyphStyle==="function" ? window.__traceGetGlyphStyle() : "orbit_ring"));
+
   const seedMaterial = [
+    "style="+glyphStyle,
     creator.creatorId,
     badge_key,
     profileMindprint.textHash, profileMindprint.rhythmHash,
@@ -2376,6 +3044,7 @@ $("#btn_analyze").addEventListener("click", async ()=>{
   const base = {
     v: "1.0",
     hop: "8.0",
+    sig_alg: ((store.get("signai_sig_alg")||"Ed25519") && (!__compatUnsigned) && window.isSecureContext && crypto && crypto.subtle) ? (store.get("signai_sig_alg")||"Ed25519") : "none",
     ts,
     window_s: windowS,
     creator_id: creator.creatorId,
@@ -2383,7 +3052,8 @@ $("#btn_analyze").addEventListener("click", async ()=>{
     payload_text: payloadText,
     img_hash: imgHash,
     img_data_url: null,
-    thumb_data_url: null,
+    wm_data_url: null,
+    img_preview_url: null,
     origin: {
       provider: "WinstonAI",
       ok: !!origin.ok,
@@ -2396,6 +3066,7 @@ $("#btn_analyze").addEventListener("click", async ()=>{
       rhythmHash: profileMindprint.rhythmHash,
       score_0_1: profileMindprint.score_0_1
     },
+    glyph_style: glyphStyle,
     mindprint_badge: {
       textHash: badgeMindprint.textHash,
       rhythmHash: badgeMindprint.rhythmHash,
@@ -2403,17 +3074,43 @@ $("#btn_analyze").addEventListener("click", async ()=>{
     },
     glyph_seed: glyphSeed
   };
-  if(baseImgDataUrl) base.img_data_url = baseImgDataUrl;
-  if(thumbDataUrl) base.thumb_data_url = thumbDataUrl;
+    // coded watermark (more visible, but not a clean copy)
+  let wmDataUrl = null;
+  let previewDataUrl = null;
+  try{ if(baseImgDataUrl) wmDataUrl = await makeCodedWatermark(baseImgDataUrl, seedMaterial); }catch(e){}
+  try{ if(baseImgDataUrl) previewDataUrl = await makeSafePreview(baseImgDataUrl); }catch(e){}
+  if(wmDataUrl) base.wm_data_url = wmDataUrl;
+  if(previewDataUrl) base.img_preview_url = previewDataUrl;
+if(baseImgDataUrl) base.img_data_url = baseImgDataUrl;
 
 
   const canon = JSON.stringify(canonicalize(base));
   const bytes = textToU8(canon);
-  const sig = await signBytes(creator.privKey, bytes);
+
+  let sigU8 = null;
+  let pubJwk = {};
+  let sigB64 = "";
+  const alg = base.sig_alg || "none";
+
+  if(alg !== "none" && creator.privKey && window.isSecureContext && crypto && crypto.subtle){
+    try{
+      sigU8 = await signBytes(creator.privKey, bytes, alg);
+      sigB64 = btoa(String.fromCharCode(...sigU8));
+      pubJwk = JSON.parse(store.get("signai_pub_jwk")||"{}");
+    }catch(e){
+      // fall back to compat unsigned instead of failing on locked-down work devices
+      base.sig_alg = "none";
+      sigU8 = null;
+      sigB64 = "";
+      pubJwk = {};
+      __compatUnsigned = true;
+    }
+  }
+
   const proof = {
     ...base,
-    sig_b64: btoa(String.fromCharCode(...sig)),
-    pub_jwk: JSON.parse(store.get("signai_pub_jwk")||"{}")
+    sig_b64: sigB64,
+    pub_jwk: pubJwk
   };
 
   // save in memory
@@ -2463,27 +3160,45 @@ $("#btn_save_json").addEventListener("click", ()=>{
 async function verifyProof(proof){
   // Reconstruct base (without signature/public key container)
   const {sig_b64, pub_jwk, ...base} = proof;
+  const alg = base.sig_alg || "Ed25519";
+
   const canon = JSON.stringify(canonicalize(base));
   const bytes = textToU8(canon);
-
-  let pubKey=null;
-  try{
-    pubKey = await crypto.subtle.importKey("jwk", pub_jwk, {name:"Ed25519"}, true, ["verify"]);
-  }catch(e){
-    return {ok:false, reason:"bad_pubkey"};
-  }
-
-  const sigBytes = Uint8Array.from(atob(sig_b64), c=>c.charCodeAt(0));
-  const sigOk = await verifySig(pubKey, sigBytes, bytes);
 
   const now = Date.now();
   const windowOk = (typeof base.window_s === "number") ? ((now >= base.ts) && ((now - base.ts) <= base.window_s*1000)) : false;
 
-  // mindprints: we can only verify hashes are present (for demo). In a real system you'd compare to live input.
-  const mpOk = !!(base.mindprint_badge?.textHash && base.mindprint_badge?.rhythmHash);
-  const traceOk = true; // placeholder (TraceNet)
+  // UNSIGNED / compat
+  if(alg === "none" || !sig_b64 || !pub_jwk || Object.keys(pub_jwk||{}).length===0){
+    const mpOk = !!(base.mindprint_profile && base.mindprint_profile.textHash && base.mindprint_badge && base.mindprint_badge.textHash);
+    return {ok:false, sigOk:false, windowOk, mpOk, reason:"unsigned", alg};
+  }
 
-  return {sigOk, windowOk, mpOk, traceOk};
+  if(!crypto || !crypto.subtle) return {ok:false, sigOk:false, windowOk, mpOk:false, reason:"no_webcrypto", alg};
+
+  let pubKey=null;
+  try{
+    if(alg === "ECDSA_P256_SHA256"){
+      pubKey = await crypto.subtle.importKey("jwk", pub_jwk, {name:"ECDSA", namedCurve:"P-256"}, true, ["verify"]);
+    }else{
+      pubKey = await crypto.subtle.importKey("jwk", pub_jwk, {name:"Ed25519"}, true, ["verify"]);
+    }
+  }catch(e){
+    return {ok:false, sigOk:false, windowOk, mpOk:false, reason:"bad_pubkey", alg};
+  }
+
+  let sigOk=false;
+  try{
+    const sigBytes = Uint8Array.from(atob(sig_b64), c=>c.charCodeAt(0));
+    sigOk = await verifySig(pubKey, sigBytes, bytes, alg);
+  }catch(e){
+    sigOk = false;
+  }
+
+  // mindprints: we can only verify hashes are present (for demo).
+  const mpOk = !!(base.mindprint_profile && base.mindprint_profile.textHash && base.mindprint_badge && base.mindprint_badge.textHash);
+
+  return {ok: sigOk && windowOk && mpOk, sigOk, windowOk, mpOk, reason: sigOk ? (windowOk ? "ok" : "expired") : "bad_sig", alg};
 }
 
 function renderVerify(proof, checks){
@@ -2491,6 +3206,14 @@ function renderVerify(proof, checks){
   const scoreTxt = (proof?.origin?.score_0_1===undefined || proof?.origin?.score_0_1===null) ? "—" : (proof.origin.score_0_1*100).toFixed(1)+"%";
   $("#verify_out").textContent = ai ? "AI FLAGGED" : "HUMAN VERIFIED";
   $("#verify_out").className = ai ? "err" : "ok";
+
+  // simple status pill (signature + window)
+  const __pill = document.querySelector("#verify_status_pill");
+  if(__pill){
+    const label = (checks.reason==="unsigned") ? "UNSIGNED" : (checks.sigOk ? (checks.windowOk ? "VERIFIED" : "SIGNED") : "INVALID");
+    __pill.textContent = label;
+    __pill.className = "statusPill " + ((checks.reason==="unsigned") ? "warn" : (checks.sigOk ? (checks.windowOk ? "ok" : "warn") : "err"));
+  }
 
   $("#verify_box").innerHTML = `
     <div class="resultCard ${ai?"bad":"good"}">
@@ -2511,15 +3234,42 @@ function renderVerify(proof, checks){
   startWindowCountdown(proof.ts, proof.window_s, $("#verify_window_left"), "verify");
 }
 
+
+async function __runVerify(proof){
+  if(!proof) return;
+  lastProof = proof;
+  try{ storeLast(proof, null); }catch(e){}
+  try{ $("#verify_raw").value = JSON.stringify(proof, null, 2); }catch(e){}
+  try{ const paste = document.querySelector("#verify_paste"); if(paste) paste.value = JSON.stringify(proof, null, 2); }catch(e){}
+  const checks = await verifyProof(proof);
+  renderVerify(proof, checks);
+}
+
+async function __verifyFromText(txt){
+  let proof=null;
+  try{ proof = JSON.parse(txt); }catch(e){ warn("Ogiltig JSON."); return null; }
+  await __runVerify(proof);
+  return proof;
+}
+
+async function __verifyFromFile(file){
+  if(!file) return warn("Välj en proof .json först.");
+  const txt = await file.text();
+  return __verifyFromText(txt);
+}
+
 async function loadLastIntoVerify(){
   const proof = lastProof || loadLast();
   if(!proof){
     $("#verify_out").textContent="—";
     $("#verify_box").innerHTML="";
     $("#verify_raw").value="";
+    const pill = document.querySelector("#verify_status_pill");
+    if(pill){ pill.textContent="—"; pill.className="statusPill"; }
     return;
   }
   $("#verify_raw").value = JSON.stringify(proof, null, 2);
+  try{ const paste = document.querySelector("#verify_paste"); if(paste) paste.value = JSON.stringify(proof, null, 2); }catch(e){}
   const checks = await verifyProof(proof);
   renderVerify(proof, checks);
 }
@@ -2537,23 +3287,35 @@ $("#btn_profile_clear").addEventListener("click", ()=>{
 });
 
 
-$("#btn_verify").addEventListener("click", async ()=>{
-  const f = $("#file_proof").files && $("#file_proof").files[0];
-  if(!f) return warn("Välj en proof .json först.");
-  const txt = await f.text();
-  let proof=null;
-  try{ proof = JSON.parse(txt); }catch(e){ return warn("Ogiltig JSON."); }
-  lastProof = proof;
-  storeLast(proof, null);
-  $("#verify_raw").value = JSON.stringify(proof, null, 2);
-  const checks = await verifyProof(proof);
-  renderVerify(proof, checks);
-});
+$("#btn_verify").addEventListener("click", async ()=>{ await __verifyFromFile($("#file_proof").files && $("#file_proof").files[0]); });
 
 /* ========= admin ========= */
 let __adminFails = 0;
 let __adminLockUntil = 0;
 const __ADMIN_PIN_HASH = "sha256:651b30c954c08ab0f40d1f70789cb6a181434bd6fa4f6f33f451cad65988a413";
+
+
+function __adminUpdateGlyphControls(){
+  try{
+    const card = document.querySelector("#admin_glyph_card");
+    const sel  = document.querySelector("#admin_glyph_style");
+    const btn  = document.querySelector("#admin_glyph_apply");
+    const state= document.querySelector("#admin_glyph_state");
+    if(!card) return;
+    const ok = !!adminUnlocked;
+    if(sel) sel.disabled = !ok;
+    if(btn) btn.disabled = !ok;
+    card.style.opacity = ok ? "1" : ".55";
+    if(state && !ok){
+      state.textContent = "Owner only (unlock first)";
+      state.className = "warn";
+    }
+    if(state && ok){
+      state.textContent = "";
+      state.className = "hint";
+    }
+  }catch(e){}
+}
 
 function __adminSetState(txt, ok=false){
   const el = $("#admin_state");
@@ -2566,7 +3328,7 @@ function __adminSetThrottle(txt){
   if(el) el.textContent = txt||"";
 }
 function __adminRefreshSnapshot(){
-  try{ $("#admin_user").textContent = (localStorage.getItem("trace_active_user")||"—"); }catch(e){}
+  try{ $("#admin_user").textContent = (LS.getItem("trace_active_user")||"—"); }catch(e){}
   try{ $("#admin_creator").textContent = adminUnlocked ? (creator?.creatorId||"—") : "—"; }catch(e){}
   try{ $("#admin_vault").textContent = adminUnlocked ? (vaultUnlocked ? "unlocked" : "locked") : "—"; }catch(e){}
   try{ $("#admin_hist").textContent = String(getHistory()?.length||0); }catch(e){}
@@ -2576,7 +3338,7 @@ function __adminRefreshSnapshot(){
 // Admin notes (per active user)
 function __adminNotesKey(){
   try{
-    const u = (localStorage.getItem("trace_active_user")||"default");
+    const u = (LS.getItem("trace_active_user")||"default");
     return "trace_admin_notes_"+u;
   }catch(e){
     return "trace_admin_notes_default";
@@ -2597,14 +3359,14 @@ function __adminNotesSetEnabled(on){
 function __adminNotesLoad(){
   const ta = $("#admin_notes");
   if(!ta) return;
-  try{ ta.value = localStorage.getItem(__adminNotesKey()) || ""; }catch(e){ ta.value = ""; }
+  try{ ta.value = LS.getItem(__adminNotesKey()) || ""; }catch(e){ ta.value = ""; }
 }
 function __adminNotesSave(){
   const ta = $("#admin_notes");
   const st = $("#admin_notes_state");
   if(!ta) return;
   try{
-    localStorage.setItem(__adminNotesKey(), ta.value||"");
+    LS.setItem(__adminNotesKey(), ta.value||"");
     if(st) st.textContent = "Saved ✓";
     setTimeout(()=>{ if(st) st.textContent = adminUnlocked ? "Unlocked" : "Locked"; }, 700);
   }catch(e){
@@ -2673,6 +3435,7 @@ $("#btn_admin_unlock")?.addEventListener("click", async ()=>{
   }
 
   adminUnlocked = true;
+  try{ __adminUpdateGlyphControls(); }catch(e){}
   __adminFails = 0;
   try{ __adminNotesLoad(); __adminNotesSetEnabled(true); }catch(e){}
   __adminLockUntil = 0;
@@ -2685,6 +3448,7 @@ $("#btn_admin_unlock")?.addEventListener("click", async ()=>{
 
 $("#btn_admin_lock")?.addEventListener("click", ()=>{
   adminUnlocked = false;
+  try{ __adminUpdateGlyphControls(); }catch(e){}
   try{ __adminNotesSetEnabled(false); }catch(e){}
   __adminSetState("Locked");
   __adminSetThrottle("");
@@ -2703,7 +3467,7 @@ function __download(filename, text){
 }
 $("#admin_btn_export_history")?.addEventListener("click", ()=>{
   if(!adminUnlocked) return warn("Locked.");
-  const u = (localStorage.getItem("trace_active_user")||"user");
+  const u = (LS.getItem("trace_active_user")||"user");
   const data = { user:u, exported_at: Date.now(), history: getHistory() };
   __download("trace_history_"+u+".json", JSON.stringify(data, null, 2));
 });
@@ -2711,7 +3475,7 @@ $("#admin_btn_export_public")?.addEventListener("click", ()=>{
   if(!adminUnlocked) return warn("Locked.");
   const pub = store.get("signai_pub_jwk");
   if(!pub) return warn("No public key.");
-  const u = (localStorage.getItem("trace_active_user")||"user");
+  const u = (LS.getItem("trace_active_user")||"user");
   __download("trace_publickey_"+u+".json", JSON.stringify({ user:u, pub_jwk: JSON.parse(pub) }, null, 2));
 });
 $("#admin_btn_run_selftest")?.addEventListener("click", async ()=>{
@@ -2729,16 +3493,16 @@ $("#admin_btn_run_selftest")?.addEventListener("click", async ()=>{
 $("#admin_btn_purge_user")?.addEventListener("click", ()=>{
   if(!adminUnlocked) return warn("Locked.");
   try{
-    const u = (localStorage.getItem("trace_active_user")||"default");
+    const u = (LS.getItem("trace_active_user")||"default");
     const keep = getHistory().filter(it => (it.creator_id||it?.proof?.creator_id) !== (creator?.creatorId));
-    localStorage.setItem("signai_badge_history", JSON.stringify(keep));
+    LS.setItem("signai_badge_history", JSON.stringify(keep));
     const prefixes = [
       "signai_priv_jwk_","signai_pub_jwk_","signai_creator_id_","signai_vault_hash_",
       "signai_profile_epoch_","signai_last_proof_","signai_last_badge_svg_",
       "signai_badge_history_","signai_profile_mp_"
     ];
-    for(const k of Object.keys(localStorage)){
-      if(prefixes.some(p=>k.startsWith(p)) && k.endsWith("_"+u)) localStorage.removeItem(k);
+    for(const k of LS.keys()){
+      if(prefixes.some(p=>k.startsWith(p)) && k.endsWith("_"+u)) LS.removeItem(k);
     }
     warn("Purged user data.");
     __adminRefreshSnapshot();
@@ -2752,6 +3516,7 @@ $("#admin_btn_purge_user")?.addEventListener("click", ()=>{
   setVaultUI();
   refreshMindprintUI();
   setReadyUI();
+  try{ setCompatUI(); }catch(e){}
   // Try to load last proof for verify
   const lp = loadLast();
   if(lp) lastProof = lp;
@@ -2772,9 +3537,9 @@ $("#admin_btn_purge_user")?.addEventListener("click", ()=>{
 <script>
 document.addEventListener("DOMContentLoaded", ()=>{
   try{
-    const u = localStorage.getItem("trace_active_user") || "default";
+    const u = LS.getItem("trace_active_user") || "default";
     const k = "signai_profile_mp_" + u;
-    if(!localStorage.getItem(k)){
+    if(!LS.getItem(k)){
       window.profileMindprint = null;
       if(typeof refreshMindprintUI==="function") refreshMindprintUI();
     }
@@ -2813,19 +3578,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 </script>
 
 
-<script>
-(function(){
-  const _FR = window./*FileReader disabled*/;
-  if(!_FR) return;
-  window./*FileReader disabled*/ = function(){
-    try { return new _FR(); }
-    catch(e){
-      console.warn("/*FileReader disabled*/ blocked, continuing without it", e);
-      return { readAsDataURL(){}, onload:null, onerror:null };
-    }
-  };
-})();
-</script>
+
 
 
 
@@ -2869,5 +3622,291 @@ document.addEventListener("DOMContentLoaded",()=>{
 })();
 </script>
 
+
+<script>
+(function(){
+  // Default glyph style (Orbit Ring)
+  const DEFAULT_STYLE = "orbit_ring";
+  function getDefaultStyle(){
+    try{ return (store.get("signai_glyph_style_default") || DEFAULT_STYLE); }catch(e){ return DEFAULT_STYLE; }
+  }
+  function setDefaultStyle(v){
+    try{ store.set("signai_glyph_style_default", v); }catch(e){}
+  }
+
+  function rerenderAll(){
+    try{
+      if(window.lastProof){
+        const wrap = document.querySelector("#badge_wrap");
+        if(wrap){
+          wrap.innerHTML = makeBadgeHtml(window.lastProof);
+          try{
+            const svg = wrap.querySelector("svg.glyph3d");
+            if(svg) startGlyphMotion(svg);
+          }catch(e){}
+        }
+      }
+    }catch(e){}
+    try{ if(typeof renderProfile==="function") renderProfile(); }catch(e){}
+  }
+
+  document.addEventListener("DOMContentLoaded", ()=>{
+    try{ if(typeof __adminUpdateGlyphControls==="function") __adminUpdateGlyphControls(); }catch(e){}
+    const sel = document.querySelector("#admin_glyph_style");
+    const btn = document.querySelector("#admin_glyph_apply");
+    const st  = document.querySelector("#admin_glyph_state");
+    const ss  = document.querySelector("#admin_storage_state");
+
+    if(ss){
+      ss.textContent = (window.__TRACE_STORAGE_OK__ ? "OK" : "BLOCKED (session-mode)");
+      ss.className = window.__TRACE_STORAGE_OK__ ? "ok" : "warn";
+    }
+
+    if(sel){
+      // reflect current default
+      const cur = getDefaultStyle();
+      sel.value = cur;
+      window.glyphType = cur; window.glyphtype = cur;
+    }
+    if(btn){
+      btn.addEventListener("click", ()=>{
+        if(!adminUnlocked){ return warn("Owner only. Unlock Owner Console först."); }
+        if(!sel) return;
+        window.__traceGlyphStyleOverride = sel.value;
+        window.glyphType = sel.value; window.glyphtype = sel.value;
+        setDefaultStyle(sel.value);
+        if(st){ st.textContent = "Saved ✓"; st.className = "ok"; }
+        rerenderAll();
+        setTimeout(()=>{ if(st){ st.textContent = ""; st.className="hint"; } }, 900);
+      });
+    }
+  });
+
+  // expose for other code paths
+  window.__traceGetGlyphStyle = getDefaultStyle;
+})();
+</script>
+
+
+  <!-- Image preview modal -->
+  <div class="imgModal hide" id="img_modal" role="dialog" aria-modal="true" aria-label="Image preview">
+    <div class="imgModalCard">
+      <div class="imgModalTop">
+        <div>
+          <div class="title">Uploaded image</div>
+          <div class="meta" id="img_modal_meta">—</div>
+        </div>
+        <div class="spacer"></div>
+        <button class="btn" id="img_modal_close" type="button">Close</button>
+      </div>
+      <div class="imgModalBody">
+        <img class="imgModalImg" id="img_modal_img" alt="Uploaded image preview"/>
+      </div>
+    </div>
+  </div>
+
+
+<script>
+(function(){
+  function isUsableDataUrl(u){
+    if(!u) return false;
+    const s = String(u);
+    return s.startsWith("data:image/") && !s.includes("…");
+  }
+  function extractBgDataUrl(el){
+    try{
+      if(!el) return null;
+      const bg = getComputedStyle(el).backgroundImage || "";
+      const m = bg.match(/url\((['"]?)(.*?)\1\)/i);
+      if(!m) return null;
+      const u = m[2] || "";
+      return isUsableDataUrl(u) ? u : null;
+    }catch(e){ return null; }
+  }
+  function findProofByKey(key){
+    try{
+      const arr = getHistory();
+      for(const it of arr){
+        const p = it.proof || it;
+        if(String(p.badge_key||"") === String(key||"")) return p;
+      }
+    }catch(e){}
+    return null;
+  }
+  function updatePreviewInHistory(badgeKey, previewUrl){
+    try{
+      const arr = getHistory();
+      let changed = false;
+      for(const it of arr){
+        const p = it.proof || it;
+        if(String(p.badge_key||"") === String(badgeKey||"")){
+          p.img_preview_url = previewUrl;
+          // keep both entry-level + proof-level if present
+          if(it && typeof it === "object"){
+            it.img_preview_url = previewUrl;
+            if(it.proof) it.proof = p;
+          }
+          changed = true;
+        }
+      }
+      if(changed) setHistory(arr);
+    }catch(e){}
+  }
+
+  function openImgModal(url, meta, badgeKey){
+    const modal = document.querySelector("#img_modal");
+    const img = document.querySelector("#img_modal_img");
+    const metaEl = document.querySelector("#img_modal_meta");
+    if(!modal || !img) return;
+    if(badgeKey) modal.dataset.badgekey = badgeKey;
+
+    img.decoding = "async";
+    img.src = url;
+
+    img.onerror = ()=>{
+      // fallback to watermark if preview fails
+      try{
+        const key = modal.dataset.badgekey || "";
+        const p = key ? findProofByKey(key) : null;
+        const fb = p?.wm_data_url || p?.thumb_data_url || null;
+        if(fb && fb !== url){
+          img.src = fb;
+        }else{
+          warn("Preview kunde inte laddas för den här badgen.");
+        }
+      }catch(e){
+        warn("Preview kunde inte laddas för den här badgen.");
+      }
+    };
+
+    if(metaEl) metaEl.textContent = meta || "";
+    modal.classList.remove("hide");
+  }
+  function closeImgModal(){
+    const modal = document.querySelector("#img_modal");
+    const img = document.querySelector("#img_modal_img");
+    if(img) img.src = "";
+    if(modal) modal.classList.add("hide");
+  }
+
+  document.addEventListener("click", async (e)=>{
+    const t = e.target;
+    const hit = t && t.closest ? t.closest(".thumbWatermark.clickable, .glyphBox[data-imgkey]") : null;
+    if(!hit) return;
+
+    const box = hit.closest(".glyphBox");
+    const key = hit.dataset.imgkey || (box ? box.dataset.imgkey : "");
+    if(!key) return;
+
+    const p = findProofByKey(key);
+    if(!p) return;
+
+    let url = isUsableDataUrl(p.img_preview_url) ? p.img_preview_url : null;
+
+    // Lazy hi-res preview generation if we have original image data URL
+    if(!url && isUsableDataUrl(p.img_data_url)){
+      try{
+        url = await makeSafePreview(p.img_data_url, 1200);
+        if(url){
+          p.img_preview_url = url;
+          updatePreviewInHistory(key, url);
+        }
+      }catch(err){}
+    }
+
+    // fallbacks: watermark/thumb
+    if(!url) url = (isUsableDataUrl(p.wm_data_url) ? p.wm_data_url : null) || (isUsableDataUrl(p.thumb_data_url) ? p.thumb_data_url : null);
+
+    // DOM fallback: use what's already visible
+    if(!url){
+      url = extractBgDataUrl(hit) || extractBgDataUrl(box?.querySelector?.(".thumbWatermark")) || extractBgDataUrl(box?.querySelector?.(".glyphWatermark"));
+    }
+
+    if(!url){
+      warn("Ingen bild-preview finns för den här badgen (bilddata sparades inte).");
+      return;
+    }
+
+    const scoreTxt = (p?.origin?.score_0_1===undefined || p?.origin?.score_0_1===null) ? "—" : (p.origin.score_0_1*100).toFixed(1)+"%";
+    const when = p.ts ? new Date(Number(p.ts||0)).toLocaleString("sv-SE") : "";
+    const meta = `${when} · ${p.origin?.ai_flag ? "AI" : "HUMAN"} · score ${scoreTxt}`;
+
+    openImgModal(url, meta, key);
+    e.preventDefault();
+    e.stopPropagation();
+  });
+
+  document.querySelector("#img_modal_close")?.addEventListener("click", closeImgModal);
+  document.querySelector("#img_modal")?.addEventListener("click", (e)=>{ if(e.target && e.target.id === "img_modal") closeImgModal(); });
+  document.addEventListener("keydown", (e)=>{ if(e.key==="Escape") closeImgModal(); });
+})();
+</script>
+
+<script>
+(function(){
+  function __wireWinstonProxyAdmin(){
+    const inp = document.querySelector("#admin_winston_proxy");
+    const btnSave = document.querySelector("#btn_winston_save");
+    const btnTest = document.querySelector("#btn_winston_test");
+    const st = document.querySelector("#winston_state");
+
+    if(inp){
+      let qp="";
+      try{ const sp=new URLSearchParams(location.search||""); qp=(sp.get("proxy")||sp.get("proxy_url")||"").trim(); }catch(e){}
+      inp.value = qp || (store.get("winston_proxy_url") || "");
+      if(qp && st){ st.textContent = "Using ?proxy=… from URL"; st.className="hint ok"; }
+    }
+
+    function setState(msg, cls){
+      if(!st) return;
+      st.textContent = msg || "";
+      st.className = "hint " + (cls||"");
+    }
+
+    function updateEnabled(){
+      const ok = !!adminUnlocked;
+      if(inp) inp.disabled = !ok;
+      if(btnSave) btnSave.disabled = !ok;
+      if(btnTest) btnTest.disabled = !ok;
+      const card = document.querySelector("#admin_winston_card");
+      if(card) card.style.opacity = ok ? "1" : ".55";
+      if(!ok) setState("Owner only (unlock first)", "warn");
+      else setState("", "");
+    }
+
+    updateEnabled();
+
+    // keep in sync when admin toggles
+    const _origSetTab = window.setTab;
+    window.setTab = function(id){
+      try{ _origSetTab(id); }catch(e){}
+      try{ updateEnabled(); }catch(e){}
+    };
+
+    btnSave?.addEventListener("click", ()=>{
+      if(!adminUnlocked) return warn("Owner only. Unlock först.");
+      const v = (inp?.value || "").trim();
+      store.set("winston_proxy_url", v);
+      setState("Saved ✓", "ok");
+      setTimeout(()=>setState("", ""), 900);
+    });
+
+    btnTest?.addEventListener("click", async ()=>{
+      if(!adminUnlocked) return warn("Owner only. Unlock först.");
+      if(!selectedImageFile) return warn("Välj en bild först i Create.");
+      setState("Testing…", "");
+      const r = await attemptWinstonAI(selectedImageFile);
+      if(r.ok){
+        setState("OK · score " + (r.score_0_1*100).toFixed(1) + "%", "ok");
+      }else{
+        setState("FAILED ("+r.reason+")", "warn");
+      }
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", __wireWinstonProxyAdmin);
+  window.__wireWinstonProxyAdmin = __wireWinstonProxyAdmin;
+})();
+</script>
 </body>
 </html>
