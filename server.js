@@ -10,19 +10,20 @@ dotenv.config();
 
 const app = express();
 app.set("trust proxy", 1);
+
+// CORS: allow all (ok för din proxy). Du kan strama åt senare.
 app.use(cors());
 app.use(express.json());
 
 const upload = multer({ storage: multer.memoryStorage() });
 
 const WINSTON_API_KEY = process.env.WINSTONAI_API_KEY;
-const WINSTON_MCP_URL = "https://api.gowinston.ai/mcp/v1";
 
-// temp uploads
+// Temp uploads (Render: /tmp är OK)
 const uploadDir = "/tmp/uploads";
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
-// public images
+// Public route so Winston can fetch the image by URL
 app.use("/uploads", express.static(uploadDir));
 
 app.get("/", (req, res) => {
@@ -47,197 +48,188 @@ function normalizeScore(x) {
 
   if (typeof x !== "number" || !Number.isFinite(x)) return null;
 
+  // if someone returns 0..100, convert to 0..1
   if (x > 1 && x <= 100) return x / 100;
   if (x >= 0 && x <= 1) return x;
 
   return null;
 }
 
-// ✅ Plockar JSON från Winston-texten: "Full API Response : { ... }"
-function extractJsonFromWinstonText(text) {
-  if (!text || typeof text !== "string") return null;
-
-  const marker = "Full API Response";
-  const idx = text.indexOf(marker);
-  if (idx === -1) return null;
-
-  // hitta första { efter markern
-  const braceStart = text.indexOf("{", idx);
-  if (braceStart === -1) return null;
-
-  // hitta matchande } genom att räkna klamrar
-  let depth = 0;
-  for (let i = braceStart; i < text.length; i++) {
-    const ch = text[i];
-    if (ch === "{") depth++;
-    else if (ch === "}") depth--;
-    if (depth === 0) {
-      const jsonStr = text.slice(braceStart, i + 1);
-      try {
-        return JSON.parse(jsonStr);
-      } catch {
-        return null;
-      }
-    }
-  }
-  return null;
-}
-
-// ✅ Hämta ai_probability/human_probability ur antingen riktiga fält eller ur textens inbäddade JSON
+// Extract values from Winston response (direct fields)
 function extractWinstonResult(obj) {
   if (!obj || typeof obj !== "object") return null;
 
-  // 1) om Winston redan ger riktiga fält (ibland gör den det)
-  const direct = {
-    ai_probability: obj.ai_probability,
-    human_probability: obj.human_probability,
-    score: obj.score,
-  };
+  const ai = normalizeScore(obj.ai_probability);
+  const human = normalizeScore(obj.human_probability);
+  const humanScore = normalizeScore(obj.score); // docs say "score" is human score 0..100
 
-  const ai1 = normalizeScore(direct.ai_probability);
-  const human1 = normalizeScore(direct.human_probability);
-
-  if (ai1 !== null || human1 !== null) {
+  // if ai/human probability exists -> prefer that
+  if (ai !== null || human !== null) {
     return {
-      ai_probability: ai1,
-      human_probability: human1,
-      score: normalizeScore(direct.score),
+      ai_probability: ai,
+      human_probability: human,
+      score: humanScore,
       raw: obj,
     };
   }
 
-  // 2) Winston MCP verkar ge: data.content[0].text som innehåller JSON
-  const text = obj?.content?.[0]?.text;
-  const embedded = extractJsonFromWinstonText(text);
-
-  if (embedded) {
+  // if only human score exists (0..100 or 0..1)
+  if (humanScore !== null) {
     return {
-      ai_probability: normalizeScore(embedded.ai_probability),
-      human_probability: normalizeScore(embedded.human_probability),
-      score: normalizeScore(embedded.score),
-      raw: embedded,
-      embedded_text: text,
+      ai_probability: null,
+      human_probability: null,
+      score: humanScore,
+      raw: obj,
     };
   }
 
   return null;
 }
 
+/**
+ * Winston AI Image Detection (DOCS):
+ * POST https://api.gowinston.ai/v2/image-detection
+ * Headers: Authorization: Bearer <token>, Content-Type: application/json
+ * Body: { url: "<public image url>", version: "3" }
+ */
 async function callWinstonImage(imageUrl) {
   if (!WINSTON_API_KEY) {
     return {
       ok: false,
       status: 500,
-      data: { error: "Missing WINSTONAI_API_KEY in Render Environment" },
+      data: { error: "Missing WINSTONAI_API_KEY in environment" },
     };
   }
 
-  const resp = await fetch(WINSTON_MCP_URL, {
+  const resp = await fetch("https://api.gowinston.ai/v2/image-detection", {
     method: "POST",
     headers: {
       "content-type": "application/json",
       accept: "application/json",
+      authorization: `Bearer ${WINSTON_API_KEY}`,
     },
     body: JSON.stringify({
-      jsonrpc: "2.0",
-      id: 1,
-      method: "tools/call",
-      params: {
-        name: "ai-image-detection",
-        arguments: {
-          url: imageUrl,
-          apiKey: WINSTON_API_KEY,
-        },
-      },
+      url: imageUrl,
+      version: "3",
     }),
   });
 
   const data = await resp.json().catch(() => null);
 
-  if (!resp.ok || data?.error) {
+  if (!resp.ok) {
     return { ok: false, status: resp.status, data };
   }
+  return { ok: true, status: 200, data };
+}
 
-  return { ok: true, status: 200, data: data.result };
+function pickExt(mime) {
+  const m = String(mime || "").toLowerCase();
+  if (m.includes("png")) return "png";
+  if (m.includes("webp")) return "webp";
+  if (m.includes("jpeg") || m.includes("jpg")) return "jpg";
+  // default
+  return "jpg";
 }
 
 app.post("/detect-image", upload.single("image"), async (req, res) => {
+  let filePath = null;
+
   try {
     if (!req.file) {
       return res.status(400).json({
+        ok: false,
         ai_score: 0.5,
         label: "No image uploaded",
       });
     }
 
-    const filename = crypto.randomBytes(16).toString("hex") + ".jpg";
-    const filePath = path.join(uploadDir, filename);
+    const ext = pickExt(req.file.mimetype);
+    const filename = crypto.randomBytes(16).toString("hex") + "." + ext;
+    filePath = path.join(uploadDir, filename);
+
     fs.writeFileSync(filePath, req.file.buffer);
 
     const imageUrl = makePublicUrl(req, filename);
 
     const w = await callWinstonImage(imageUrl);
-    console.log("Winston response:", JSON.stringify(w, null, 2));
+
+    // log minimal (Render logs)
+    console.log("Winston status:", w.status, "image:", imageUrl);
 
     if (!w.ok) {
       return res.status(502).json({
+        ok: false,
         ai_score: 0.5,
         label: "Winston error",
         status: w.status,
-        raw: w.data,
         image_url: imageUrl,
+        raw: w.data,
       });
     }
 
-    // ✅ Här gör vi “rätt”: ta ut riktiga siffror ur text/JSON
     const parsed = extractWinstonResult(w.data);
 
-    if (!parsed || (parsed.ai_probability === null && parsed.human_probability === null)) {
+    if (!parsed) {
       return res.json({
+        ok: true,
         ai_score: 0.5,
         label: "Unknown",
         image_url: imageUrl,
         raw: w.data,
-        note: "Could not parse Winston result (no numeric probabilities found).",
+        note: "Could not parse Winston result (no numeric fields found).",
       });
     }
 
-    // Välj AI-score: helst ai_probability, annars 1-human_probability
+    // Compute aiScore:
+    // Prefer ai_probability; else use 1-human_probability; else use (1 - humanScore)
     let aiScore = parsed.ai_probability;
+
     if (aiScore === null && parsed.human_probability !== null) {
       aiScore = 1 - parsed.human_probability;
     }
+
+    if (aiScore === null && parsed.score !== null) {
+      // score is "human score" (0..1 or 0..100 normalized to 0..1)
+      aiScore = 1 - parsed.score;
+    }
+
     if (aiScore === null) aiScore = 0.5;
 
-    // Labels med trösklar
+    // Label thresholds
     let label = "Mixed";
     if (aiScore >= 0.65) label = "AI";
     else if (aiScore <= 0.35) label = "Human";
 
     return res.json({
+      ok: true,
       ai_score: aiScore,
       label,
       image_url: imageUrl,
-      // skicka tillbaka det rena parsed-resultatet också (nice för debug)
       parsed: {
         ai_probability: parsed.ai_probability,
         human_probability: parsed.human_probability,
-        score: parsed.score,
-        version: parsed.raw?.version,
-        mime_type: parsed.raw?.mime_type,
-        credits_used: parsed.raw?.credits_used,
-        credits_remaining: parsed.raw?.credits_remaining,
-        ai_watermark_detected: parsed.raw?.ai_watermark_detected,
+        human_score: parsed.score, // normalized 0..1
+        version: w.data?.version,
+        mime_type: w.data?.mime_type,
+        credits_used: w.data?.credits_used,
+        credits_remaining: w.data?.credits_remaining,
+        ai_watermark_detected: w.data?.ai_watermark_detected,
       },
       raw: w.data,
     });
   } catch (err) {
     console.error("Server error:", err);
     return res.status(500).json({
+      ok: false,
       ai_score: 0.5,
       label: "Server error",
       error: err.message,
     });
+  } finally {
+    // Optional cleanup to avoid /tmp growing forever
+    try {
+      if (filePath && fs.existsSync(filePath)) fs.unlinkSync(filePath);
+    } catch (e) {}
   }
 });
 
