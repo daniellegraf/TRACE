@@ -1,8 +1,6 @@
-<!doctype html>
-<html lang="sv">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<html lang="sv"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>TRACE — BETA 1.0 (H.O.P 8.0)</title>
 <style>
   :root{
@@ -449,6 +447,71 @@
   }
   .thumbWatermark.clickable:hover{ opacity:.56; }
 
+  /* Clear artwork preview inside the badge itself */
+  .badge.withArtworkThumb .badgeInner{
+    padding-right:92px;
+    min-height:122px;
+  }
+  .badgeArtworkThumb{
+    position:absolute;
+    right:14px;
+    bottom:14px;
+    width:66px;
+    height:66px;
+    border-radius:18px;
+    border:1px solid rgba(255,255,255,.16);
+    background:#070b12 center / cover no-repeat;
+    box-shadow:
+      0 14px 34px rgba(0,0,0,.36),
+      inset 0 0 0 1px rgba(255,255,255,.04);
+    z-index:4;
+    overflow:hidden;
+    pointer-events:none;
+  }
+  .badgeArtworkThumb::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,0) 45%),
+      radial-gradient(80% 80% at 20% 0%, rgba(52,215,255,.16), transparent 70%);
+    pointer-events:none;
+  }
+  .badgeArtworkThumb.clickable{
+    pointer-events:auto;
+    cursor:pointer;
+  }
+  .badgeArtworkThumbLabel{
+    position:absolute;
+    left:6px;
+    right:6px;
+    bottom:5px;
+    font-size:7px;
+    line-height:1;
+    font-weight:900;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:rgba(233,243,255,.78);
+    text-shadow:0 1px 6px rgba(0,0,0,.75);
+    z-index:2;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  @media (max-width:560px){
+    .badge.withArtworkThumb .badgeInner{
+      padding-right:78px;
+      min-height:116px;
+    }
+    .badgeArtworkThumb{
+      width:56px;
+      height:56px;
+      right:12px;
+      bottom:12px;
+      border-radius:16px;
+    }
+  }
+
   /* Image preview modal */
   .imgModal{
     position:fixed;
@@ -584,7 +647,532 @@
     font-size:12px;
   }
 
+
+  /* Share artifact */
+  .shareModalStage{
+    position:relative;
+    width:100%;
+    aspect-ratio:1 / 1;
+    border-radius:14px;
+    overflow:hidden;
+    background:
+      radial-gradient(120% 120% at 50% 0%, rgba(70,130,255,.10), transparent 55%),
+      linear-gradient(180deg, #05070e, #08111d 54%, #05070e);
+    border:1px solid rgba(255,255,255,.08);
+    max-width:min(100%, var(--share-stage-size, 360px));
+    margin:0 auto;
+    flex:0 0 auto;
+  }
+  .shareModalNav{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  .shareModalPageCount{
+    min-width:62px;
+    text-align:center;
+    color:rgba(255,255,255,.66);
+    font-size:12px;
+    letter-spacing:.08em;
+  }
+  .shareModalLivePage,
+  .shareModalImg{
+    width:100%;
+    height:100%;
+    display:block;
+  }
+  .shareModalLivePage{
+    overflow:hidden;
+  }
+  .shareModalImg{
+    object-fit:contain;
+    background:#05070e;
+  }
+  .shareModalLivePage.hide,
+  .shareModalImg.hide{
+    display:none;
+  }
+
+  #share_modal{
+    --share-stage-size:360px;
+    padding:12px;
+  }
+  #share_modal .imgModalCard{
+    width:min(94vw, 900px);
+    max-height:min(88vh, 860px);
+    display:flex;
+    flex-direction:column;
+    margin:auto;
+  }
+  #share_modal .imgModalTop{
+    flex-wrap:wrap;
+    row-gap:10px;
+    padding:10px 12px;
+  }
+  #share_modal .imgModalBody{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:10px 12px 12px;
+    overflow:auto;
+  }
+  @media (max-width: 980px){
+    #share_modal{
+      padding:10px;
+    }
+    #share_modal .imgModalCard{
+      width:min(95vw, 840px);
+      max-height:88vh;
+    }
+    #share_modal .shareModalNav{
+      width:100%;
+      justify-content:flex-end;
+    }
+  }
+  @media (max-width: 640px){
+    #share_modal{
+      padding:8px;
+    }
+    #share_modal .imgModalTop{
+      padding:10px 12px;
+      gap:10px;
+    }
+    #share_modal .imgModalTop .btn{
+      padding:8px 10px;
+    }
+    #share_modal .shareModalNav{
+      justify-content:space-between;
+    }
+    #share_modal .imgModalBody{
+      padding:8px 8px 10px;
+    }
+    #share_modal .shareModalStage{
+      border-radius:12px;
+    }
+  }
+  
+  .shareLiveCard{
+    position:relative;
+    width:100%;
+    height:100%;
+    color:#e9f3ff;
+    overflow:hidden;
+    background:
+      radial-gradient(60% 52% at 14% 12%, rgba(52,215,255,.18), transparent 70%),
+      radial-gradient(54% 48% at 84% 82%, rgba(169,90,255,.14), transparent 72%),
+      linear-gradient(180deg, #05070e, #09111f 52%, #05070e);
+  }
+  .shareLiveHeader,
+  .shareLiveHeader.shareLiveHeaderCenter{
+    position:absolute;
+    left:8%;
+    right:8%;
+    top:7%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-start;
+    text-align:center;
+    gap:calc(var(--share-stage-size, 360px) * .012);
+    margin:0;
+  }
+  .shareLiveBrand{
+    letter-spacing:.24em;
+    font-size:clamp(9px, calc(var(--share-stage-size, 360px) * .03), 13px);
+    font-weight:800;
+    color:rgba(233,243,255,.62);
+  }
+  .shareLiveStatus,
+  .shareLiveHeaderCenter .shareLiveStatus{
+    margin:0;
+    max-width:100%;
+    font-size:clamp(18px, calc(var(--share-stage-size, 360px) * .10), 38px);
+    line-height:.96;
+    font-weight:900;
+    letter-spacing:.06em;
+    white-space:normal;
+    word-break:break-word;
+    text-wrap:balance;
+  }
+  .shareLiveSub{
+    max-width:92%;
+    margin:0 auto;
+    font-size:clamp(9px, calc(var(--share-stage-size, 360px) * .034), 15px);
+    line-height:1.22;
+    color:rgba(233,243,255,.66);
+    letter-spacing:.04em;
+    text-wrap:balance;
+  }
+  .shareLiveHero,
+  .shareLiveHero.shareLiveHeroSym{
+    position:absolute;
+    left:50%;
+    top:22%;
+    transform:translateX(-50%);
+    width:min(72%, calc(var(--share-stage-size, 360px) * .72));
+    max-width:76%;
+    aspect-ratio:1 / 1;
+    height:auto;
+    min-height:0;
+    margin:0;
+    border-radius:clamp(16px, calc(var(--share-stage-size, 360px) * .06), 26px);
+    overflow:hidden;
+    border:1px solid rgba(255,255,255,.10);
+    background:rgba(255,255,255,.03);
+    box-shadow:0 18px 44px rgba(0,0,0,.34);
+  }
+  .shareLiveHeroMedia{
+    position:absolute;
+    inset:0;
+    background:#0a111b center / cover no-repeat;
+  }
+  .shareLiveHeroMedia.placeholder{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:rgba(233,243,255,.56);
+    font-size:clamp(12px, calc(var(--share-stage-size, 360px) * .05), 20px);
+    letter-spacing:.06em;
+    background:
+      linear-gradient(135deg, rgba(255,255,255,.06), rgba(255,255,255,.02)),
+      #09111b;
+  }
+  .shareLiveHeroShade{
+    position:absolute;
+    inset:0;
+    background:
+      linear-gradient(180deg, rgba(5,7,14,0.04), rgba(5,7,14,0.18) 54%, rgba(5,7,14,0.34)),
+      radial-gradient(40% 40% at 84% 22%, rgba(52,215,255,.10), transparent 80%);
+    pointer-events:none;
+  }
+  .shareLiveHeroLabel{
+    position:absolute;
+    left:50%;
+    top:10px;
+    transform:translateX(-50%);
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding:6px 10px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.12);
+    background:rgba(7,11,22,.42);
+    backdrop-filter: blur(12px);
+    color:rgba(233,243,255,.78);
+    font-size:clamp(8px, calc(var(--share-stage-size, 360px) * .024), 11px);
+    letter-spacing:.10em;
+    text-transform:uppercase;
+    white-space:nowrap;
+  }
+  .shareLiveBottomStack{
+    position:absolute;
+    left:calc(50% + min(20%, calc(var(--share-stage-size, 360px) * .20)));
+    top:calc(22% + min(72%, calc(var(--share-stage-size, 360px) * .72)) - clamp(32px, calc(var(--share-stage-size, 360px) * .08), 42px));
+    width:clamp(78px, calc(var(--share-stage-size, 360px) * .22), 108px);
+    min-width:78px;
+    display:block;
+    z-index:4;
+  }
+  .shareLivePanel,
+  .shareLiveGlyphPanel{
+    width:100%;
+    min-width:0;
+    aspect-ratio:1 / 1;
+    display:flex;
+    flex-direction:column;
+    gap:3px;
+    padding:clamp(7px, calc(var(--share-stage-size, 360px) * .02), 10px);
+    border-radius:clamp(14px, calc(var(--share-stage-size, 360px) * .04), 18px);
+    border:1px solid rgba(255,255,255,.12);
+    background:rgba(8,14,24,.82);
+    box-shadow:0 14px 32px rgba(0,0,0,.26);
+    backdrop-filter: blur(12px);
+  }
+  .shareLivePanelKicker{
+    flex:0 0 auto;
+    font-size:clamp(5px, calc(var(--share-stage-size, 360px) * .013), 6px);
+    letter-spacing:.06em;
+    text-transform:none;
+    color:rgba(233,243,255,.60);
+    text-align:center;
+    white-space:nowrap;
+    line-height:1.1;
+  }
+  .shareLiveGlyphWrap{
+    flex:1 1 auto;
+    min-height:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .shareLiveGlyphWrap .glyph3d,
+  .shareLiveGlyphPanel .shareLiveGlyphWrap .glyph3d{
+    width:78%;
+    height:78%;
+    max-width:none;
+    max-height:none;
+  }
+  .shareLiveMetaLine{
+    position:absolute;
+    left:16%;
+    right:16%;
+    top:calc(22% + min(72%, calc(var(--share-stage-size, 360px) * .72)) + clamp(16px, calc(var(--share-stage-size, 360px) * .05), 22px));
+    text-align:center;
+    font-size:clamp(8px, calc(var(--share-stage-size, 360px) * .019), 11px);
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:rgba(233,243,255,.58);
+    white-space:nowrap;
+    overflow:visible;
+    text-overflow:clip;
+    z-index:5;
+    pointer-events:none;
+  }
+  @media (max-width: 640px){
+    .shareLiveHeader,
+    .shareLiveHeader.shareLiveHeaderCenter{
+      left:7%;
+      right:7%;
+      top:6%;
+    }
+    .shareLiveHero,
+    .shareLiveHero.shareLiveHeroSym{
+      top:22%;
+      width:min(74%, calc(var(--share-stage-size, 360px) * .74));
+    }
+    .shareLiveBottomStack{
+      left:calc(50% + min(22%, calc(var(--share-stage-size, 360px) * .22)));
+      top:calc(22% + min(74%, calc(var(--share-stage-size, 360px) * .74)) - clamp(30px, calc(var(--share-stage-size, 360px) * .08), 38px));
+      width:clamp(72px, calc(var(--share-stage-size, 360px) * .21), 92px);
+      min-width:72px;
+    }
+  }
+
+
+/* === TRACE consumer UX refactor === */
+.trace-public-landing{
+  min-height:100vh;
+  background:
+    radial-gradient(780px 520px at 15% 5%, rgba(52,215,255,.18), transparent 58%),
+    radial-gradient(780px 520px at 85% 12%, rgba(168,90,255,.16), transparent 58%),
+    linear-gradient(180deg,#05070e 0%,#090d16 100%);
+  color:var(--text);
+}
+.public-nav{
+  height:72px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 clamp(18px,5vw,72px);
+  border-bottom:1px solid rgba(255,255,255,.08);
+  background:rgba(5,7,14,.78);
+  backdrop-filter:blur(18px);
+  position:sticky;
+  top:0;
+  z-index:10;
+}
+.public-brand{display:flex;align-items:center;gap:12px}
+.public-logo,.app-logo-dot{
+  width:38px;height:38px;border-radius:14px;
+  display:inline-grid;place-items:center;
+  background:linear-gradient(135deg,rgba(52,215,255,.24),rgba(168,90,255,.20));
+  border:1px solid rgba(255,255,255,.14);
+  box-shadow:0 12px 32px rgba(52,215,255,.08);
+}
+.public-brand strong{display:block;letter-spacing:.18em}
+.public-brand span{display:block;color:var(--muted2);font-size:12px;margin-top:2px}
+.public-nav nav{display:flex;gap:10px}
+.nav-link,.nav-cta,.hero-primary,.hero-secondary,.auth-submit,.auth-admin{
+  border:0;border-radius:14px;font-weight:800;cursor:pointer;
+}
+.nav-link{background:transparent;color:var(--text);padding:12px 14px}
+.nav-cta,.hero-primary,.auth-submit{
+  color:#031012;background:linear-gradient(135deg,var(--green),#7cf7c1);padding:12px 18px;
+  box-shadow:0 14px 34px rgba(53,240,163,.18);
+}
+.public-hero{
+  max-width:1180px;margin:0 auto;padding:clamp(44px,8vw,104px) clamp(18px,5vw,72px);
+  display:grid;grid-template-columns:minmax(0,1.1fr) minmax(320px,.74fr);gap:clamp(28px,6vw,86px);align-items:center;
+}
+.public-copy .eyebrow,.hero-card .eyebrow{
+  color:var(--green);letter-spacing:.18em;text-transform:uppercase;font-size:12px;font-weight:900;
+}
+.public-copy h1{font-size:clamp(42px,6vw,78px);line-height:.95;margin:16px 0 18px;letter-spacing:-.06em}
+.public-copy p{max-width:640px;color:var(--muted);font-size:clamp(17px,2vw,21px);line-height:1.55;margin:0 0 26px}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap}
+.hero-secondary{background:rgba(255,255,255,.08);color:var(--text);padding:12px 18px;border:1px solid rgba(255,255,255,.12)}
+.public-features{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:34px;max-width:620px}
+.public-features div{background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:18px}
+.public-features b{color:var(--blue);display:block;margin-bottom:8px}
+.public-features span{color:var(--muted);font-size:14px}
+.auth-card{
+  background:rgba(255,255,255,.075);border:1px solid rgba(255,255,255,.12);
+  border-radius:28px;padding:22px;box-shadow:var(--shadow);backdrop-filter:blur(18px);
+}
+.auth-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.auth-tab{padding:12px;border-radius:14px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.055);color:var(--text);font-weight:900}
+.auth-tab.active{background:rgba(53,240,163,.16);border-color:rgba(53,240,163,.32);color:#d8ffee}
+.auth-field{display:grid;gap:7px;margin-top:12px}
+.auth-field span{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted2);font-weight:900}
+.auth-field input{
+  width:100%;padding:14px 14px;border-radius:16px;border:1px solid rgba(255,255,255,.12);
+  background:rgba(0,0,0,.25);color:var(--text);outline:none;
+}
+.auth-submit{width:100%;margin-top:16px;padding:15px}
+.auth-admin{width:100%;margin-top:10px;padding:12px;background:rgba(255,255,255,.06);color:var(--muted);border:1px solid rgba(255,255,255,.10)}
+.auth-hint{min-height:22px;color:var(--amber);font-size:13px;margin-top:10px}
+.auth-smalltext{margin:10px 0 0!important;color:var(--muted2)!important;font-size:12px!important;line-height:1.45!important}
+
+/* Hide old surface by default, keep DOM/engine alive */
+.wrap > .topbar,
+.wrap > .panel,
+.wrap > .footer{display:none!important}
+body.trace-engine-visible .wrap > .topbar{display:flex!important}
+body.trace-engine-visible .wrap > .panel:not(.hide){display:block!important}
+body.trace-engine-visible #trace_app_shell{display:none!important}
+
+.trace-app-shell{width:min(1180px,100%);margin:0 auto;padding:18px clamp(14px,3vw,28px) 44px}
+.app-header{
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding:14px 0 22px;margin-bottom:4px;
+}
+.app-logo-row{display:flex;align-items:center;gap:10px;font-size:20px;letter-spacing:.18em}
+.app-logo-dot{width:32px;height:32px;border-radius:12px}
+.app-header p{margin:4px 0 0;color:var(--muted2);font-size:14px}
+.app-nav{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.app-nav button,.text-btn{
+  padding:10px 13px;border-radius:999px;border:1px solid rgba(255,255,255,.10);
+  color:var(--muted);background:rgba(255,255,255,.045);font-weight:800;cursor:pointer
+}
+.app-nav button.active{color:#dfffee;background:rgba(53,240,163,.13);border-color:rgba(53,240,163,.28)}
+.app-main{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:18px;align-items:start}
+.app-flow{display:grid;gap:14px}
+.flow-card,.result-card,.advanced-card{
+  background:rgba(255,255,255,.065);border:1px solid rgba(255,255,255,.10);
+  border-radius:26px;padding:20px;box-shadow:0 18px 60px rgba(0,0,0,.22);
+}
+.hero-card{padding:26px;background:linear-gradient(135deg,rgba(52,215,255,.12),rgba(168,90,255,.08) 54%,rgba(255,255,255,.055))}
+.hero-card h1{font-size:clamp(30px,4vw,52px);line-height:1;margin:10px 0 10px;letter-spacing:-.05em}
+.hero-card p,.flow-card p,.result-card p{color:var(--muted);line-height:1.45;margin:0}
+.step-head{display:flex;gap:14px;align-items:flex-start;margin-bottom:16px}
+.step-number{
+  min-width:34px;height:34px;border-radius:12px;display:grid;place-items:center;
+  background:rgba(53,240,163,.15);color:#d8ffee;font-weight:1000;border:1px solid rgba(53,240,163,.24)
+}
+.step-head h2,.action-card h2,.result-card h2{margin:0 0 4px;font-size:20px}
+.upload-drop{
+  display:grid;place-items:center;text-align:center;gap:8px;min-height:170px;border-radius:24px;
+  border:1px dashed rgba(255,255,255,.20);background:rgba(0,0,0,.18);cursor:pointer;padding:20px
+}
+.upload-drop input{display:none}
+.upload-icon{width:48px;height:48px;border-radius:18px;display:grid;place-items:center;background:rgba(53,240,163,.13);color:#d8ffee;font-size:28px}
+.upload-drop em{font-style:normal;color:var(--muted2);font-size:13px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.app-image-preview{
+  margin-top:12px;min-height:180px;border-radius:22px;background:rgba(0,0,0,.20);
+  border:1px solid rgba(255,255,255,.09);display:grid;place-items:center;color:var(--muted2);
+  overflow:hidden;background-size:cover;background-position:center;
+}
+.app-image-preview:not(.is-empty){min-height:260px}
+.mini-form{display:grid;gap:12px}
+.mini-form label{display:grid;gap:8px}
+.mini-form span{font-size:13px;font-weight:900;color:var(--muted);letter-spacing:.03em}
+.mini-form small{font-weight:800;color:var(--green);opacity:.85}
+.mini-form textarea{
+  width:100%;min-height:78px;resize:vertical;border-radius:18px;border:1px solid rgba(255,255,255,.11);
+  background:rgba(0,0,0,.20);color:var(--text);padding:14px;outline:none;font:inherit
+}
+.action-card{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.action-card > div{min-width:0}
+.app-primary,.result-actions button{
+  border:0;border-radius:18px;padding:15px 18px;font-weight:1000;cursor:pointer;
+  background:linear-gradient(135deg,var(--green),#7cf7c1);color:#031012;box-shadow:0 14px 36px rgba(53,240,163,.17)
+}
+.app-primary{min-width:190px}
+.app-status{
+  margin-top:12px;color:var(--muted);font-size:14px;
+  background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:12px
+}
+.result-panel{position:sticky;top:14px;display:grid;gap:14px}
+.result-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.status-pill{display:inline-flex;border-radius:999px;padding:7px 10px;font-size:12px;font-weight:1000;letter-spacing:.08em;text-transform:uppercase;border:1px solid rgba(255,255,255,.10)}
+.status-pill.idle{color:var(--muted2);background:rgba(255,255,255,.05)}
+.status-pill.ready{color:#d8ffee;background:rgba(53,240,163,.13);border-color:rgba(53,240,163,.24)}
+.status-pill.warn{color:#ffe7af;background:rgba(255,211,106,.12);border-color:rgba(255,211,106,.22)}
+.app-badge-result{
+  min-height:280px;border-radius:24px;border:1px solid rgba(255,255,255,.10);background:rgba(0,0,0,.20);
+  display:grid;place-items:center;margin:16px 0;overflow:auto;padding:12px
+}
+.app-badge-result .badge{transform:scale(.86);transform-origin:center}
+.empty-glyph{width:138px;height:138px;border-radius:40px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.10);color:var(--muted2);letter-spacing:.25em;background:rgba(255,255,255,.04)}
+.result-meta{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.result-meta div,.debug-readout div{
+  background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:12px
+}
+.result-meta span,.debug-readout span{display:block;color:var(--muted2);font-size:12px;margin-bottom:4px}
+.result-meta b,.debug-readout b{font-size:13px}
+.result-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.result-actions button:disabled,.app-primary:disabled{opacity:.45;cursor:not-allowed;filter:saturate(.4)}
+.advanced-card{padding:0;overflow:hidden}
+.advanced-card summary{cursor:pointer;padding:16px 18px;color:var(--muted);font-weight:900}
+.advanced-actions{display:flex;gap:10px;flex-wrap:wrap;padding:0 18px 14px}
+.advanced-actions button{border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.05);color:var(--text);border-radius:14px;padding:10px 12px;font-weight:800;cursor:pointer}
+.debug-readout{display:grid;gap:8px;padding:0 18px 18px}
+
+/* Old auth mode class support */
+#auth_mode_login.ghost,#auth_mode_signup.ghost{opacity:.72}
+
+@media (max-width:860px){
+  .public-hero{grid-template-columns:1fr;padding-top:38px}
+  .public-features{grid-template-columns:1fr}
+  .public-copy h1{font-size:44px}
+  .app-header{align-items:flex-start;flex-direction:column}
+  .app-main{grid-template-columns:1fr}
+  .result-panel{position:static}
+  .action-card{display:block}
+  .app-primary{width:100%;margin-top:14px}
+}
+@media (max-width:520px){
+  .public-nav{height:auto;align-items:flex-start;gap:12px;padding:14px 16px}
+  .public-nav nav{width:100%;justify-content:flex-end}
+  .public-copy h1{font-size:38px}
+  .public-hero{padding:30px 16px}
+  .auth-card{border-radius:22px;padding:16px}
+  .trace-app-shell{padding:12px 12px 34px}
+  .flow-card,.result-card{border-radius:22px;padding:16px}
+  .hero-card h1{font-size:32px}
+  .result-actions{grid-template-columns:1fr}
+  .app-badge-result{min-height:220px}
+}
+
 </style>
+
+
+<script>
+const LS = {
+  getItem(k){ try{return localStorage.getItem(k);}catch(e){return null;} },
+  setItem(k,v){ try{return localStorage.setItem(k,v);}catch(e){} },
+  removeItem(k){ try{return localStorage.removeItem(k);}catch(e){} }
+};
+</script>
+<script id="trace_public_beta_config">
+/*
+  TRACE public beta config.
+  Change PROXY_BASE_URL to your live Winston/proxy backend root URL.
+  Example: https://trace-proxy-yourname.onrender.com
+*/
+var TRACE_CONFIG = window.TRACE_CONFIG || {
+  PROXY_BASE_URL: "https://signai-tamy.onrender.com",
+  DETECT_IMAGE_PATH: "/detect-image",
+  HEALTH_PATH: "/health",
+  ENABLE_ORIGIN_SCAN: true,
+  ENABLE_PROXY_WARMUP: true,
+  PROXY_TIMEOUT_MS: 30000,
+  PROXY_RETRIES: 4,
+  PROXY_RETRY_BASE_DELAY_MS: 900
+};
+window.TRACE_CONFIG = TRACE_CONFIG;
+</script>
 
 <script>
 function getActiveUser(){
@@ -738,54 +1326,540 @@ function getActiveUser(){
 .section h2{margin-top:0;font-size:18px}
 </style>
 
+
+<style id="trace_final_mobile_tight_polish">
+/* Final landing cleanup: one auth surface only, no duplicate CTA rows, no 01/02/03 explainer */
+.public-nav{
+  min-height:72px;
+  height:auto;
+}
+.public-nav nav,
+.hero-actions,
+.public-features{
+  display:none !important;
+}
+
+.public-hero{
+  padding-top:clamp(24px, 5vw, 56px) !important;
+  padding-bottom:clamp(24px, 5vw, 56px) !important;
+  gap:clamp(18px, 4vw, 44px) !important;
+  align-items:start !important;
+}
+
+.public-copy{
+  padding-top:0 !important;
+}
+
+.public-copy .eyebrow{
+  margin-bottom:10px !important;
+}
+
+.public-copy h1{
+  margin:10px 0 14px !important;
+  line-height:.96 !important;
+  letter-spacing:-.065em !important;
+}
+
+.public-copy p{
+  margin:0 !important;
+  max-width:580px !important;
+}
+
+.auth-card{
+  align-self:start !important;
+  margin-top:0 !important;
+}
+
+/* Make the login/create profile form feel like the single primary action */
+.auth-tabs{
+  margin-bottom:14px !important;
+}
+.auth-submit{
+  margin-top:14px !important;
+}
+
+/* Remove excess onboarding/landing vertical bulk on phones */
+@media (max-width: 860px){
+  .public-hero{
+    grid-template-columns:1fr !important;
+    padding:24px 16px 30px !important;
+    gap:18px !important;
+  }
+  .public-copy h1{
+    font-size:clamp(34px, 11vw, 46px) !important;
+    max-width:10.5ch;
+  }
+  .public-copy p{
+    font-size:16px !important;
+    line-height:1.45 !important;
+  }
+  .auth-card{
+    width:100% !important;
+    border-radius:22px !important;
+    padding:16px !important;
+  }
+}
+
+@media (max-width: 520px){
+  .public-nav{
+    padding:14px 16px !important;
+  }
+  .public-brand{
+    width:100%;
+  }
+  .public-logo{
+    width:34px !important;
+    height:34px !important;
+    border-radius:12px !important;
+  }
+  .public-brand strong{
+    font-size:16px !important;
+  }
+  .public-brand span{
+    font-size:12px !important;
+    line-height:1.25 !important;
+  }
+  .public-copy .eyebrow{
+    font-size:11px !important;
+    letter-spacing:.16em !important;
+  }
+  .public-copy h1{
+    font-size:38px !important;
+  }
+  .public-copy p{
+    font-size:15px !important;
+  }
+}
+</style>
+
+
+<style id="trace_stability_patch">
+#app_badge_result{
+  transition:none !important;
+  animation:none !important;
+}
+#app_badge_result *{
+  animation:none !important;
+}
+.status-pill{
+  transition:none !important;
+}
+.app-badge-result .badge{
+  transform:none !important;
+  width:100%;
+  max-width:760px;
+}
+.app-badge-result{
+  display:flex !important;
+  align-items:center;
+  justify-content:center;
+  min-height:340px;
+}
+.empty-glyph{
+  opacity:.75;
+}
+</style>
+
+
+<style id="trace_app_store_phase1_css">
+/* === App Store Phase 1: consumer release candidate polish === */
+body:not(.trace-admin) #trace_show_dev,
+body:not(.trace-admin) #app_advanced,
+body:not(.trace-admin) .dev-only-toggle,
+body:not(.trace-admin) .debug-readout,
+body:not(.trace-admin) .advanced-card,
+body:not(.trace-admin) body.trace-engine-visible,
+body:not(.trace-admin) .topbar,
+body:not(.trace-admin) #panel_admin{
+  display:none !important;
+}
+
+/* Keep engine DOM alive but visually sealed for normal users */
+body:not(.trace-admin).trace-engine-visible #trace_app_shell{
+  display:block !important;
+}
+body:not(.trace-admin).trace-engine-visible .wrap > .topbar,
+body:not(.trace-admin).trace-engine-visible .wrap > .panel:not(.hide){
+  display:none !important;
+}
+
+/* Release candidate landing polish */
+.auth-smalltext{
+  display:none !important;
+}
+.auth-card::before{
+  content:"Creator access";
+  display:block;
+  margin-bottom:12px;
+  color:rgba(233,243,255,.62);
+  font-size:12px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  font-weight:900;
+}
+.auth-admin{
+  opacity:.72;
+}
+body:not(.trace-admin) .auth-admin{
+  font-size:12px;
+}
+.public-copy p{
+  max-width:520px !important;
+}
+
+/* Compact app flow for mobile release */
+.hero-card{
+  padding:20px !important;
+}
+.hero-card p{
+  display:none;
+}
+.step-head{
+  margin-bottom:12px !important;
+}
+.step-number{
+  display:none !important;
+}
+.flow-card{
+  padding:18px !important;
+}
+.app-status{
+  min-height:44px;
+}
+.app-badge-result{
+  overscroll-behavior:contain;
+  contain:layout paint;
+}
+
+/* Mindprint readiness bars */
+.trace-mp-meter{
+  height:8px;
+  border-radius:999px;
+  background:rgba(255,255,255,.08);
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.07);
+  margin-top:-4px;
+}
+.trace-mp-meter > i{
+  display:block;
+  height:100%;
+  width:0%;
+  background:linear-gradient(90deg, rgba(255,211,106,.85), rgba(53,240,163,.95));
+  border-radius:999px;
+  transition:width .18s ease;
+}
+.trace-mp-note{
+  color:rgba(233,243,255,.56);
+  font-size:12px;
+  margin-top:-2px;
+}
+.trace-mp-note.ready{
+  color:rgba(53,240,163,.92);
+}
+
+/* Release candidate QA notice hidden unless admin */
+.trace-rc-panel{
+  display:none;
+  margin-top:14px;
+  padding:14px;
+  border-radius:18px;
+  border:1px solid rgba(53,240,163,.20);
+  background:rgba(53,240,163,.055);
+  color:rgba(233,243,255,.72);
+  font-size:13px;
+  line-height:1.45;
+}
+body.trace-admin .trace-rc-panel{
+  display:block;
+}
+
+/* Premium app tweaks */
+.app-header{
+  position:sticky;
+  top:0;
+  z-index:8;
+  padding-top:12px !important;
+  backdrop-filter:blur(18px);
+}
+.trace-app-shell{
+  max-width:1180px;
+}
+.result-card{
+  border-color:rgba(255,255,255,.12);
+}
+.upload-drop:active,
+.app-primary:active,
+.result-actions button:active{
+  transform:scale(.99);
+}
+@media(max-width:520px){
+  .app-header{
+    position:relative;
+    padding-bottom:12px !important;
+  }
+  .app-nav{
+    width:100%;
+    display:grid !important;
+    grid-template-columns:repeat(3,1fr);
+  }
+  .app-nav button{
+    width:100%;
+    text-align:center;
+    padding:11px 8px !important;
+  }
+  .hero-card{
+    padding:18px !important;
+  }
+  .hero-card h1{
+    font-size:30px !important;
+  }
+  .upload-drop{
+    min-height:144px !important;
+  }
+  .app-image-preview:not(.is-empty){
+    min-height:220px !important;
+  }
+  .app-badge-result{
+    min-height:260px !important;
+    padding:10px !important;
+  }
+  .result-meta{
+    grid-template-columns:1fr !important;
+  }
+}
+</style>
+
 </head>
-<body>
+<body class="trace-app-polish">
 
-<!-- AUTH MODAL -->
-<div id="auth_modal" class="simple-landing">
-  <h1>TRACE</h1>
-  <p>Välj om du vill logga in på en befintlig profil eller skapa en ny.</p>
 
-  <div class="section" style="width:min(560px,92vw);text-align:left">
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px">
-      <button id="auth_mode_login" class="btn primary" type="button">Logga in</button>
-      <button id="auth_mode_signup" class="btn ghost" type="button">Skapa ny profil</button>
+<!-- AUTH MODAL / PUBLIC LANDING -->
+<div id="auth_modal" class="trace-public-landing">
+  <header class="public-nav">
+    <div class="public-brand">
+      <div class="public-logo">T</div>
+      <div>
+        <strong>TRACE</strong>
+        <span>Human verification for digital work</span>
+      </div>
     </div>
+  </header>
 
-    <div style="display:grid;gap:10px">
-      <label style="display:grid;gap:6px">
-        <span style="color:#aaa;font-size:13px">Användarnamn</span>
-        <input id="auth_user" placeholder="t.ex. daniel" autocomplete="username"
-               style="padding:10px;border-radius:10px;border:1px solid #333;background:#0b0b0b;color:#fff">
+  <main class="public-hero">
+    <section class="public-copy">
+      <div class="eyebrow">Human authenticity layer</div>
+      <h1>Verify and share digital artwork with a Trace badge.</h1>
+      <p>Create a clean provenance badge, glyph signature and share artifact — without showing the technical engine to your audience.</p>
+    </section>
+
+    <section class="auth-card" aria-label="TRACE login">
+      <div class="auth-tabs">
+        <button id="auth_mode_login" class="auth-tab active" type="button">Logga in</button>
+        <button id="auth_mode_signup" class="auth-tab" type="button">Ny profil</button>
+      </div>
+
+      <label class="auth-field">
+        <span>Användarnamn</span>
+        <input id="auth_user" placeholder="t.ex. creator" autocomplete="username">
       </label>
 
-      <label style="display:grid;gap:6px">
-        <span style="color:#aaa;font-size:13px">Lösenord</span>
-        <input id="auth_pass" type="password" placeholder="••••••••" autocomplete="current-password"
-               style="padding:10px;border-radius:10px;border:1px solid #333;background:#0b0b0b;color:#fff">
+      <label class="auth-field">
+        <span>Lösenord</span>
+        <input id="auth_pass" type="password" placeholder="••••••••" autocomplete="current-password">
       </label>
 
-      <label id="auth_pass2_wrap" style="display:none;gap:6px">
-        <span style="color:#aaa;font-size:13px">Bekräfta lösenord</span>
-        <input id="auth_pass2" type="password" placeholder="••••••••" autocomplete="new-password"
-               style="padding:10px;border-radius:10px;border:1px solid #333;background:#0b0b0b;color:#fff">
+      <label id="auth_pass2_wrap" class="auth-field" style="display:none">
+        <span>Bekräfta lösenord</span>
+        <input id="auth_pass2" type="password" placeholder="••••••••" autocomplete="new-password">
       </label>
 
-      <button id="auth_btn" class="cta" type="button">Fortsätt</button>
-      <div id="auth_hint" style="min-height:18px;color:#9aa"></div>
+      <button id="auth_btn" class="auth-submit" type="button">Continue</button>
+      <button id="trace_admin_1996" class="auth-admin" type="button" data-trace-phase1-ready="1">Admin login · 1996</button>
 
-      <p id="auth_smalltext" style="margin:0;color:#777;font-size:13px">
-        Beta: profiler lagras lokalt i din webbläsare (hashad inloggning). Vault-data och nycklar är kopplade till din profil.
-      </p>
-    </div>
-  </div>
+      <div id="auth_hint" class="auth-hint"></div>
+      <p id="auth_smalltext" class="auth-smalltext">Keys and vault are created locally. In the normal app they stay behind the scenes.</p>
+    </section>
+  </main>
 </div>
 
 <div class="wrap hide">
+  <!-- TRACE CONSUMER APP SHELL: clean UI above existing engine -->
+  <div id="trace_app_shell" class="trace-app-shell">
+    <header class="app-header">
+      <div>
+        <div class="app-logo-row"><span class="app-logo-dot"></span><strong>TRACE</strong></div>
+        <p>Verify human-made digital work.</p>
+      </div>
+      <div class="app-nav">
+        <button type="button" data-trace-tab="use" class="">Create</button>
+        <button type="button" data-trace-tab="verify">Verify</button>
+        <button type="button" data-trace-tab="profile">Profile</button>
+        <button type="button" id="trace_show_dev" class="dev-only-toggle" data-trace-phase1-ready="1">Advanced</button>
+      </div>
+    </header>
+
+    <main class="app-main app-view active" id="app_create_view">
+      <section class="app-flow">
+        <div class="flow-card hero-card">
+          <div class="eyebrow">Create a Trace badge</div>
+          <h1>Upload artwork. Create badge. Share proof.</h1>
+          <p>The technical vault, signing keys and origin scan run quietly in the background.</p>
+        </div>
+
+        <div class="flow-card" id="app_step_upload">
+          <div class="step-head">
+            <span class="step-number">1</span>
+            <div>
+              <h2>Upload artwork</h2>
+              <p>Choose the image you want to verify.</p>
+            </div>
+          </div>
+          <label class="upload-drop">
+            <input id="app_file_img" type="file" accept="image/*">
+            <span class="upload-icon">＋</span>
+            <strong>Upload artwork</strong>
+            <em id="app_file_name">No image selected</em>
+          </label>
+          <div id="app_image_preview" class="app-image-preview is-empty">Artwork preview</div>
+        </div>
+
+        <div class="flow-card" id="app_step_mindprint" style="display: grid;">
+          <div class="step-head">
+            <span class="step-number">2</span>
+            <div>
+              <h2>Creator notes</h2>
+              <p>One profile statement, then a short note for this badge.</p>
+            </div>
+          </div>
+
+          <div class="mini-form" id="app_profile_block" style="opacity: 1; visibility: visible; display: grid;" data-trace-no-glitch-observer="1">
+            <label>
+              <span>Profile mindprint <small>once</small></span>
+              <textarea id="app_profile_mp" rows="3" placeholder="Describe your creative identity." data-trace-stable-mindprint-wired="1" data-trace-meter-ready="1"></textarea><div class="trace-mp-meter"><i style="width: 0%;"></i></div><div class="trace-mp-note">0/20 characters</div><div id="app_profile_mp_meter" class="trace-mp-meter"><span class="trace-mp-label">Minimum 40 characters</span><span class="trace-mp-bar"><i class="trace-mp-fill" style="width: 0%;"></i></span><span class="trace-mp-count">0 / 40</span></div>
+            </label>
+          </div>
+
+          <div class="mini-form">
+            <label>
+              <span>Badge mindprint <small>this artwork</small></span>
+              <textarea id="app_badge_mp" rows="3" placeholder="Short note about this artwork." data-trace-stable-mindprint-wired="1" data-trace-meter-ready="1"></textarea><div class="trace-mp-meter"><i style="width: 0%;"></i></div><div class="trace-mp-note">0/10 characters</div><div id="app_badge_mp_meter" class="trace-mp-meter"><span class="trace-mp-label">Minimum 20 characters</span><span class="trace-mp-bar"><i class="trace-mp-fill" style="width: 0%;"></i></span><span class="trace-mp-count">0 / 20</span></div>
+            </label>
+            <label>
+              <span>Title or caption <small>optional</small></span>
+              <textarea id="app_payload_text" rows="2" placeholder="Artwork title, caption or statement."></textarea>
+            </label>
+          </div>
+        </div>
+
+        <div class="flow-card action-card" id="app_step_create">
+          <div>
+            <h2>Create Badge</h2>
+            <p>Generates the Trace glyph, signs the badge and runs the origin scan at the correct point in the flow.</p>
+          </div>
+          <button id="app_create_badge" class="app-primary" type="button" data-trace-phase1-ready="1">Create Badge</button>
+          <div id="app_status" class="app-status">Origin scan service ready.</div>
+        </div>
+      </section>
+
+      <aside class="result-panel">
+        <div class="result-card">
+          <div class="result-top">
+            <span id="app_result_pill" class="status-pill idle">Waiting</span>
+            <button id="app_new_badge" class="text-btn" type="button" data-trace-phase1-ready="1">New</button>
+          </div>
+          <h2 id="app_result_title">Your badge will appear here</h2>
+          <p id="app_result_sub">Upload artwork, then create a badge.</p>
+
+          <div id="app_badge_result" class="app-badge-result trace-result-idle"><div class="empty-glyph">TRACE</div></div>
+
+          <div class="result-meta">
+            <div><span>Origin scan</span><b id="app_origin_status">Not run</b></div>
+            <div><span>Badge</span><b id="app_badge_state">Not created</b></div>
+          </div>
+
+          <div class="result-actions">
+            <button id="app_share_badge" type="button" disabled="">Share Badge</button>
+            <button id="app_download_png" type="button" disabled="">Download PNG</button>
+          </div>
+        </div>
+
+        <details class="advanced-card" id="app_advanced">
+          <summary>Developer details</summary>
+          <div class="advanced-actions">
+            <button type="button" id="app_open_engine">Show full TRACE engine</button>
+            <button type="button" id="app_hide_engine">Hide engine</button>
+          </div>
+          <div class="debug-readout">
+            <div><span>Vault</span><b id="app_vault_state">Status: Locked</b></div>
+            <div><span>Creator</span><b id="app_creator_state">Automatic</b></div>
+            <div><span>Raw origin</span><b id="app_origin_raw">Not analyzed yet.</b></div>
+          </div>
+        <div id="trace_rc_panel" class="trace-rc-panel"><b>Release candidate checks</b><br>Upload → Create Badge → Share/Download → New Badge. Technical engine stays available only in admin mode.</div></details>
+      </aside>
+    </main>
+  <main id="app_verify_view" class="app-main app-view">
+        <section class="app-flow">
+          <div class="app-simple-card">
+            <div class="eyebrow">Verify</div>
+            <h1>Check a Trace badge</h1>
+            <p>Load your latest badge or paste proof JSON. Technical verification details stay in Advanced.</p>
+            <textarea id="app_verify_paste" rows="7" placeholder="Paste proof JSON here"></textarea>
+            <div class="app-simple-actions">
+              <button type="button" class="primary" id="app_verify_latest">Load latest</button>
+              <button type="button" id="app_verify_run">Verify</button>
+              <button type="button" id="app_verify_clear">Clear</button>
+            </div>
+          </div>
+        </section>
+        <aside class="result-panel">
+          <div class="result-card">
+            <span class="status-pill idle" id="app_verify_pill">Waiting</span>
+            <h2>Verification result</h2>
+            <div id="app_verify_result" class="app-view-placeholder">No proof loaded yet.</div>
+          </div>
+        </aside></main><main id="app_profile_view" class="app-main app-view">
+        <section class="app-flow"><div id="trace_profile_identity_card" class="trace-profile-identity-card">
+      <div class="trace-profile-top">
+        <div class="trace-profile-avatar" id="trace_profile_avatar" aria-label="Profile glyph avatar"><div class="empty-glyph">TRACE</div></div>
+        <div class="trace-profile-avatar-meta">
+          <div class="eyebrow">Profile glyph</div>
+          <h2>Creator signature</h2>
+          <p>Updates from your Trace badge history.</p>
+        </div>
+      </div>
+      <div class="trace-history-head">
+        <h3>Badge gallery</h3>
+        <span class="trace-history-count" id="trace_history_count">0 badges</span>
+      </div>
+      <div class="trace-profile-gallery" id="trace_profile_gallery"><div class="trace-profile-gallery-empty">Created badges will appear here.</div></div>
+    </div>
+          <div class="app-simple-card">
+            <div class="eyebrow">Profile</div>
+            <h1>Your Trace profile</h1>
+            <p>Your creator identity and profile mindprint run quietly in the background.</p>
+            <div class="profile-clean-list">
+              <div><span>Creator identity</span><b id="app_profile_creator">Automatic</b></div>
+              <div><span>Profile mindprint</span><b id="app_profile_mindprint">Automatic</b></div>
+              <div><span>Vault</span><b id="app_profile_vault">Automatic</b></div>
+            </div>
+          </div>
+        </section>
+        <aside class="result-panel">
+          <div class="result-card">
+            <span class="status-pill ready">Ready</span>
+            <h2>Private engine</h2>
+            <p>The keys and signing system are hidden from normal use. Open Advanced only when needed.</p>
+            <div class="result-actions">
+              <button type="button" id="app_profile_show_engine">Open Advanced</button>
+            </div>
+          </div>
+        </aside></main></div>
+
+
   <div class="topbar">
     <div class="brand">
       <div class="logoBox" title="logo.png (placeholder)">
-        <img src="logo.png" alt="logo" onerror="this.style.display='none'">
+        <img src="logo.png" alt="logo" onerror="this.style.display='none'" style="display: none;">
       </div>
       <div>
         <div class="brandTitle">TRACE</div>
@@ -825,7 +1899,7 @@ function getActiveUser(){
         <div style="height:10px"></div>
 
         <div class="row">
-          <input id="vault_pass" type="password" placeholder="Local vault password (nytt eller befintligt)"/>
+          <input id="vault_pass" type="password" placeholder="Local vault password (nytt eller befintligt)">
           <button class="btn primary" id="btn_unlock">Unlock vault</button>
           <button class="btn ghost" id="btn_lock">Lock</button>
           <button class="btn ghost mini" id="btn_reset">Reset</button>
@@ -872,7 +1946,7 @@ function getActiveUser(){
 
         <div style="height:10px"></div>
         <div class="cardTitle" style="font-size:13px">Attach image (optional)</div>
-        <input id="file_img" type="file" accept="image/*"/>
+        <input id="file_img" type="file" accept="image/*">
         <div class="hint" id="img_hint">No image selected.</div>
 
         <div style="height:10px"></div>
@@ -884,6 +1958,7 @@ function getActiveUser(){
         
 <div class="row" style="flex-wrap:wrap">
   <button class="btn primary" id="btn_analyze" type="button">Create badge</button>
+  <button class="btn good" id="btn_share_badge" type="button" disabled="">Share badge</button>
   <button class="btn" id="btn_download_svg" type="button">Download SVG</button>
   <button class="btn" id="btn_save_json" type="button">Save proof (.json)</button>
 </div>
@@ -920,7 +1995,7 @@ function getActiveUser(){
         <div class="dropzone" id="verify_dropzone" role="button" tabindex="0" aria-label="Upload proof JSON">
           <div class="dzTitle">Släpp <b>.json</b> här eller klicka för att välja fil</div>
           <div class="dzSub">Tips: Om du klickade en badge nyss kan du trycka <b>Load last</b>.</div>
-          <input id="file_proof" class="fileHidden" type="file" accept=".json,application/json"/>
+          <input id="file_proof" class="fileHidden" type="file" accept=".json,application/json">
         </div>
 
         <div class="row" style="margin-top:12px; gap:10px; flex-wrap:wrap">
@@ -939,7 +2014,7 @@ function getActiveUser(){
 
         <details class="details" style="margin-top:12px">
           <summary>Visa rå JSON</summary>
-          <textarea id="verify_raw" class="mono" placeholder="Raw proof JSON (read-only)" readonly></textarea>
+          <textarea id="verify_raw" class="mono" placeholder="Raw proof JSON (read-only)" readonly=""></textarea>
         </details>
       </div>
 
@@ -981,7 +2056,7 @@ function getActiveUser(){
 
         <div class="row" style="margin-top:10px;gap:10px;flex-wrap:wrap;align-items:center">
           <button class="btn ghost" id="btn_vaultkey_toggle">Show vault key</button>
-          <button class="btn ghost" id="btn_vaultkey_copy" disabled>Copy</button>
+          <button class="btn ghost" id="btn_vaultkey_copy" disabled="">Copy</button>
           <span class="hint monoWrap" id="vaultkey_value" style="max-width:360px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">••••••••••</span>
           <span class="hint" id="vaultkey_hint" style="margin-left:auto;color:#888">Locked</span>
         </div>
@@ -1018,12 +2093,11 @@ function getActiveUser(){
         </div>
 
         <div class="row" style="flex-wrap:wrap; gap:10px">
-          <input id="admin_winston_proxy" type="text" placeholder="https://din-backend.onrender.com/detect-image"
-                 style="min-width:320px; flex:1 1 420px"/>
+          <input id="admin_winston_proxy" type="text" placeholder="https://din-backend.onrender.com/detect-image" style="min-width:320px; flex:1 1 420px">
           <button class="btn primary" id="btn_winston_save" type="button">Save</button>
           <button class="btn ghost" id="btn_winston_test" type="button">Test with selected image</button>
         </div>
-        <div class="hint" id="winston_state" style="min-height:18px; margin-top:8px"></div>
+        <div class="hint" id="winston_state" style="min-height:18px; margin-top:8px">Origin scan service ready.</div>
       </div>
 
 
@@ -1046,14 +2120,14 @@ function getActiveUser(){
           <span class="hint" id="admin_glyph_state" style="min-height:18px"></span>
         </div>
         <div class="hint" style="margin-top:8px">
-          Storage: <b id="admin_storage_state">—</b> · Om policy blockerar lagring kör vi i “session-mode” men du kan fortfarande rendera badges.
+          Storage: <b id="admin_storage_state" class="warn">BLOCKED (session-mode)</b> · Om policy blockerar lagring kör vi i “session-mode” men du kan fortfarande rendera badges.
         </div>
       </div>
 
       <div class="card">
         <div class="cardTitle">Access</div>
         <div class="row">
-          <input id="admin_pin" type="password" placeholder="PIN"/>
+          <input id="admin_pin" type="password" placeholder="PIN">
           <button class="btn primary" id="btn_admin_unlock">Unlock</button>
           <button class="btn ghost" id="btn_admin_lock">Lock</button>
         </div>
@@ -1082,10 +2156,10 @@ function getActiveUser(){
 
       <div class="card">
         <div class="cardTitle">Notes</div>
-        <textarea id="admin_notes" class="mono" placeholder="(Unlock för att skriva)" disabled></textarea>
+        <textarea id="admin_notes" class="mono" placeholder="(Unlock för att skriva)" disabled=""></textarea>
         <div class="row" style="margin-top:10px;gap:10px;flex-wrap:wrap">
-          <button class="btn ghost" id="admin_notes_save" disabled>Save notes</button>
-          <button class="btn ghost" id="admin_notes_clear" disabled>Clear</button>
+          <button class="btn ghost" id="admin_notes_save" disabled="">Save notes</button>
+          <button class="btn ghost" id="admin_notes_clear" disabled="">Clear</button>
           <div class="hint" id="admin_notes_state" style="margin-left:auto;color:#888">Locked</div>
         </div>
         <div class="hint">Anteckningar sparas lokalt per aktiv användare (Owner Console).</div>
@@ -1101,7 +2175,7 @@ function getActiveUser(){
 
 </div>
 
-</div>
+
 
 <script>
 /* ========= tiny helpers ========= */
@@ -1113,21 +2187,21 @@ const LS = (()=>{
   let ok = false;
   try{
     const k="__trace_ls_test__";
-    window.LS.setItem(k,"1");
-    window.LS.removeItem(k);
+    window.localStorage.setItem(k,"1");
+    window.localStorage.removeItem(k);
     ok = true;
   }catch(e){ ok = false; }
 
   function getItem(k){
-    if(ok){ try{ return window.LS.getItem(k); }catch(e){} }
+    if(ok){ try{ return window.localStorage.getItem(k); }catch(e){} }
     return mem.has(k) ? mem.get(k) : null;
   }
   function setItem(k,v){
-    if(ok){ try{ window.LS.setItem(k,String(v)); return; }catch(e){ ok=false; } }
+    if(ok){ try{ window.localStorage.setItem(k,String(v)); return; }catch(e){ ok=false; } }
     mem.set(k, String(v));
   }
   function removeItem(k){
-    if(ok){ try{ window.LS.removeItem(k); return; }catch(e){ ok=false; } }
+    if(ok){ try{ window.localStorage.removeItem(k); return; }catch(e){ ok=false; } }
     mem.delete(k);
   }
   function keys(){
@@ -1702,6 +2776,7 @@ function setReadyUI(){
   $("#ready_flag").className = ready ? "ok" : "warn";
   $("#btn_analyze").disabled = !ready;
   $("#btn_analyze").style.opacity = ready ? "1" : ".55";
+  try{ setShareButtonState(); }catch(e){}
 }
 function warn(msg){ alert(msg); }
 
@@ -1894,6 +2969,9 @@ $("#btn_reset").addEventListener("click", ()=>{
   $("#vault_mp_hint").textContent="At least 20 characters required.";
   $("#origin_out").textContent="Not analyzed yet.";
   $("#badge_wrap").innerHTML="";
+  lastProof = null;
+  lastBadgeSvg = null;
+  if(typeof __clearShareArtifactState === "function") __clearShareArtifactState();
   if(badgeWindowTimer){ clearInterval(badgeWindowTimer); badgeWindowTimer=null; }
   if(verifyWindowTimer){ clearInterval(verifyWindowTimer); verifyWindowTimer=null; }
   setVaultUI(); refreshMindprintUI(); setReadyUI();
@@ -2126,14 +3204,59 @@ $("#file_img").addEventListener("change", ()=>{
 });
 
 async function attemptWinstonAI(file){
-  // Fail-closed default: AI (but expose reason clearly)
   const fallback = { ok:false, score_0_1:1.0, ai_flag:true, reason:"winston_unavailable_or_failed" };
+  const cfg = window.TRACE_CONFIG || {};
+  if(cfg.ENABLE_ORIGIN_SCAN === false){
+    return { ok:false, score_0_1:0.0, ai_flag:false, reason:"origin_scan_disabled" };
+  }
   if(!file) return { ok:false, score_0_1:0.0, ai_flag:false, reason:"no_image" };
 
-  // Proxy URL priority:
-  // 1) URL param (?proxy=...)
-  // 2) saved admin setting (winston_proxy_url)
-  // 3) hardcoded default (your Render backend)
+  function setHumanScanStatus(msg){
+    try{
+      const a = document.getElementById("app_status");
+      if(a) a.textContent = msg;
+      const b = document.getElementById("app_origin_status");
+      if(b) b.textContent = msg;
+      const c = document.getElementById("winston_state");
+      if(c) c.textContent = msg;
+    }catch(e){}
+  }
+
+  function normalizeProxyEndpoint(raw){
+    let u = String(raw || "").trim();
+    if(!u) return "";
+    u = u.replace(/\/+$/,"");
+    const detectPath = String(cfg.DETECT_IMAGE_PATH || "/detect-image");
+    if(u.endsWith(detectPath)) return u;
+    return u + detectPath;
+  }
+
+  function proxyBaseFromEndpoint(endpoint){
+    const detectPath = String(cfg.DETECT_IMAGE_PATH || "/detect-image");
+    return String(endpoint || "").replace(new RegExp(detectPath.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "$"), "");
+  }
+
+  // Accept File | Blob | dataURL string.
+  let uploadObj = file;
+  try{
+    if(typeof uploadObj === "string" && uploadObj.indexOf("data:image/") === 0){
+      const blob = await (await fetch(uploadObj)).blob();
+      const ext = (blob.type && blob.type.indexOf("png") >= 0) ? "png" :
+                  (blob.type && blob.type.indexOf("webp") >= 0) ? "webp" : "jpg";
+      uploadObj = new File([blob], "upload."+ext, { type: blob.type || "image/jpeg" });
+    }else if(uploadObj instanceof Blob && !(uploadObj instanceof File)){
+      const ext = (uploadObj.type && uploadObj.type.indexOf("png") >= 0) ? "png" :
+                  (uploadObj.type && uploadObj.type.indexOf("webp") >= 0) ? "webp" : "jpg";
+      uploadObj = new File([uploadObj], "upload."+ext, { type: uploadObj.type || "image/jpeg" });
+    }
+  }catch(e){
+    return { ...fallback, reason:"prep_upload_failed", detail:String((e && e.message) || e) };
+  }
+
+  if(!(uploadObj instanceof Blob)){
+    return { ...fallback, reason:"bad_image_input_type", detail: typeof uploadObj };
+  }
+
   let urlProxy = "";
   try{
     const sp = new URLSearchParams(location.search || "");
@@ -2141,66 +3264,122 @@ async function attemptWinstonAI(file){
   }catch(e){ urlProxy = ""; }
 
   const savedProxy = (store.get("winston_proxy_url") || "").trim();
-  const defaultProxy = "https://signai-tamy.onrender.com/detect-image";
-  const proxyUrl = urlProxy || savedProxy || defaultProxy;
+  const configProxy = (cfg.PROXY_BASE_URL || "").trim();
+  const endpointBase = normalizeProxyEndpoint(urlProxy || savedProxy || configProxy);
 
-  // If we're running via file://, we MUST use a proxy (direct Winston is blocked).
-  if(location.protocol === "file:" && !proxyUrl){
+  if(location.protocol === "file:" && !endpointBase){
     return { ...fallback, reason:"proxy_not_configured_file_protocol" };
   }
-
-  // Build candidate list:
-  // - if a proxy is set, ONLY try the proxy (do not fall back to direct Winston — avoids confusion/noise).
-  // - if running on https origin and no proxy, try same-origin /detect-image.
-  const candidates = [];
-  if(proxyUrl) candidates.push(proxyUrl);
-  if(!proxyUrl && location.protocol !== "file:"){
-    candidates.push(location.origin + "/detect-image");
+  if(!endpointBase){
+    return { ...fallback, reason:"proxy_not_configured" };
   }
 
-  for(const endpoint of candidates){
+  const sleep = (ms)=>new Promise(r=>setTimeout(r,ms));
+  const retries = Math.max(1, Number(cfg.PROXY_RETRIES || 4));
+  const timeoutMs = Math.max(8000, Number(cfg.PROXY_TIMEOUT_MS || 30000));
+  const baseDelay = Math.max(250, Number(cfg.PROXY_RETRY_BASE_DELAY_MS || 900));
+
+  async function doFetchOnce(attempt){
+    const endpoint = endpointBase + (endpointBase.indexOf("?") >= 0 ? "&" : "?") + "t=" + Date.now();
+
+    const fd = new FormData();
+    const fname = (uploadObj instanceof File && uploadObj.name) ? uploadObj.name : "upload.jpg";
+    fd.append("image", uploadObj, fname);
+
+    const ctrl = new AbortController();
+    const timeout = setTimeout(()=>ctrl.abort(), timeoutMs);
+
     try{
-      const fd = new FormData();
-      fd.append("image", file);
+      if(attempt === 1) setHumanScanStatus("Origin scan service is starting…");
+      else setHumanScanStatus("Origin scan is retrying…");
 
-      const res = await fetch(endpoint, { method:"POST", body: fd });
+      const res = await fetch(endpoint, {
+        method:"POST",
+        body: fd,
+        credentials:"omit",
+        cache:"no-store",
+        signal: ctrl.signal
+      });
 
-      // read JSON (or text) for better diagnostics
       let data = null;
       let text = "";
-      try{
-        data = await res.json();
-      }catch(e){
-        try{ text = await res.text(); }catch(_){}
-      }
+      try{ data = await res.json(); }catch(_){ try{ text = await res.text(); }catch(__){} }
 
       if(!res.ok){
         const reason = "proxy_http_" + String(res.status || "error");
-        const detail = (data && (data.error || data.description || data.label)) ? (data.error || data.description || data.label) : (text ? text.slice(0,160) : "");
-        return { ...fallback, reason, status: res.status, detail, endpoint };
+        const detail =
+          (data && (data.upstream_description || data.description || data.error || data.label)) ?
+            (data.upstream_description || data.description || data.error || data.label) :
+            (text ? text.slice(0,220) : "");
+        return { ...fallback, reason, status: res.status, detail, endpoint:endpointBase, raw:data||null };
       }
 
       if(!data){
-        return { ...fallback, reason:"proxy_bad_json", endpoint };
+        return { ...fallback, reason:"proxy_bad_json", endpoint:endpointBase };
       }
 
-      // Proxy contract: {ai_score, label, ...}
-      let score = Number(data.ai_score);
-      if(!isFinite(score)){
-        score = Number(data.score ?? data?.result?.score ?? data?.origin?.score ?? NaN);
-      }
-      if(!isFinite(score)){
-        return { ...fallback, reason:"proxy_missing_ai_score", endpoint };
+      let aiScore = null;
+      const p = data.parsed || null;
+
+      if(p){
+        const ap = Number(p.ai_probability);
+        const hp = Number(p.human_probability);
+        let hs = Number(p.human_score);
+
+        if(Number.isFinite(ap)) aiScore = ap;
+        else if(Number.isFinite(hp)) aiScore = 1 - hp;
+        else if(Number.isFinite(hs)){
+          if(hs > 1 && hs <= 100) hs = hs/100;
+          aiScore = 1 - hs;
+        }
       }
 
-      const s = clamp01(score);
-      return { ok:true, score_0_1: s, ai_flag:(s>=0.5), reason:"winston_proxy_ok", endpoint, raw:data };
+      if(aiScore === null){
+        let n = Number(data.ai_score ?? data.aiScore ?? data.score ?? NaN);
+        if(Number.isFinite(n)){
+          if(n > 1 && n <= 100) n = n/100;
+          aiScore = n;
+        }
+      }
+
+      if(aiScore === null || !Number.isFinite(aiScore)){
+        return { ...fallback, reason:"proxy_missing_ai_score", endpoint:endpointBase, raw:data };
+      }
+
+      aiScore = clamp01(aiScore);
+      setHumanScanStatus("Origin scan complete.");
+      return { ok:true, score_0_1: aiScore, ai_flag:(aiScore>=0.5), reason:"winston_proxy_ok", endpoint:endpointBase, raw:data };
     }catch(e){
-      return { ...fallback, reason:"proxy_network_or_blocked", detail:String(e?.message||e), endpoint };
+      return { ...fallback, reason:"proxy_network_or_blocked", detail:String((e && e.message) || e), endpoint:endpointBase };
+    }finally{
+      clearTimeout(timeout);
     }
   }
 
-  return { ...fallback, reason:"proxy_failed_or_blocked" };
+  let last = null;
+  for(let attempt=1; attempt<=retries; attempt++){
+    const r = await doFetchOnce(attempt);
+    if(r.ok) return r;
+
+    last = r;
+    const st = Number(r.status||0);
+    const transient =
+      r.reason==="proxy_network_or_blocked" ||
+      r.reason==="proxy_bad_json" ||
+      (String(r.reason).indexOf("proxy_http_") === 0 && [408,425,429,500,502,503,504].includes(st));
+
+    if(transient && attempt<retries){
+      setHumanScanStatus("Origin scan service is waking up. This can take a moment…");
+      await sleep(baseDelay * attempt);
+      continue;
+    }
+
+    setHumanScanStatus("Origin scan unavailable. Badge can still be created with local fallback.");
+    return r;
+  }
+
+  setHumanScanStatus("Origin scan unavailable. Badge can still be created with local fallback.");
+  return last || { ...fallback, reason:"proxy_failed_or_blocked" };
 }
 
 /* ========= badge + proof ========= */
@@ -2657,14 +3836,16 @@ function makeBadgeHtml(proof){
   const ai = !!proof.origin.ai_flag;
   const scoreTxt = (proof.origin.score_0_1*100).toFixed(1)+"%";
   const windowS = proof.window_s;
+  const artworkThumbUrl = (proof.wm_data_url || proof.thumb_data_url || proof.img_data_url) || null;
+  const escapedImgKey = escapeHtml(proof.badge_key || "");
 
   const helix = makeHelixSvg(proof.glyph_seed, ai, (proof?.origin?.score_0_1 ?? NaN), (proof.thumb_data_url || proof.img_data_url)||null, {mode:"badge", style: (window.__traceGlyphStyleOverride || proof.glyph_style || (typeof window.__traceGetGlyphStyle==="function"?window.__traceGetGlyphStyle():"orbit_ring")), meta:{payloadLen:(proof.payload_text||"").length, hasImg:!!proof.img_hash}});
 
   return `
-    <div class="badge ${ai?"bad":"good"}" id="badge_click">
+    <div class="badge ${ai?"bad":"good"}${artworkThumbUrl?" withArtworkThumb":""}" id="badge_click">
       <div class="cornerDot"></div>
       <div class="badgeInner">
-        <div class="glyphBox" data-imgkey="${escapeHtml(proof.badge_key||"")}" title="View image">${helix}${(proof.wm_data_url || proof.thumb_data_url || proof.img_data_url)?`<div class="thumbWatermark clickable" data-imgkey="${escapeHtml(proof.badge_key||"")}" title="View image" style="background-image:url(${(proof.wm_data_url || proof.thumb_data_url || proof.img_data_url)})"></div>`:""}</div>
+        <div class="glyphBox" data-imgkey="${escapedImgKey}" title="View image">${helix}${artworkThumbUrl?`<div class="thumbWatermark clickable" data-imgkey="${escapedImgKey}" title="View image" style="background-image:url(${artworkThumbUrl})"></div>`:""}</div>
         <div class="badgeRight">
           <div class="badgeTop">
             <div>
@@ -2679,6 +3860,7 @@ function makeBadgeHtml(proof){
           </div>
         </div>
       </div>
+      ${artworkThumbUrl?`<div class="badgeArtworkThumb clickable" data-imgkey="${escapedImgKey}" title="Artwork preview" style="background-image:url(${artworkThumbUrl})"><span class="badgeArtworkThumbLabel">Artwork</span></div>`:""}
     </div>
   `;
 }
@@ -3115,8 +4297,10 @@ if(baseImgDataUrl) base.img_data_url = baseImgDataUrl;
 
   // save in memory
   lastProof = proof;
+  if(typeof __clearShareArtifactState === "function") __clearShareArtifactState();
   storeLast(proof, null);
   addToHistory(proof);
+  try{ setShareButtonState(); }catch(e){}
 
   // render badge
   $("#badge_wrap").innerHTML = makeBadgeHtml(proof);
@@ -3520,6 +4704,7 @@ $("#admin_btn_purge_user")?.addEventListener("click", ()=>{
   // Try to load last proof for verify
   const lp = loadLast();
   if(lp) lastProof = lp;
+  try{ setShareButtonState(); }catch(e){}
   // Profile history
   try{ renderProfile(); }catch(e){}
   try{ if(typeof __adminRefreshSnapshot==='function'){ __adminRefreshSnapshot(); } }catch(e){}
@@ -3636,10 +4821,10 @@ document.addEventListener("DOMContentLoaded",()=>{
 
   function rerenderAll(){
     try{
-      if(window.lastProof){
+      if(lastProof){
         const wrap = document.querySelector("#badge_wrap");
         if(wrap){
-          wrap.innerHTML = makeBadgeHtml(window.lastProof);
+          wrap.innerHTML = makeBadgeHtml(lastProof);
           try{
             const svg = wrap.querySelector("svg.glyph3d");
             if(svg) startGlyphMotion(svg);
@@ -3700,10 +4885,1461 @@ document.addEventListener("DOMContentLoaded",()=>{
         <button class="btn" id="img_modal_close" type="button">Close</button>
       </div>
       <div class="imgModalBody">
-        <img class="imgModalImg" id="img_modal_img" alt="Uploaded image preview"/>
+        <img class="imgModalImg" id="img_modal_img" alt="Uploaded image preview">
       </div>
     </div>
   </div>
+
+
+  <!-- Share badge preview modal -->
+  <div class="imgModal hide" id="share_modal" role="dialog" aria-modal="true" aria-label="Share badge preview" style="--share-stage-size: 220px;">
+    <div class="imgModalCard">
+      <div class="imgModalTop">
+        <div>
+          <div class="title">Share badge artifact</div>
+          <div class="meta" id="share_modal_meta">Page 1 of 2 · Artwork + glyph · 1080 × 1080 PNG</div>
+        </div>
+        <div class="spacer"></div>
+        <div class="shareModalNav">
+          <button class="btn" id="btn_share_prev" type="button" disabled="disabled">← Prev</button>
+          <div class="shareModalPageCount" id="share_modal_pagecount">1 / 2</div>
+          <button class="btn" id="btn_share_next" type="button" disabled="disabled">Next →</button>
+        </div>
+        <button class="btn good" id="btn_share_download" type="button">Download PNG</button>
+        <button class="btn" id="btn_share_close" type="button">Close</button>
+      </div>
+      <div class="imgModalBody">
+        <div class="shareModalStage" id="share_modal_stage">
+          <div class="shareModalLivePage" id="share_modal_live" aria-label="Animated share artifact preview"></div>
+          <img class="shareModalImg hide" id="share_modal_img" alt="Share badge artifact preview" src="">
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+<script>
+(function(){
+  let lastShareArtifactDataUrl = null;
+  let lastShareArtifactName = "trace-share-badge.png";
+
+  function traceRoundRect(ctx, x, y, w, h, r){
+    const rr = Math.max(0, Math.min(r, Math.min(w, h) / 2));
+    ctx.beginPath();
+    ctx.moveTo(x + rr, y);
+    ctx.arcTo(x + w, y, x + w, y + h, rr);
+    ctx.arcTo(x + w, y + h, x, y + h, rr);
+    ctx.arcTo(x, y + h, x, y, rr);
+    ctx.arcTo(x, y, x + w, y, rr);
+    ctx.closePath();
+  }
+
+  function traceFillRoundRect(ctx, x, y, w, h, r){
+    traceRoundRect(ctx, x, y, w, h, r);
+    ctx.fill();
+  }
+
+  function traceStrokeRoundRect(ctx, x, y, w, h, r){
+    traceRoundRect(ctx, x, y, w, h, r);
+    ctx.stroke();
+  }
+
+  function traceIsRenderableImageSource(src){
+    if(!src) return false;
+    const s = String(src).trim();
+    if(!s || s.includes("…")) return false;
+    return /^(data:image\/|blob:|https?:\/\/)/i.test(s);
+  }
+
+  async function traceLoadImage(src){
+    return await new Promise((resolve, reject)=>{
+      const img = new Image();
+      img.decoding = "async";
+      img.loading = "eager";
+      if(/^https?:\/\//i.test(String(src||""))){
+        img.crossOrigin = "anonymous";
+      }
+      img.onload = ()=>resolve(img);
+      img.onerror = ()=>reject(new Error("Image load failed"));
+      img.src = src;
+    });
+  }
+
+  async function traceSvgToImage(svgMarkup){
+    const blob = new Blob([svgMarkup], { type:"image/svg+xml;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    try{
+      return await traceLoadImage(url);
+    }finally{
+      setTimeout(()=>{ try{ URL.revokeObjectURL(url); }catch(e){} }, 1200);
+    }
+  }
+
+  function traceFindLiveGlyphSvg(proof){
+    const badgeKey = String(proof?.badge_key || "");
+    const selectors = [
+      badgeKey ? `.glyphBox[data-imgkey="${badgeKey.replace(/"/g, '\"')}"] svg.glyph3d` : "",
+      "#badge_wrap .glyphBox svg.glyph3d",
+      "#share_live_glyph_wrap svg.glyph3d",
+      ".badge .glyphBox svg.glyph3d"
+    ].filter(Boolean);
+    for(const sel of selectors){
+      try{
+        const svg = document.querySelector(sel);
+        if(svg) return svg;
+      }catch(e){}
+    }
+    return null;
+  }
+
+  function traceSerializeGlyphSnapshotSvg(svg){
+    if(!svg) return "";
+    try{
+      const clone = svg.cloneNode(true);
+      const vb = clone.getAttribute("viewBox") || "0 0 142 92";
+      const vbParts = vb.trim().split(/\s+/).map(Number);
+      const vbW = vbParts[2] || 142;
+      const vbH = vbParts[3] || 92;
+      clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+      clone.setAttribute("width", String(vbW));
+      clone.setAttribute("height", String(vbH));
+      clone.setAttribute("preserveAspectRatio", "xMidYMid meet");
+      clone.querySelectorAll("script").forEach(n=>n.remove());
+      clone.querySelectorAll("[style]").forEach(n=>{
+        const s = n.getAttribute("style") || "";
+        if(/animation|transition/i.test(s)) n.setAttribute("style", s.replace(/(?:^|;)\s*(animation|transition)[^;]*/ig, ""));
+      });
+      return new XMLSerializer().serializeToString(clone);
+    }catch(e){
+      return "";
+    }
+  }
+
+  function traceBuildGlyphSnapshotSvg(proof, glyphStyle){
+    const live = traceFindLiveGlyphSvg(proof);
+    const snap = traceSerializeGlyphSnapshotSvg(live);
+    if(snap) return snap;
+    return makeHelixSvg(
+      proof.glyph_seed,
+      !!(proof.origin && proof.origin.ai_flag),
+      (proof && proof.origin && typeof proof.origin.score_0_1 === "number") ? proof.origin.score_0_1 : NaN,
+      (proof.thumb_data_url || proof.img_data_url || null),
+      {
+        mode: "badge",
+        style: glyphStyle,
+        meta: { payloadLen: (proof.payload_text || "").length, hasImg: !!(proof.img_hash || proof.img_data_url || proof.thumb_data_url) }
+      }
+    );
+  }
+
+
+  function traceDrawImageCover(ctx, img, x, y, w, h){
+    const iw = img.naturalWidth || img.width || 1;
+    const ih = img.naturalHeight || img.height || 1;
+    const scale = Math.max(w / iw, h / ih);
+    const dw = iw * scale;
+    const dh = ih * scale;
+    const dx = x + (w - dw) / 2;
+    const dy = y + (h - dh) / 2;
+    ctx.drawImage(img, dx, dy, dw, dh);
+  }
+
+  function traceDrawImageContain(ctx, img, x, y, w, h){
+    const iw = img.naturalWidth || img.width || 1;
+    const ih = img.naturalHeight || img.height || 1;
+    const scale = Math.min(w / iw, h / ih);
+    const dw = iw * scale;
+    const dh = ih * scale;
+    const dx = x + (w - dw) / 2;
+    const dy = y + (h - dh) / 2;
+    ctx.drawImage(img, dx, dy, dw, dh);
+  }
+
+  function traceDrawPreviewPlaceholder(ctx, x, y, w, h){
+    ctx.save();
+    const g = ctx.createLinearGradient(x, y, x + w, y + h);
+    g.addColorStop(0, "rgba(255,255,255,0.08)");
+    g.addColorStop(1, "rgba(255,255,255,0.02)");
+    ctx.fillStyle = g;
+    traceFillRoundRect(ctx, x, y, w, h, 26);
+
+    ctx.strokeStyle = "rgba(255,255,255,0.14)";
+    ctx.lineWidth = 2;
+    traceStrokeRoundRect(ctx, x, y, w, h, 26);
+
+    ctx.strokeStyle = "rgba(255,255,255,0.12)";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(x + 28, y + h - 34);
+    ctx.lineTo(x + w * 0.44, y + h * 0.52);
+    ctx.lineTo(x + w * 0.66, y + h * 0.68);
+    ctx.lineTo(x + w - 28, y + 42);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(x + w * 0.28, y + h * 0.30, Math.min(w, h) * 0.08, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.fillStyle = "rgba(233,243,255,0.70)";
+    ctx.font = "600 20px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
+    
+    ctx.restore();
+  }
+
+  function traceFormatDate(ts){
+    try{
+      const d = new Date(Number(ts || Date.now()));
+      if(Number.isNaN(+d)) return "";
+      return d.toLocaleDateString("sv-SE", { year:"numeric", month:"short", day:"numeric" });
+    }catch(e){
+      return "";
+    }
+  }
+
+  function traceArtifactFileName(proof){
+    const id = String((proof && (proof.badge_id || proof.badge_key)) || "trace-badge").replace(/[^a-z0-9_-]+/gi, "-").slice(0, 24) || "trace-badge";
+    return "trace-share-" + id + ".png";
+  }
+
+  function traceResolveVerificationUrl(proof){
+    if(!proof || typeof proof !== "object") return "";
+    const nested = (obj, path)=>{
+      try{
+        return path.reduce((acc, key)=>acc && acc[key], obj);
+      }catch(e){
+        return null;
+      }
+    };
+    const candidates = [
+      proof.verification_url,
+      proof.verify_url,
+      proof.trace_url,
+      proof.public_url,
+      proof.public_verification_url,
+      proof.qr_url,
+      nested(proof, ["links","verify"]),
+      nested(proof, ["links","verification"]),
+      nested(proof, ["public","verification_url"]),
+      nested(proof, ["public","url"]),
+      nested(proof, ["meta","verification_url"])
+    ].filter(Boolean);
+    const hit = candidates.find(v=>/^https?:\/\//i.test(String(v || "").trim()));
+    return hit ? String(hit).trim() : "";
+  }
+
+  async function traceResolvePreviewSource(proof){
+    const direct = [
+      proof && proof.img_preview_url,
+      proof && proof.wm_data_url,
+      proof && proof.thumb_data_url,
+      proof && proof.img_data_url
+    ].find(traceIsRenderableImageSource);
+    if(direct) return direct;
+
+    try{
+      if(selectedImageFile){
+        const fileUrl = await fileToDataUrl(selectedImageFile);
+        if(traceIsRenderableImageSource(fileUrl)) return fileUrl;
+      }
+    }catch(e){}
+
+    return "";
+  }
+
+  function traceQrPlaceholder(ctx, x, y, size){
+    ctx.save();
+    ctx.fillStyle = "#f7fbff";
+    traceFillRoundRect(ctx, x, y, size, size, 28);
+
+    ctx.strokeStyle = "rgba(7,11,22,0.18)";
+    ctx.lineWidth = 2;
+    traceStrokeRoundRect(ctx, x, y, size, size, 28);
+
+    const pad = 28;
+    const inner = size - pad * 2;
+    ctx.strokeStyle = "rgba(7,11,22,0.14)";
+    ctx.lineWidth = 2;
+    ctx.setLineDash([8, 8]);
+    traceStrokeRoundRect(ctx, x + pad, y + pad, inner, inner, 20);
+    ctx.setLineDash([]);
+
+    ctx.fillStyle = "#0f1726";
+    ctx.font = "700 24px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
+    ctx.textAlign = "center";
+    ctx.fillText("QR pending", x + size / 2, y + size / 2 + 8);
+    ctx.font = "500 14px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
+    ctx.fillStyle = "rgba(15,23,38,0.58)";
+    ctx.fillText("verification link not attached", x + size / 2, y + size / 2 + 34);
+    ctx.restore();
+  }
+
+  const TraceQR = (function(){
+    const ERROR_CORRECT_MAP = { M:0, L:1, H:2, Q:3 };
+    const MODE_8BIT_BYTE = 1 << 2;
+    const PAD0 = 0xEC;
+    const PAD1 = 0x11;
+    const G15 = (1 << 10) | (1 << 8) | (1 << 5) | (1 << 4) | (1 << 2) | (1 << 1) | (1 << 0);
+    const G18 = (1 << 12) | (1 << 11) | (1 << 10) | (1 << 9) | (1 << 8) | (1 << 5) | (1 << 2) | (1 << 0);
+    const G15_MASK = (1 << 14) | (1 << 12) | (1 << 10) | (1 << 4) | (1 << 1);
+
+    const PATTERN_POSITION_TABLE = [
+      [], [6,18], [6,22], [6,26], [6,30], [6,34], [6,22,38], [6,24,42], [6,26,46], [6,28,50],
+      [6,30,54], [6,32,58], [6,34,62], [6,26,46,66], [6,26,48,70], [6,26,50,74], [6,30,54,78],
+      [6,30,56,82], [6,30,58,86], [6,34,62,90], [6,28,50,72,94], [6,26,50,74,98], [6,30,54,78,102],
+      [6,28,54,80,106], [6,32,58,84,110], [6,30,58,86,114], [6,34,62,90,118], [6,26,50,74,98,122],
+      [6,30,54,78,102,126], [6,26,52,78,104,130], [6,30,56,82,108,134], [6,34,60,86,112,138],
+      [6,30,58,86,114,142], [6,34,62,90,118,146], [6,30,54,78,102,126,150], [6,24,50,76,102,128,154],
+      [6,28,54,80,106,132,158], [6,32,58,84,110,136,162], [6,26,54,82,110,138,166], [6,30,58,86,114,142,170]
+    ];
+
+    const RS_BLOCK_TABLE = [
+      [1,26,19],[1,26,16],[1,26,13],[1,26,9],
+      [1,44,34],[1,44,28],[1,44,22],[1,44,16],
+      [1,70,55],[1,70,44],[2,35,17],[2,35,13],
+      [1,100,80],[2,50,32],[2,50,24],[4,25,9],
+      [1,134,108],[2,67,43],[2,33,15,2,34,16],[2,33,11,2,34,12],
+      [2,86,68],[4,43,27],[4,43,19],[4,43,15],
+      [2,98,78],[4,49,31],[2,32,14,4,33,15],[4,39,13,1,40,14],
+      [2,121,97],[2,60,38,2,61,39],[4,40,18,2,41,19],[4,40,14,2,41,15],
+      [2,146,116],[3,58,36,2,59,37],[4,36,16,4,37,17],[4,36,12,4,37,13],
+      [2,86,68,2,87,69],[4,69,43,1,70,44],[6,43,19,2,44,20],[6,43,15,2,44,16],
+      [4,101,81],[1,80,50,4,81,51],[4,50,22,4,51,23],[3,36,12,8,37,13],
+      [2,116,92,2,117,93],[6,58,36,2,59,37],[4,46,20,6,47,21],[7,42,14,4,43,15],
+      [4,133,107],[8,59,37,1,60,38],[8,44,20,4,45,21],[12,33,11,4,34,12],
+      [3,145,115,1,146,116],[4,64,40,5,65,41],[11,36,16,5,37,17],[11,36,12,5,37,13],
+      [5,109,87,1,110,88],[5,65,41,5,66,42],[5,54,24,7,55,25],[11,36,12,7,37,13],
+      [5,122,98,1,123,99],[7,73,45,3,74,46],[15,43,19,2,44,20],[3,45,15,13,46,16],
+      [1,135,107,5,136,108],[10,74,46,1,75,47],[1,50,22,15,51,23],[2,42,14,17,43,15],
+      [5,150,120,1,151,121],[9,69,43,4,70,44],[17,50,22,1,51,23],[2,42,14,19,43,15],
+      [3,141,113,4,142,114],[3,70,44,11,71,45],[17,47,21,4,48,22],[9,39,13,16,40,14],
+      [3,135,107,5,136,108],[3,67,41,13,68,42],[15,54,24,5,55,25],[15,43,15,10,44,16],
+      [4,144,116,4,145,117],[17,68,42],[17,50,22,6,51,23],[19,46,16,6,47,17],
+      [2,139,111,7,140,112],[17,74,46],[7,54,24,16,55,25],[34,37,13],
+      [4,151,121,5,152,122],[4,75,47,14,76,48],[11,54,24,14,55,25],[16,45,15,14,46,16],
+      [6,147,117,4,148,118],[6,73,45,14,74,46],[11,54,24,16,55,25],[30,46,16,2,47,17],
+      [8,132,106,4,133,107],[8,75,47,13,76,48],[7,54,24,22,55,25],[22,45,15,13,46,16],
+      [10,142,114,2,143,115],[19,74,46,4,75,47],[28,50,22,6,51,23],[33,46,16,4,47,17],
+      [8,152,122,4,153,123],[22,73,45,3,74,46],[8,53,23,26,54,24],[12,45,15,28,46,16],
+      [3,147,117,10,148,118],[3,73,45,23,74,46],[4,54,24,31,55,25],[11,45,15,31,46,16],
+      [7,146,116,7,147,117],[21,73,45,7,74,46],[1,53,23,37,54,24],[19,45,15,26,46,16],
+      [5,145,115,10,146,116],[19,75,47,10,76,48],[15,54,24,25,55,25],[23,45,15,25,46,16],
+      [13,145,115,3,146,116],[2,74,46,29,75,47],[42,54,24,1,55,25],[23,45,15,28,46,16],
+      [17,145,115],[10,74,46,23,75,47],[10,54,24,35,55,25],[19,45,15,35,46,16],
+      [17,145,115,1,146,116],[14,74,46,21,75,47],[29,54,24,19,55,25],[11,45,15,46,46,16],
+      [13,145,115,6,146,116],[14,74,46,23,75,47],[44,54,24,7,55,25],[59,46,16,1,47,17],
+      [12,151,121,7,152,122],[12,75,47,26,76,48],[39,54,24,14,55,25],[22,45,15,41,46,16],
+      [6,151,121,14,152,122],[6,75,47,34,76,48],[46,54,24,10,55,25],[2,45,15,64,46,16],
+      [17,152,122,4,153,123],[29,74,46,14,75,47],[49,54,24,10,55,25],[24,45,15,46,46,16],
+      [4,152,122,18,153,123],[13,74,46,32,75,47],[48,54,24,14,55,25],[42,45,15,32,46,16],
+      [20,147,117,4,148,118],[40,75,47,7,76,48],[43,54,24,22,55,25],[10,45,15,67,46,16],
+      [19,148,118,6,149,119],[18,75,47,31,76,48],[34,54,24,34,55,25],[20,45,15,61,46,16]
+    ];
+
+    const EXP_TABLE = new Array(256);
+    const LOG_TABLE = new Array(256);
+    for(let i=0;i<8;i++) EXP_TABLE[i] = 1 << i;
+    for(let i=8;i<256;i++){
+      EXP_TABLE[i] = EXP_TABLE[i - 4] ^ EXP_TABLE[i - 5] ^ EXP_TABLE[i - 6] ^ EXP_TABLE[i - 8];
+    }
+    for(let i=0;i<255;i++) LOG_TABLE[EXP_TABLE[i]] = i;
+
+    function glog(n){
+      if(n < 1) throw new Error("glog(" + n + ")");
+      return LOG_TABLE[n];
+    }
+    function gexp(n){
+      while(n < 0) n += 255;
+      while(n >= 256) n -= 255;
+      return EXP_TABLE[n];
+    }
+    class Polynomial{
+      constructor(num, shift){
+        if(!num || !num.length) throw new Error("bad polynomial");
+        let offset = 0;
+        while(offset < num.length && num[offset] === 0) offset++;
+        this.num = num.slice(offset);
+        for(let i=0;i<shift;i++) this.num.push(0);
+      }
+      get length(){ return this.num.length; }
+      at(i){ return this.num[i]; }
+      multiply(other){
+        const num = new Array(this.length + other.length - 1).fill(0);
+        for(let i=0;i<this.length;i++){
+          for(let j=0;j<other.length;j++){
+            num[i + j] ^= gexp(glog(this.at(i)) + glog(other.at(j)));
+          }
+        }
+        return new Polynomial(num, 0);
+      }
+      mod(other){
+        if(this.length - other.length < 0) return this;
+        const ratio = glog(this.at(0)) - glog(other.at(0));
+        const num = this.num.slice();
+        for(let i=0;i<other.length;i++){
+          num[i] ^= gexp(glog(other.at(i)) + ratio);
+        }
+        return new Polynomial(num, 0).mod(other);
+      }
+    }
+    class BitBuffer{
+      constructor(){
+        this.buffer = [];
+        this.length = 0;
+      }
+      put(num, length){
+        for(let i=0;i<length;i++){
+          this.putBit(((num >>> (length - i - 1)) & 1) === 1);
+        }
+      }
+      putBit(bit){
+        const bufIndex = Math.floor(this.length / 8);
+        if(this.buffer.length <= bufIndex) this.buffer.push(0);
+        if(bit) this.buffer[bufIndex] |= (0x80 >>> (this.length % 8));
+        this.length++;
+      }
+    }
+    function rsBlocks(version, errorCorrection){
+      const offset = {1:0, 0:1, 3:2, 2:3}[errorCorrection];
+      const rsBlock = RS_BLOCK_TABLE[(version - 1) * 4 + offset];
+      const blocks = [];
+      for(let i=0;i<rsBlock.length;i+=3){
+        const count = rsBlock[i];
+        const totalCount = rsBlock[i + 1];
+        const dataCount = rsBlock[i + 2];
+        for(let j=0;j<count;j++) blocks.push({ totalCount, dataCount });
+      }
+      return blocks;
+    }
+    function getBCHDigit(data){
+      let digit = 0;
+      while(data !== 0){
+        digit++;
+        data >>>= 1;
+      }
+      return digit;
+    }
+    function BCHTypeInfo(data){
+      let d = data << 10;
+      while(getBCHDigit(d) - getBCHDigit(G15) >= 0){
+        d ^= (G15 << (getBCHDigit(d) - getBCHDigit(G15)));
+      }
+      return ((data << 10) | d) ^ G15_MASK;
+    }
+    function BCHTypeNumber(data){
+      let d = data << 12;
+      while(getBCHDigit(d) - getBCHDigit(G18) >= 0){
+        d ^= (G18 << (getBCHDigit(d) - getBCHDigit(G18)));
+      }
+      return (data << 12) | d;
+    }
+    function maskFunc(pattern){
+      switch(pattern){
+        case 0: return (i, j)=>((i + j) % 2) === 0;
+        case 1: return (i, j)=>(i % 2) === 0;
+        case 2: return (i, j)=>(j % 3) === 0;
+        case 3: return (i, j)=>((i + j) % 3) === 0;
+        case 4: return (i, j)=>((Math.floor(i / 2) + Math.floor(j / 3)) % 2) === 0;
+        case 5: return (i, j)=>(((i * j) % 2) + ((i * j) % 3)) === 0;
+        case 6: return (i, j)=>((((i * j) % 2) + ((i * j) % 3)) % 2) === 0;
+        case 7: return (i, j)=>((((i * j) % 3) + ((i + j) % 2)) % 2) === 0;
+        default: throw new Error("Bad mask pattern");
+      }
+    }
+    function setupPositionProbePattern(modules, row, col){
+      const modulesCount = modules.length;
+      for(let r=-1;r<8;r++){
+        if(row + r <= -1 || modulesCount <= row + r) continue;
+        for(let c=-1;c<8;c++){
+          if(col + c <= -1 || modulesCount <= col + c) continue;
+          if(((0 <= r && r <= 6) && (c === 0 || c === 6)) || ((0 <= c && c <= 6) && (r === 0 || r === 6)) || ((2 <= r && r <= 4) && (2 <= c && c <= 4))){
+            modules[row + r][col + c] = true;
+          }else{
+            modules[row + r][col + c] = false;
+          }
+        }
+      }
+    }
+    function setupTimingPattern(modules){
+      const modulesCount = modules.length;
+      for(let r=8;r<modulesCount - 8;r++){
+        if(modules[r][6] !== null) continue;
+        modules[r][6] = (r % 2) === 0;
+      }
+      for(let c=8;c<modulesCount - 8;c++){
+        if(modules[6][c] !== null) continue;
+        modules[6][c] = (c % 2) === 0;
+      }
+    }
+    function setupPositionAdjustPattern(modules, version){
+      const pos = PATTERN_POSITION_TABLE[version - 1];
+      for(let i=0;i<pos.length;i++){
+        const row = pos[i];
+        for(let j=0;j<pos.length;j++){
+          const col = pos[j];
+          if(modules[row][col] !== null) continue;
+          for(let r=-2;r<3;r++){
+            for(let c=-2;c<3;c++){
+              if(r === -2 || r === 2 || c === -2 || c === 2 || (r === 0 && c === 0)){
+                modules[row + r][col + c] = true;
+              }else{
+                modules[row + r][col + c] = false;
+              }
+            }
+          }
+        }
+      }
+    }
+    function setupTypeNumber(modules, version, test){
+      const bits = BCHTypeNumber(version);
+      const modulesCount = modules.length;
+      for(let i=0;i<18;i++){
+        const mod = !test && (((bits >> i) & 1) === 1);
+        modules[Math.floor(i / 3)][(i % 3) + modulesCount - 8 - 3] = mod;
+      }
+      for(let i=0;i<18;i++){
+        const mod = !test && (((bits >> i) & 1) === 1);
+        modules[(i % 3) + modulesCount - 8 - 3][Math.floor(i / 3)] = mod;
+      }
+    }
+    function setupTypeInfo(modules, errorCorrection, maskPattern, test){
+      const data = (errorCorrection << 3) | maskPattern;
+      const bits = BCHTypeInfo(data);
+      const modulesCount = modules.length;
+      for(let i=0;i<15;i++){
+        const mod = !test && (((bits >> i) & 1) === 1);
+        if(i < 6){
+          modules[i][8] = mod;
+        }else if(i < 8){
+          modules[i + 1][8] = mod;
+        }else{
+          modules[modulesCount - 15 + i][8] = mod;
+        }
+      }
+      for(let i=0;i<15;i++){
+        const mod = !test && (((bits >> i) & 1) === 1);
+        if(i < 8){
+          modules[8][modulesCount - i - 1] = mod;
+        }else if(i < 9){
+          modules[8][15 - i] = mod;
+        }else{
+          modules[8][15 - i - 1] = mod;
+        }
+      }
+      modules[modulesCount - 8][8] = !test;
+    }
+    function createBytes(buffer, blocks){
+      let offset = 0;
+      let maxDcCount = 0;
+      let maxEcCount = 0;
+      const dcdata = [];
+      const ecdata = [];
+      for(const block of blocks){
+        const dcCount = block.dataCount;
+        const ecCount = block.totalCount - dcCount;
+        maxDcCount = Math.max(maxDcCount, dcCount);
+        maxEcCount = Math.max(maxEcCount, ecCount);
+
+        const currentDc = [];
+        for(let i=0;i<dcCount;i++) currentDc.push(0xFF & buffer.buffer[i + offset]);
+        offset += dcCount;
+
+        let rsPoly = new Polynomial([1], 0);
+        for(let i=0;i<ecCount;i++){
+          rsPoly = rsPoly.multiply(new Polynomial([1, gexp(i)], 0));
+        }
+
+        const rawPoly = new Polynomial(currentDc, rsPoly.length - 1);
+        const modPoly = rawPoly.mod(rsPoly);
+        const currentEc = [];
+        const modOffset = modPoly.length - ecCount;
+        for(let i=0;i<ecCount;i++){
+          const modIndex = i + modOffset;
+          currentEc.push(modIndex >= 0 ? modPoly.at(modIndex) : 0);
+        }
+
+        dcdata.push(currentDc);
+        ecdata.push(currentEc);
+      }
+
+      const data = [];
+      for(let i=0;i<maxDcCount;i++){
+        for(const dc of dcdata){
+          if(i < dc.length) data.push(dc[i]);
+        }
+      }
+      for(let i=0;i<maxEcCount;i++){
+        for(const ec of ecdata){
+          if(i < ec.length) data.push(ec[i]);
+        }
+      }
+      return data;
+    }
+    function createData(version, errorCorrection, bytes){
+      const buffer = new BitBuffer();
+      buffer.put(MODE_8BIT_BYTE, 4);
+      buffer.put(bytes.length, version < 10 ? 8 : 16);
+      for(const c of bytes) buffer.put(c, 8);
+
+      const blocks = rsBlocks(version, errorCorrection);
+      const bitLimit = blocks.reduce((sum, block)=>sum + block.dataCount * 8, 0);
+      if(buffer.length > bitLimit) throw new Error("QR overflow");
+
+      for(let i=0;i<Math.min(bitLimit - buffer.length, 4);i++) buffer.putBit(false);
+
+      const delimit = buffer.length % 8;
+      if(delimit){
+        for(let i=0;i<8 - delimit;i++) buffer.putBit(false);
+      }
+
+      const bytesToFill = (bitLimit - buffer.length) / 8;
+      for(let i=0;i<bytesToFill;i++){
+        buffer.put((i % 2) === 0 ? PAD0 : PAD1, 8);
+      }
+
+      return createBytes(buffer, blocks);
+    }
+    function mapData(modules, data, maskPattern){
+      let inc = -1;
+      let row = modules.length - 1;
+      let bitIndex = 7;
+      let byteIndex = 0;
+      const mask = maskFunc(maskPattern);
+
+      for(let col=modules.length - 1; col > 0; col -= 2){
+        if(col <= 6) col--;
+        while(true){
+          for(let c=0;c<2;c++){
+            const currentCol = col - c;
+            if(modules[row][currentCol] === null){
+              let dark = false;
+              if(byteIndex < data.length){
+                dark = (((data[byteIndex] >>> bitIndex) & 1) === 1);
+              }
+              if(mask(row, currentCol)) dark = !dark;
+              modules[row][currentCol] = dark;
+              bitIndex--;
+              if(bitIndex === -1){
+                byteIndex++;
+                bitIndex = 7;
+              }
+            }
+          }
+          row += inc;
+          if(row < 0 || modules.length <= row){
+            row -= inc;
+            inc = -inc;
+            break;
+          }
+        }
+      }
+    }
+    function cloneModules(modules){
+      return modules.map(row=>row.slice());
+    }
+    function lostPoint(modules){
+      const modulesCount = modules.length;
+      let lost = 0;
+
+      const container = new Array(modulesCount + 1).fill(0);
+      for(let row=0;row<modulesCount;row++){
+        let previousColor = modules[row][0];
+        let length = 0;
+        for(let col=0; col<modulesCount; col++){
+          if(modules[row][col] === previousColor){
+            length++;
+          }else{
+            if(length >= 5) container[length]++;
+            length = 1;
+            previousColor = modules[row][col];
+          }
+        }
+        if(length >= 5) container[length]++;
+      }
+      for(let col=0; col<modulesCount; col++){
+        let previousColor = modules[0][col];
+        let length = 0;
+        for(let row=0; row<modulesCount; row++){
+          if(modules[row][col] === previousColor){
+            length++;
+          }else{
+            if(length >= 5) container[length]++;
+            length = 1;
+            previousColor = modules[row][col];
+          }
+        }
+        if(length >= 5) container[length]++;
+      }
+      for(let i=5;i<container.length;i++) lost += container[i] * (i - 2);
+
+      for(let row=0; row<modulesCount - 1; row++){
+        for(let col=0; col<modulesCount - 1; col++){
+          const color = modules[row][col];
+          if(color === modules[row][col + 1] && color === modules[row + 1][col] && color === modules[row + 1][col + 1]) lost += 3;
+        }
+      }
+
+      for(let row=0; row<modulesCount; row++){
+        for(let col=0; col<modulesCount - 10; col++){
+          if(
+            !modules[row][col + 1] &&
+            modules[row][col + 4] &&
+            !modules[row][col + 5] &&
+            modules[row][col + 6] &&
+            !modules[row][col + 9] &&
+            (
+              (modules[row][col] && modules[row][col + 2] && modules[row][col + 3] && !modules[row][col + 7] && !modules[row][col + 8] && !modules[row][col + 10]) ||
+              (!modules[row][col] && !modules[row][col + 2] && !modules[row][col + 3] && modules[row][col + 7] && modules[row][col + 8] && modules[row][col + 10])
+            )
+          ){
+            lost += 40;
+          }
+        }
+      }
+      for(let col=0; col<modulesCount; col++){
+        for(let row=0; row<modulesCount - 10; row++){
+          if(
+            !modules[row + 1][col] &&
+            modules[row + 4][col] &&
+            !modules[row + 5][col] &&
+            modules[row + 6][col] &&
+            !modules[row + 9][col] &&
+            (
+              (modules[row][col] && modules[row + 2][col] && modules[row + 3][col] && !modules[row + 7][col] && !modules[row + 8][col] && !modules[row + 10][col]) ||
+              (!modules[row][col] && !modules[row + 2][col] && !modules[row + 3][col] && modules[row + 7][col] && modules[row + 8][col] && modules[row + 10][col])
+            )
+          ){
+            lost += 40;
+          }
+        }
+      }
+
+      let darkCount = 0;
+      for(let row=0; row<modulesCount; row++){
+        for(let col=0; col<modulesCount; col++){
+          if(modules[row][col]) darkCount++;
+        }
+      }
+      const percent = darkCount / (modulesCount * modulesCount);
+      const rating = Math.floor(Math.abs(percent * 100 - 50) / 5);
+      lost += rating * 10;
+
+      return lost;
+    }
+    function chooseVersion(byteLength, errorCorrection){
+      for(let version=1; version<=40; version++){
+        const blocks = rsBlocks(version, errorCorrection);
+        const capacity = blocks.reduce((sum, block)=>sum + block.dataCount * 8, 0);
+        const needed = 4 + (version < 10 ? 8 : 16) + byteLength * 8;
+        if(needed <= capacity) return version;
+      }
+      throw new Error("QR data too long");
+    }
+    function buildMatrix(version, errorCorrection, dataBytes, maskPattern, test){
+      const modulesCount = version * 4 + 17;
+      const modules = Array.from({length: modulesCount}, ()=>Array(modulesCount).fill(null));
+
+      setupPositionProbePattern(modules, 0, 0);
+      setupPositionProbePattern(modules, modulesCount - 7, 0);
+      setupPositionProbePattern(modules, 0, modulesCount - 7);
+      setupPositionAdjustPattern(modules, version);
+      setupTimingPattern(modules);
+      setupTypeInfo(modules, errorCorrection, maskPattern, test);
+      if(version >= 7) setupTypeNumber(modules, version, test);
+      mapData(modules, dataBytes, maskPattern);
+
+      return modules;
+    }
+    function makeMatrix(text, level){
+      const errorCorrection = ERROR_CORRECT_MAP[level] ?? ERROR_CORRECT_MAP.M;
+      const bytes = Array.from(new TextEncoder().encode(String(text || "")));
+      const version = chooseVersion(bytes.length, errorCorrection);
+      const dataBytes = createData(version, errorCorrection, bytes);
+
+      let bestMatrix = null;
+      let bestLost = Infinity;
+      for(let mask=0; mask<8; mask++){
+        const matrix = buildMatrix(version, errorCorrection, dataBytes, mask, false);
+        const lost = lostPoint(matrix);
+        if(lost < bestLost){
+          bestLost = lost;
+          bestMatrix = matrix;
+        }
+      }
+      return bestMatrix;
+    }
+    return { makeMatrix };
+  })();
+
+  function traceDrawQrMatrix(ctx, matrix, x, y, size){
+    ctx.save();
+    ctx.fillStyle = "#f7fbff";
+    traceFillRoundRect(ctx, x, y, size, size, 28);
+    const count = matrix.length;
+    const quiet = 4;
+    const module = Math.floor((size - 34) / (count + quiet * 2));
+    const content = module * (count + quiet * 2);
+    const ox = x + Math.floor((size - content) / 2);
+    const oy = y + Math.floor((size - content) / 2);
+    ctx.fillStyle = "#0b111d";
+    for(let row=0; row<count; row++){
+      for(let col=0; col<count; col++){
+        if(matrix[row][col]){
+          ctx.fillRect(ox + (col + quiet) * module, oy + (row + quiet) * module, module, module);
+        }
+      }
+    }
+    ctx.restore();
+  }
+
+  function traceDrawBadgeChip(ctx, label, x, y, w){
+    ctx.save();
+    ctx.fillStyle = "rgba(255,255,255,0.06)";
+    traceFillRoundRect(ctx, x, y, w, 42, 21);
+    ctx.strokeStyle = "rgba(255,255,255,0.10)";
+    ctx.lineWidth = 1.2;
+    traceStrokeRoundRect(ctx, x, y, w, 42, 21);
+    ctx.fillStyle = "rgba(233,243,255,0.78)";
+    ctx.font = "600 18px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
+    ctx.fillText(label, x + 18, y + 27);
+    ctx.restore();
+  }
+
+  
+  let lastShareArtifact = null;
+  let currentSharePageIndex = 0;
+
+  function traceArtifactBaseName(proof){
+    const id = String((proof && (proof.badge_id || proof.badge_key)) || "trace-badge").replace(/[^a-z0-9_-]+/gi, "-").slice(0, 24) || "trace-badge";
+    return "trace-share-" + id;
+  }
+
+  function traceArtifactFileName(proof, suffix){
+    const base = traceArtifactBaseName(proof);
+    return suffix ? (base + "-" + suffix + ".png") : (base + ".png");
+  }
+
+  function traceEscapeAttr(value){
+    return String(value == null ? "" : value)
+      .replace(/&/g, "&amp;")
+      .replace(/"/g, "&quot;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+  }
+
+  function traceBuildPageOneMeta(info){
+    const parts = [];
+    if(info.dateText) parts.push(info.dateText);
+    if(info.shortId) parts.push("Badge " + info.shortId);
+    return parts.join(" · ");
+  }
+
+  function traceShareLabelsForProof(proof){
+    const isAi = !!(proof && proof.origin && proof.origin.ai_flag);
+    return {
+      primaryLabel: isAi ? "AI FLAGGED" : "HUMAN VERIFIED",
+      secondaryLabel: isAi ? "AI-origin content" : "Human-made digital artwork",
+      footerLabel: isAi ? "Flagged in Trace" : "Verified in Trace"
+    };
+  }
+
+  function traceDrawArtworkFrame(ctx, x, y, w, h, previewImg){
+    ctx.save();
+    ctx.shadowColor = "rgba(0,0,0,0.34)";
+    ctx.shadowBlur = 40;
+    ctx.fillStyle = "rgba(255,255,255,0.045)";
+    traceFillRoundRect(ctx, x, y, w, h, 34);
+    ctx.restore();
+
+    ctx.strokeStyle = "rgba(255,255,255,0.10)";
+    ctx.lineWidth = 1.6;
+    traceStrokeRoundRect(ctx, x, y, w, h, 34);
+
+    const ix = x + 10;
+    const iy = y + 10;
+    const iw = w - 20;
+    const ih = h - 20;
+
+    if(previewImg){
+      ctx.save();
+      traceRoundRect(ctx, ix, iy, iw, ih, 26);
+      ctx.clip();
+      traceDrawImageCover(ctx, previewImg, ix, iy, iw, ih);
+      const shade = ctx.createLinearGradient(ix, iy, ix, iy + ih);
+      shade.addColorStop(0, "rgba(5,7,14,0.02)");
+      shade.addColorStop(0.58, "rgba(5,7,14,0.16)");
+      shade.addColorStop(1, "rgba(5,7,14,0.38)");
+      ctx.fillStyle = shade;
+      ctx.fillRect(ix, iy, iw, ih);
+      ctx.restore();
+      ctx.strokeStyle = "rgba(255,255,255,0.08)";
+      ctx.lineWidth = 1;
+      traceStrokeRoundRect(ctx, ix, iy, iw, ih, 26);
+    }else{
+      traceDrawPreviewPlaceholder(ctx, ix, iy, iw, ih);
+    }
+
+    ctx.save();
+    ctx.fillStyle = "rgba(7,11,22,0.42)";
+    traceFillRoundRect(ctx, x + 18, y + 18, 76, 24, 12);
+    ctx.strokeStyle = "rgba(255,255,255,0.10)";
+    ctx.lineWidth = 1;
+    traceStrokeRoundRect(ctx, x + 18, y + 18, 76, 24, 12);
+    ctx.fillStyle = "rgba(233,243,255,0.78)";
+    ctx.font = "700 11px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
+    ctx.textAlign = "left";
+    ctx.fillText("ARTWORK", x + 28, y + 34);
+    ctx.restore();
+  }
+
+  function traceDrawGlyphCard(ctx, x, y, size, glyphImg, kicker){
+    ctx.save();
+    ctx.shadowColor = "rgba(0,0,0,0.36)";
+    ctx.shadowBlur = 40;
+    ctx.fillStyle = "rgba(8,14,24,0.92)";
+    traceFillRoundRect(ctx, x, y, size, size, 30);
+    ctx.restore();
+
+    ctx.strokeStyle = "rgba(255,255,255,0.12)";
+    ctx.lineWidth = 1.4;
+    traceStrokeRoundRect(ctx, x, y, size, size, 30);
+
+    ctx.fillStyle = "rgba(233,243,255,0.58)";
+    ctx.font = "700 11px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
+    ctx.textAlign = "left";
+    ctx.fillText(String(kicker || "TRACE GLYPH").toUpperCase(), x + 18, y + 24);
+
+    const glyphInsetX = 28;
+    const glyphInsetTop = 42;
+    const glyphInsetBottom = 20;
+    const glyphRenderSize = Math.max(24, size - (glyphInsetX * 2));
+    const glyphRenderBox = Math.min(glyphRenderSize, Math.max(24, size - glyphInsetTop - glyphInsetBottom));
+
+    if(glyphImg){
+      traceDrawImageContain(ctx, glyphImg, x + glyphInsetX, y + glyphInsetTop, glyphRenderBox, glyphRenderBox);
+    }else{
+      ctx.save();
+      ctx.strokeStyle = "rgba(255,255,255,0.12)";
+      ctx.lineWidth = 1.4;
+      ctx.setLineDash([8,8]);
+      traceStrokeRoundRect(ctx, x + glyphInsetX, y + glyphInsetTop, glyphRenderBox, glyphRenderBox, 22);
+      ctx.setLineDash([]);
+      ctx.restore();
+    }
+  }
+
+  
+  function traceDrawPageOneCanvas(info, opts){
+    opts = opts || {};
+    const includeGlyphCard = opts.includeGlyphCard !== false;
+    const SIZE = 1080;
+    const canvas = document.createElement("canvas");
+    canvas.width = SIZE;
+    canvas.height = SIZE;
+    const ctx = canvas.getContext("2d");
+    ctx.textBaseline = "alphabetic";
+
+    const bg = ctx.createLinearGradient(0, 0, SIZE, SIZE);
+    bg.addColorStop(0, "#05070e");
+    bg.addColorStop(.46, "#09111f");
+    bg.addColorStop(1, "#05070e");
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, SIZE, SIZE);
+
+    const aura1 = ctx.createRadialGradient(170, 120, 12, 170, 120, 460);
+    aura1.addColorStop(0, "rgba(52,215,255,0.20)");
+    aura1.addColorStop(.58, "rgba(52,215,255,0.06)");
+    aura1.addColorStop(1, "rgba(52,215,255,0)");
+    ctx.fillStyle = aura1;
+    ctx.fillRect(0, 0, SIZE, SIZE);
+
+    const aura2 = ctx.createRadialGradient(920, 940, 30, 920, 940, 420);
+    aura2.addColorStop(0, "rgba(169,90,255,0.16)");
+    aura2.addColorStop(.58, "rgba(169,90,255,0.05)");
+    aura2.addColorStop(1, "rgba(169,90,255,0)");
+    ctx.fillStyle = aura2;
+    ctx.fillRect(0, 0, SIZE, SIZE);
+
+    ctx.strokeStyle = "rgba(255,255,255,0.08)";
+    ctx.lineWidth = 1;
+    traceStrokeRoundRect(ctx, 22, 22, SIZE - 44, SIZE - 44, 30);
+
+    ctx.textAlign = "center";
+    ctx.fillStyle = "rgba(233,243,255,0.56)";
+    ctx.font = "700 14px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
+    ctx.fillText("TRACE", SIZE / 2, 60);
+
+    ctx.fillStyle = "rgba(233,243,255,0.92)";
+    ctx.font = "900 40px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
+    ctx.fillText(info.primaryLabel, SIZE / 2, 104);
+
+    ctx.fillStyle = "rgba(233,243,255,0.68)";
+    ctx.font = "600 20px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
+    ctx.fillText(info.secondaryLabel + " · " + info.footerLabel, SIZE / 2, 140);
+
+    ctx.textAlign = "right";
+    ctx.fillStyle = "rgba(233,243,255,0.52)";
+    ctx.font = "700 12px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
+    ctx.fillText("PAGE 1 / 2", 1004, 64);
+
+    const artSize = 760;
+    const artX = Math.round((SIZE - artSize) / 2);
+    const artY = 190;
+    traceDrawArtworkFrame(ctx, artX, artY, artSize, artSize, info.previewImg);
+
+    const glyphSize = 138;
+    const glyphX = artX + artSize - Math.round(glyphSize * 0.55);
+    const glyphY = artY + artSize - Math.round(glyphSize * 0.38);
+    if(includeGlyphCard){
+      traceDrawGlyphCard(ctx, glyphX, glyphY, glyphSize, info.glyphImg, "GLYPH SIGNATURE");
+    }
+
+    const metaLine = traceBuildPageOneMeta(info);
+    if(metaLine){
+      ctx.textAlign = "left";
+      ctx.fillStyle = "rgba(233,243,255,0.84)";
+      ctx.font = "700 18px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace";
+      ctx.fillText(metaLine.toUpperCase(), artX + 6, artY + artSize + 38);
+    }
+
+    return canvas;
+  }
+
+
+  function traceDrawPageTwoCanvas(info){
+    const SIZE = 1080;
+    const canvas = document.createElement("canvas");
+    canvas.width = SIZE;
+    canvas.height = SIZE;
+    const ctx = canvas.getContext("2d");
+    ctx.textBaseline = "alphabetic";
+
+    const bg = ctx.createLinearGradient(0, 0, SIZE, SIZE);
+    bg.addColorStop(0, "#05070e");
+    bg.addColorStop(.44, "#08111d");
+    bg.addColorStop(1, "#05070e");
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, SIZE, SIZE);
+
+    const aura1 = ctx.createRadialGradient(220, 140, 10, 220, 140, 400);
+    aura1.addColorStop(0, "rgba(52,215,255,0.18)");
+    aura1.addColorStop(.55, "rgba(52,215,255,0.06)");
+    aura1.addColorStop(1, "rgba(52,215,255,0)");
+    ctx.fillStyle = aura1;
+    ctx.fillRect(0, 0, SIZE, SIZE);
+
+    const aura2 = ctx.createRadialGradient(900, 900, 20, 900, 900, 390);
+    aura2.addColorStop(0, "rgba(169,90,255,0.16)");
+    aura2.addColorStop(.58, "rgba(169,90,255,0.05)");
+    aura2.addColorStop(1, "rgba(169,90,255,0)");
+    ctx.fillStyle = aura2;
+    ctx.fillRect(0, 0, SIZE, SIZE);
+
+    ctx.strokeStyle = "rgba(255,255,255,0.08)";
+    ctx.lineWidth = 1;
+    traceStrokeRoundRect(ctx, 22, 22, SIZE - 44, SIZE - 44, 30);
+
+    ctx.textAlign = "center";
+    ctx.fillStyle = "rgba(233,243,255,0.56)";
+    ctx.font = "700 14px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
+    ctx.fillText("TRACE", SIZE / 2, 64);
+
+    ctx.fillStyle = "rgba(233,243,255,0.92)";
+    ctx.font = "900 40px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
+    ctx.fillText(info.primaryLabel, SIZE / 2, 112);
+
+    ctx.textAlign = "right";
+    ctx.fillStyle = "rgba(233,243,255,0.52)";
+    ctx.font = "700 12px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
+    ctx.fillText("PAGE 2 / 2", 1004, 64);
+
+    ctx.textAlign = "center";
+    ctx.fillStyle = "rgba(233,243,255,0.76)";
+    ctx.font = "700 20px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
+    ctx.fillText(info.verificationUrl ? "Scan to verify in Trace" : "Verification area reserved", SIZE / 2, 152);
+
+    ctx.fillStyle = "rgba(233,243,255,0.52)";
+    ctx.font = "500 17px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
+    ctx.fillText(info.verificationUrl ? "Open the public verification record." : "A public verification link can be attached later.", SIZE / 2, 184);
+
+    const qrX = 220;
+    const qrY = 214;
+    const qrSize = 640;
+
+    if(info.verificationUrl){
+      try{
+        const matrix = TraceQR.makeMatrix(info.verificationUrl, "M");
+        traceDrawQrMatrix(ctx, matrix, qrX, qrY, qrSize);
+      }catch(e){
+        traceQrPlaceholder(ctx, qrX, qrY, qrSize);
+      }
+    }else{
+      traceQrPlaceholder(ctx, qrX, qrY, qrSize);
+    }
+
+    ctx.fillStyle = "rgba(233,243,255,0.46)";
+    ctx.font = "700 12px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
+    ctx.fillText(info.verificationUrl ? "PUBLIC VERIFICATION QR" : "QR PLACEHOLDER", SIZE / 2, 882);
+
+    const leftX = 100;
+    const rightX = 560;
+    const cardY = 906;
+    const cardW = 420;
+    const cardH = 126;
+
+    ctx.save();
+    ctx.shadowColor = "rgba(0,0,0,0.28)";
+    ctx.shadowBlur = 28;
+    ctx.fillStyle = "rgba(255,255,255,0.045)";
+    traceFillRoundRect(ctx, leftX, cardY, cardW, cardH, 28);
+    traceFillRoundRect(ctx, rightX, cardY, cardW, cardH, 28);
+    ctx.restore();
+
+    ctx.strokeStyle = "rgba(255,255,255,0.10)";
+    ctx.lineWidth = 1.1;
+    traceStrokeRoundRect(ctx, leftX, cardY, cardW, cardH, 28);
+    traceStrokeRoundRect(ctx, rightX, cardY, cardW, cardH, 28);
+
+    ctx.fillStyle = "rgba(233,243,255,0.54)";
+    ctx.font = "700 12px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
+    ctx.textAlign = "left";
+    ctx.fillText("ARTWORK REFERENCE", leftX + 146, cardY + 30);
+
+    if(info.previewImg){
+      ctx.save();
+      ctx.fillStyle = "rgba(255,255,255,0.045)";
+      traceFillRoundRect(ctx, leftX + 18, cardY + 14, 102, 102, 20);
+      ctx.restore();
+      ctx.save();
+      traceRoundRect(ctx, leftX + 24, cardY + 20, 90, 90, 18);
+      ctx.clip();
+      traceDrawImageCover(ctx, info.previewImg, leftX + 24, cardY + 20, 90, 90);
+      ctx.restore();
+      ctx.strokeStyle = "rgba(255,255,255,0.10)";
+      ctx.lineWidth = 1;
+      traceStrokeRoundRect(ctx, leftX + 24, cardY + 20, 90, 90, 18);
+    }else{
+      traceDrawPreviewPlaceholder(ctx, leftX + 24, cardY + 20, 90, 90);
+    }
+
+    ctx.fillStyle = "rgba(233,243,255,0.88)";
+    ctx.font = "700 20px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
+    ctx.fillText("Artwork linked to this badge", leftX + 146, cardY + 58);
+
+    ctx.fillStyle = "rgba(233,243,255,0.52)";
+    ctx.font = "600 14px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
+    ctx.fillText(info.dateText || "Trace session", leftX + 146, cardY + 86);
+
+    ctx.fillStyle = "rgba(233,243,255,0.54)";
+    ctx.font = "700 12px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
+    ctx.fillText("TRACE STATUS", rightX + 24, cardY + 30);
+
+    ctx.fillStyle = "rgba(233,243,255,0.90)";
+    ctx.font = "800 24px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
+    ctx.fillText(info.footerLabel, rightX + 24, cardY + 58);
+
+    ctx.fillStyle = "rgba(233,243,255,0.72)";
+    ctx.font = "600 18px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
+    ctx.fillText(info.secondaryLabel, rightX + 24, cardY + 84);
+
+    if(info.badgeId){
+      ctx.fillStyle = "rgba(233,243,255,0.38)";
+      ctx.font = "600 12px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace";
+      ctx.fillText("ID " + info.badgeId.slice(0, 26).toUpperCase(), rightX + 24, cardY + 108);
+    }
+
+    return canvas;
+  }
+
+
+  
+  function traceBuildLivePreviewPage(info){
+    const live = document.querySelector("#share_modal_live");
+    if(!live) return;
+    live.innerHTML = `
+      <div class="shareLiveCard shareLivePngMirrorCard">
+        <img class="shareLivePngMirror" src="${traceEscapeAttr(info.pageOnePreviewUrl || info.pageOneUrl || "")}" alt="Share badge preview">
+        <div class="shareLiveGlyphOverlay shareLiveGlyphPanel">
+          <div class="shareLivePanelKicker">Signature glyph</div>
+          <div class="shareLiveGlyphWrap" id="share_live_glyph_wrap"></div>
+        </div>
+      </div>
+    `;
+
+    const glyphWrap = live.querySelector("#share_live_glyph_wrap");
+    if(glyphWrap){
+      glyphWrap.innerHTML = info.liveGlyphSvg || info.shareGlyphSvg || info.heroSvg || "";
+      const svg = glyphWrap.querySelector("svg.glyph3d");
+      if(svg){
+        try{ startGlyphMotion(svg); }catch(e){}
+      }
+    }
+    traceUpdateShareModalViewportFit();
+  }
+
+  function traceUpdateShareModalViewportFit(){
+    const modal = document.querySelector("#share_modal");
+    const card = modal ? modal.querySelector(".imgModalCard") : null;
+    const top = card ? card.querySelector(".imgModalTop") : null;
+    const body = card ? card.querySelector(".imgModalBody") : null;
+    if(!modal || !card) return;
+
+    const modalStyle = getComputedStyle(modal);
+    const bodyStyle = body ? getComputedStyle(body) : null;
+    const cardRect = card.getBoundingClientRect();
+    const topH = top ? top.getBoundingClientRect().height : 0;
+
+    const padX = (parseFloat(modalStyle.paddingLeft) || 0) + (parseFloat(modalStyle.paddingRight) || 0);
+    const padY = (parseFloat(modalStyle.paddingTop) || 0) + (parseFloat(modalStyle.paddingBottom) || 0);
+    const bodyPadX = bodyStyle ? ((parseFloat(bodyStyle.paddingLeft) || 0) + (parseFloat(bodyStyle.paddingRight) || 0)) : 0;
+    const bodyPadY = bodyStyle ? ((parseFloat(bodyStyle.paddingTop) || 0) + (parseFloat(bodyStyle.paddingBottom) || 0)) : 0;
+
+    const availableWidth = Math.max(220, Math.min(window.innerWidth - padX - bodyPadX - 28, cardRect.width - bodyPadX - 12));
+    const availableHeight = Math.max(220, window.innerHeight - padY - topH - bodyPadY - 28);
+    const stageSize = Math.floor(Math.max(220, Math.min(availableWidth, availableHeight, 400)));
+
+    modal.style.setProperty("--share-stage-size", stageSize + "px");
+  }
+
+
+  function setShareButtonState(){
+    const btn = document.querySelector("#btn_share_badge");
+    if(!btn) return;
+    const enabled = !!(lastProof && lastProof.glyph_seed);
+    btn.disabled = !enabled;
+    btn.style.opacity = enabled ? "1" : ".55";
+    btn.style.cursor = enabled ? "pointer" : "not-allowed";
+  }
+
+  function clearShareArtifactState(){
+    lastShareArtifactDataUrl = null;
+    lastShareArtifactName = "trace-share-badge.png";
+    lastShareArtifact = null;
+    currentSharePageIndex = 0;
+    const img = document.querySelector("#share_modal_img");
+    const live = document.querySelector("#share_modal_live");
+    const meta = document.querySelector("#share_modal_meta");
+    const pageCount = document.querySelector("#share_modal_pagecount");
+    if(img){ img.src = ""; img.classList.add("hide"); }
+    if(live){ live.innerHTML = ""; live.classList.remove("hide"); }
+    if(meta) meta.textContent = "Page 1 of 2 · Artwork + glyph · 1080 × 1080 PNG";
+    if(pageCount) pageCount.textContent = "1 / 2";
+    document.querySelector("#btn_share_prev")?.setAttribute("disabled", "disabled");
+    document.querySelector("#btn_share_next")?.setAttribute("disabled", "disabled");
+    traceUpdateShareModalViewportFit();
+    setShareButtonState();
+  }
+
+  function renderShareModalPage(index){
+    if(!lastShareArtifact || !Array.isArray(lastShareArtifact.pages) || !lastShareArtifact.pages.length) return;
+    currentSharePageIndex = Math.max(0, Math.min(index|0, lastShareArtifact.pages.length - 1));
+    const page = lastShareArtifact.pages[currentSharePageIndex];
+    const img = document.querySelector("#share_modal_img");
+    const live = document.querySelector("#share_modal_live");
+    const meta = document.querySelector("#share_modal_meta");
+    const pageCount = document.querySelector("#share_modal_pagecount");
+    const prevBtn = document.querySelector("#btn_share_prev");
+    const nextBtn = document.querySelector("#btn_share_next");
+
+    if(meta) meta.textContent = page.meta || "1080 × 1080 PNG";
+    if(pageCount) pageCount.textContent = (currentSharePageIndex + 1) + " / " + lastShareArtifact.pages.length;
+    if(prevBtn) prevBtn.disabled = currentSharePageIndex === 0;
+    if(nextBtn) nextBtn.disabled = currentSharePageIndex >= lastShareArtifact.pages.length - 1;
+
+    if(page.livePreview){
+      if(img){ img.classList.add("hide"); }
+      if(live){
+        live.classList.remove("hide");
+        if(!page.__liveBuilt){
+          traceBuildLivePreviewPage(page.livePreview);
+          page.__liveBuilt = true;
+        }
+      }
+    }else{
+      if(live){ live.classList.add("hide"); }
+      if(img){
+        img.src = page.dataUrl || "";
+        img.classList.remove("hide");
+      }
+    }
+
+    traceUpdateShareModalViewportFit();
+    lastShareArtifactDataUrl = page.dataUrl || null;
+    lastShareArtifactName = page.filename || "trace-share-badge.png";
+  }
+
+  function openShareModal(artifact){
+    if(!artifact || !artifact.pages || !artifact.pages.length) return;
+    lastShareArtifact = artifact;
+    currentSharePageIndex = 0;
+    const modal = document.querySelector("#share_modal");
+    if(modal) modal.classList.remove("hide");
+    traceUpdateShareModalViewportFit();
+    renderShareModalPage(0);
+  }
+
+  function closeShareModal(){
+    const modal = document.querySelector("#share_modal");
+    if(modal) modal.classList.add("hide");
+  }
+
+  async function renderShareArtifact(proof){
+    const p = proof || lastProof;
+    if(!p || !p.glyph_seed) throw new Error("Create en badge först.");
+
+    const previewSource = await traceResolvePreviewSource(p).catch(()=> "");
+    const verificationUrl = traceResolveVerificationUrl(p);
+    const badgeId = String(p.badge_id || p.badge_key || "").replace(/^sha256:/, "");
+    const shortId = badgeId ? badgeId.slice(0, 12).toUpperCase() : "TRACE";
+    const dateText = traceFormatDate(p.ts) || traceFormatDate(Date.now());
+    const glyphStyle = p.glyph_style || (typeof window.__traceGetGlyphStyle === "function" ? window.__traceGetGlyphStyle() : "orbit_ring");
+    const heroSvg = makeHelixSvg(
+      p.glyph_seed,
+      !!(p.origin && p.origin.ai_flag),
+      (p && p.origin && typeof p.origin.score_0_1 === "number") ? p.origin.score_0_1 : NaN,
+      previewSource || p.img_data_url || p.wm_data_url || p.thumb_data_url || null,
+      {
+        mode: "avatar",
+        style: glyphStyle,
+        meta: { payloadLen: (p.payload_text || "").length, hasImg: !!(p.img_hash || previewSource) }
+      }
+    );
+    const originalLiveGlyph = traceFindLiveGlyphSvg(p);
+    const liveGlyphSvg = originalLiveGlyph
+      ? originalLiveGlyph.outerHTML
+      : makeHelixSvg(
+          p.glyph_seed,
+          !!(p.origin && p.origin.ai_flag),
+          (p && p.origin && typeof p.origin.score_0_1 === "number") ? p.origin.score_0_1 : NaN,
+          (p.thumb_data_url || p.img_data_url) || previewSource || p.wm_data_url || null,
+          {
+            mode: "badge",
+            style: glyphStyle,
+            meta: { payloadLen: (p.payload_text || "").length, hasImg: !!(p.img_hash || previewSource) }
+          }
+        );
+    const shareGlyphSvg = traceBuildGlyphSnapshotSvg(p, glyphStyle);
+
+    const [glyphImg, previewImg] = await Promise.all([
+      traceSvgToImage(shareGlyphSvg).catch(()=>null),
+      previewSource ? traceLoadImage(previewSource).catch(()=>null) : Promise.resolve(null)
+    ]);
+
+    const shareLabels = traceShareLabelsForProof(p);
+
+    const info = {
+      proof: p,
+      previewSource,
+      verificationUrl,
+      previewImg,
+      glyphImg,
+      heroSvg,
+      liveGlyphSvg,
+      shareGlyphSvg,
+      badgeId,
+      shortId,
+      dateText,
+      primaryLabel: shareLabels.primaryLabel,
+      secondaryLabel: shareLabels.secondaryLabel,
+      footerLabel: shareLabels.footerLabel
+    };
+
+    const pageOneCanvas = traceDrawPageOneCanvas(info, { includeGlyphCard: true });
+    const pageOnePreviewCanvas = traceDrawPageOneCanvas(info, { includeGlyphCard: false });
+    const pageTwoCanvas = traceDrawPageTwoCanvas(info);
+
+    let pageOneUrl = "";
+    let pageOnePreviewUrl = "";
+    let pageTwoUrl = "";
+    try{
+      pageOneUrl = pageOneCanvas.toDataURL("image/png");
+      pageOnePreviewUrl = pageOnePreviewCanvas.toDataURL("image/png");
+      pageTwoUrl = pageTwoCanvas.toDataURL("image/png");
+      info.pageOneUrl = pageOneUrl;
+      info.pageOnePreviewUrl = pageOnePreviewUrl;
+    }catch(err){
+      throw new Error("PNG export failed");
+    }
+
+    return {
+      proof: p,
+      pages: [
+        {
+          key: "artwork",
+          dataUrl: pageOneUrl,
+          filename: traceArtifactFileName(p, "art"),
+          meta: "Page 1 of 2 · Artwork + glyph · 1080 × 1080 PNG",
+          livePreview: info
+        },
+        {
+          key: "verify",
+          dataUrl: pageTwoUrl,
+          filename: traceArtifactFileName(p, verificationUrl ? "verify" : "verify-pending"),
+          meta: verificationUrl ? "Page 2 of 2 · Verification QR · 1080 × 1080 PNG" : "Page 2 of 2 · QR pending · 1080 × 1080 PNG"
+        }
+      ]
+    };
+  }
+
+  function downloadShareArtifactPNG(dataUrl, filename){
+    const page = lastShareArtifact && lastShareArtifact.pages && lastShareArtifact.pages[currentSharePageIndex];
+    const url = dataUrl || (page && page.dataUrl) || lastShareArtifactDataUrl;
+    const name = filename || (page && page.filename) || lastShareArtifactName || "trace-share-badge.png";
+    if(!url) return warn("Create and render a share badge först.");
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+
+  window.setShareButtonState = setShareButtonState;
+  window.renderShareArtifact = renderShareArtifact;
+  window.downloadShareArtifactPNG = downloadShareArtifactPNG;
+  window.__clearShareArtifactState = clearShareArtifactState;
+
+  document.addEventListener("DOMContentLoaded", ()=>{
+    clearShareArtifactState();
+
+    document.querySelector("#btn_share_badge")?.addEventListener("click", async ()=>{
+      if(!lastProof || !lastProof.glyph_seed) return warn("Create en badge först.");
+      try{
+        const artifact = await renderShareArtifact(lastProof);
+        openShareModal(artifact);
+      }catch(e){
+        console.error(e);
+        warn("Kunde inte skapa share artifact.");
+      }
+    });
+
+    document.querySelector("#btn_share_prev")?.addEventListener("click", ()=>{
+      renderShareModalPage(currentSharePageIndex - 1);
+    });
+
+    document.querySelector("#btn_share_next")?.addEventListener("click", ()=>{
+      renderShareModalPage(currentSharePageIndex + 1);
+    });
+
+    document.querySelector("#btn_share_download")?.addEventListener("click", ()=>{
+      downloadShareArtifactPNG();
+    });
+    document.querySelector("#btn_share_close")?.addEventListener("click", closeShareModal);
+    document.querySelector("#share_modal")?.addEventListener("click", (e)=>{
+      if(e.target && e.target.id === "share_modal") closeShareModal();
+    });
+    window.addEventListener("resize", traceUpdateShareModalViewportFit);
+    window.addEventListener("orientationchange", traceUpdateShareModalViewportFit);
+    document.addEventListener("keydown", (e)=>{
+      if(e.key === "Escape") closeShareModal();
+      if(document.querySelector("#share_modal")?.classList.contains("hide")) return;
+      if(e.key === "ArrowRight") renderShareModalPage(currentSharePageIndex + 1);
+      if(e.key === "ArrowLeft") renderShareModalPage(currentSharePageIndex - 1);
+    });
+  });
+
+})();
+</script>
 
 
 <script>
@@ -3908,5 +6544,1853 @@ document.addEventListener("DOMContentLoaded",()=>{
   window.__wireWinstonProxyAdmin = __wireWinstonProxyAdmin;
 })();
 </script>
-</body>
-</html>
+
+<style id="trace-share-preview-animated-overlay-fix">
+  .shareLivePngMirrorCard{
+    position:relative;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    border-radius:clamp(18px, calc(var(--share-stage-size, 360px) * .055), 28px);
+    background:
+      radial-gradient(60% 52% at 14% 12%, rgba(52,215,255,.18), transparent 70%),
+      radial-gradient(54% 48% at 84% 82%, rgba(169,90,255,.14), transparent 72%),
+      linear-gradient(180deg, #05070e, #09111f 52%, #05070e);
+  }
+  .shareLivePngMirror{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    display:block;
+    user-select:none;
+    -webkit-user-drag:none;
+    pointer-events:none;
+  }
+  .shareLiveGlyphOverlay{
+    position:absolute;
+    right:13.2%;
+    bottom:18.2%;
+    width:clamp(76px, calc(var(--share-stage-size, 360px) * .18), 98px);
+    aspect-ratio:1 / 1;
+    display:flex;
+    flex-direction:column;
+    gap:3px;
+    padding:clamp(7px, calc(var(--share-stage-size, 360px) * .02), 10px);
+    border-radius:clamp(14px, calc(var(--share-stage-size, 360px) * .04), 18px);
+    border:1px solid rgba(255,255,255,.12);
+    background:rgba(8,14,24,.90);
+    box-shadow:0 14px 32px rgba(0,0,0,.30);
+    backdrop-filter: blur(12px);
+    z-index:3;
+    pointer-events:none;
+  }
+  .shareLiveGlyphOverlay .shareLivePanelKicker{
+    font-size:clamp(5px, calc(var(--share-stage-size, 360px) * .013), 6px);
+    letter-spacing:.04em;
+    color:rgba(233,243,255,.70);
+    text-align:center;
+    white-space:nowrap;
+    line-height:1.1;
+    text-transform:none;
+  }
+  .shareLiveGlyphOverlay .shareLiveGlyphWrap{
+    flex:1 1 auto;
+    min-height:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+  }
+  .shareLiveGlyphOverlay .shareLiveGlyphWrap .glyph3d{
+    width:80%;
+    height:80%;
+    max-width:none;
+    max-height:none;
+    display:block;
+  }
+</style>
+
+
+
+<script id="trace-consumer-result-session-gate">
+/* Gate consumer result rendering so stale engine/lastProof data never appears before a new app badge is created. */
+(function(){
+  window.__traceConsumerBadgeCreated = false;
+  window.__traceConsumerBadgeCreating = false;
+  window.__traceConsumerSetBadgeSession = function(state){
+    window.__traceConsumerBadgeCreated = !!state;
+    window.__traceConsumerBadgeCreating = !!state;
+  };
+})();
+</script>
+
+<script>
+/* === TRACE consumer UI bridge (keeps existing engine intact) === */
+(function(){
+  const $ = (id)=>document.getElementById(id);
+  const qs = (sel)=>document.querySelector(sel);
+
+  function click(id){ const el=$(id); if(el && !el.disabled) el.click(); }
+  function setValue(id, value){
+    const el=$(id); if(!el) return;
+    if(el.value === value) return;
+    el.value = value || "";
+    el.dispatchEvent(new Event("input",{bubbles:true}));
+    el.dispatchEvent(new Event("change",{bubbles:true}));
+  }
+  function mirrorFileToEngine(file){
+    const old=$("file_img");
+    if(!old || !file) return;
+    try{
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      old.files = dt.files;
+      old.dispatchEvent(new Event("change",{bubbles:true}));
+    }catch(e){
+      const status=$("app_status");
+      if(status) status.textContent="Artwork selected. Browser blocked file mirroring, try the original upload in Advanced.";
+    }
+  }
+  function humanOriginText(raw){
+    const s=(raw||"").toString();
+    if(!s || /not analyzed/i.test(s)) return "Not run";
+    if(/fallback|blocked|cors|proxy|failed|error|offline/i.test(s)) return "Local fallback";
+    if(/human|verified|ready|ok|scan/i.test(s)) return "Scanned";
+    return s.replace(/\s+/g," ").slice(0,42);
+  }
+  function syncEngineToApp(){
+    const vault=$("vault_state")?.innerText?.trim() || "—";
+    const creator=$("creator_id")?.innerText?.trim() || "—";
+    const origin=$("origin_out")?.innerText?.trim() || "Not run";
+    const badgeWrap=$("badge_wrap");
+    const appBadge=$("app_badge_result");
+    const hasBadge=!!(window.__traceConsumerBadgeCreated && badgeWrap && badgeWrap.innerHTML.trim());
+    if($("app_vault_state")) $("app_vault_state").textContent=vault;
+    if($("app_creator_state")) $("app_creator_state").textContent=creator==="—" ? "Pending" : "Ready";
+    if($("app_origin_raw")) $("app_origin_raw").textContent=origin.slice(0,90);
+    if($("app_origin_status")) $("app_origin_status").textContent=humanOriginText(origin);
+    if($("app_badge_state")) $("app_badge_state").textContent=hasBadge ? "Created" : "Not created";
+    if($("app_result_pill")){
+      $("app_result_pill").textContent=hasBadge ? "Ready" : "Waiting";
+      $("app_result_pill").className="status-pill " + (hasBadge ? "ready" : "idle");
+    }
+    if($("app_result_title")) $("app_result_title").textContent=hasBadge ? "Badge ready" : "Your badge will appear here";
+    if($("app_result_sub")) $("app_result_sub").textContent=hasBadge ? "Trace glyph and verification proof are ready to share." : "Upload artwork, then create a badge.";
+    if(appBadge && badgeWrap){
+      if(hasBadge){
+        appBadge.innerHTML = badgeWrap.innerHTML;
+        appBadge.querySelectorAll("[id]").forEach(n=>{ if(!n.closest("svg")) n.removeAttribute("id"); });
+      }else if(!appBadge.querySelector(".empty-glyph")){
+        appBadge.innerHTML='<div class="empty-glyph">TRACE</div>';
+      }
+    }
+    const shareOld=$("btn_share_badge");
+    const canShare=hasBadge && shareOld && !shareOld.disabled;
+    if($("app_share_badge")) $("app_share_badge").disabled=!canShare;
+    if($("app_download_png")) $("app_download_png").disabled=!canShare;
+  }
+  function updateProfileVisibility(){
+    const vaultMp=$("vault_mp");
+    const block=$("app_profile_block");
+    const status=$("vault_mp_status")?.innerText || "";
+    const ready = vaultMp && vaultMp.value.trim().length>=20 && !/required/i.test(status);
+    if(block) block.style.display = ready ? "none" : "grid";
+  }
+  function setStatus(text, kind){
+    const el=$("app_status"); if(!el) return;
+    el.textContent=text;
+    el.dataset.kind=kind||"";
+  }
+  function wire(){
+    // Public landing shortcuts reuse existing auth mode buttons
+    $("trace_nav_login")?.addEventListener("click",()=>click("auth_mode_login"));
+    $("trace_hero_login")?.addEventListener("click",()=>click("auth_mode_login"));
+    $("trace_nav_signup")?.addEventListener("click",()=>click("auth_mode_signup"));
+    $("trace_hero_signup")?.addEventListener("click",()=>click("auth_mode_signup"));
+    $("trace_admin_1996")?.addEventListener("click",()=>{
+      try{ localStorage.setItem("trace_admin","true"); }catch(e){}
+      setValue("auth_user","1996");
+      if(!$("auth_pass")?.value) setValue("auth_pass","1996");
+      click("auth_btn");
+      setTimeout(()=>document.body.classList.add("trace-admin"),400);
+    });
+
+    // Nav delegates to existing tabs, except advanced
+    document.querySelectorAll("[data-trace-tab]").forEach(btn=>{
+      btn.addEventListener("click",()=>{
+        document.querySelectorAll("[data-trace-tab]").forEach(b=>b.classList.remove("active"));
+        btn.classList.add("active");
+        const tab=btn.dataset.traceTab;
+        if(tab==="use") document.body.classList.remove("trace-engine-visible");
+        if(tab==="verify"){ document.body.classList.add("trace-engine-visible"); click("tab_verify"); }
+        if(tab==="profile"){ document.body.classList.add("trace-engine-visible"); click("tab_profile"); }
+      });
+    });
+    $("trace_show_dev")?.addEventListener("click",()=>document.body.classList.toggle("trace-engine-visible"));
+    $("app_open_engine")?.addEventListener("click",()=>document.body.classList.add("trace-engine-visible"));
+    $("app_hide_engine")?.addEventListener("click",()=>document.body.classList.remove("trace-engine-visible"));
+
+    // App inputs mirror to existing engine inputs
+    $("app_file_img")?.addEventListener("change", (e)=>{
+      const file=e.target.files && e.target.files[0];
+      if(!file) return;
+      $("app_file_name").textContent=file.name;
+      mirrorFileToEngine(file);
+      const r=new FileReader();
+      r.onload=()=>{ const prev=$("app_image_preview"); if(prev){ prev.classList.remove("is-empty"); prev.textContent=""; prev.style.backgroundImage=`url("${r.result}")`; } };
+      r.readAsDataURL(file);
+      setStatus("Artwork added. Add a badge mindprint, then create badge.");
+      syncEngineToApp();
+    });
+    $("app_profile_mp")?.addEventListener("input",e=>setValue("vault_mp",e.target.value));
+    $("app_badge_mp")?.addEventListener("input",e=>setValue("mp_badge",e.target.value));
+    $("app_payload_text")?.addEventListener("input",e=>setValue("payload_text",e.target.value));
+
+    $("app_create_badge")?.addEventListener("click",()=>{
+      // Keep engine as source of truth; only prepare visible inputs.
+      setValue("vault_mp", $("app_profile_mp")?.value || $("vault_mp")?.value || "");
+      setValue("mp_badge", $("app_badge_mp")?.value || $("mp_badge")?.value || "");
+      setValue("payload_text", $("app_payload_text")?.value || $("payload_text")?.value || "");
+      const pass=$("auth_pass")?.value || $("vault_pass")?.value || "";
+      if(pass && $("vault_pass") && /locked/i.test($("vault_state")?.innerText||"")){
+        setValue("vault_pass", pass);
+        click("btn_unlock");
+      }
+      window.__traceConsumerBadgeCreating = true;
+      window.__traceConsumerBadgeCreated = false;
+      try{ const bw=document.getElementById("badge_wrap"); if(bw) bw.innerHTML=""; }catch(e){}
+      try{ window.__traceCurrentCreateStartedAt = Date.now(); }catch(e){}
+      setStatus("Creating badge… running Trace engine.");
+      setTimeout(()=>setStatus("Running origin scan and generating glyph…"),350);
+      setTimeout(()=>click("btn_analyze"),650);
+      setTimeout(()=>{ syncEngineToApp(); setStatus("Still working…"); },1800);
+      setTimeout(syncEngineToApp,3200);
+    });
+    $("app_share_badge")?.addEventListener("click",()=>click("btn_share_badge"));
+    $("app_download_png")?.addEventListener("click",()=>click("btn_share_badge"));
+    $("app_new_badge")?.addEventListener("click",()=>{
+      // Use existing reset button conservatively, then clear only consumer UI fields for next badge.
+      click("btn_reset");
+      ["app_file_img","app_badge_mp","app_payload_text"].forEach(id=>{ const el=$(id); if(el) el.value=""; });
+      if($("app_file_name")) $("app_file_name").textContent="No image selected";
+      const prev=$("app_image_preview"); if(prev){ prev.classList.add("is-empty"); prev.textContent="Artwork preview"; prev.style.backgroundImage=""; }
+      window.__traceConsumerBadgeCreated = false;
+      window.__traceConsumerBadgeCreating = false;
+      if($("app_badge_result")) $("app_badge_result").innerHTML='<div class="empty-glyph">TRACE</div>';
+      setStatus("Ready for a new artwork.");
+      setTimeout(()=>{ updateProfileVisibility(); syncEngineToApp(); },300);
+    });
+
+    // Observers keep app result synced without touching engine state
+    ["badge_wrap","origin_out","vault_state","creator_id","vault_mp_status","btn_share_badge"].forEach(id=>{
+      const el=$(id);
+      if(el) new MutationObserver(()=>{syncEngineToApp(); updateProfileVisibility();}).observe(el,{childList:true,subtree:true,attributes:true,characterData:true});
+    });
+    ["vault_mp","mp_badge","payload_text"].forEach(id=>{
+      const el=$(id); if(el) el.addEventListener("input",()=>{syncEngineToApp(); updateProfileVisibility();});
+    });
+
+    // First sync after existing auth/engine scripts settle
+    setTimeout(()=>{ 
+      if($("vault_mp")?.value) $("app_profile_mp").value=$("vault_mp").value;
+      if($("mp_badge")?.value) $("app_badge_mp").value=$("mp_badge").value;
+      if($("payload_text")?.value) $("app_payload_text").value=$("payload_text").value;
+      updateProfileVisibility(); syncEngineToApp(); 
+    },800);
+    setInterval(syncEngineToApp,2000);
+  }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",wire);
+  else wire();
+})();
+</script>
+
+
+<style id="trace-consumer-app-fix-v2">
+/* TRACE consumer shell fix: keep app shell visible; old engine only in Advanced */
+body:not(.trace-engine-visible) .wrap > .topbar,
+body:not(.trace-engine-visible) .wrap > .panel{display:none!important}
+body:not(.trace-engine-visible) #trace_app_shell{display:block!important}
+#trace_app_shell .app-main.app-view{display:none}
+#trace_app_shell .app-main.app-view.active{display:grid}
+.app-simple-card{background:rgba(255,255,255,.065);border:1px solid rgba(255,255,255,.10);border-radius:26px;padding:20px;box-shadow:0 18px 60px rgba(0,0,0,.18)}
+.app-simple-card h1,.app-simple-card h2{margin:0 0 8px}
+.app-simple-card p{margin:0 0 14px;color:var(--muted)}
+.app-simple-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.app-simple-actions button{border:0;border-radius:14px;padding:12px 14px;background:rgba(255,255,255,.09);color:var(--text);font-weight:850;cursor:pointer}
+.app-simple-actions button.primary{background:linear-gradient(135deg,var(--blue),var(--green));color:#021016}
+.app-view-placeholder{min-height:280px;display:grid;place-items:center;text-align:center;color:var(--muted)}
+.profile-clean-list{display:grid;gap:10px;margin-top:12px}
+.profile-clean-list div{display:flex;justify-content:space-between;gap:16px;padding:12px;border-radius:16px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08)}
+.profile-clean-list span{color:var(--muted2)}
+.profile-clean-list b{font-family:var(--mono);font-size:12px;word-break:break-all;text-align:right}
+@media(max-width:760px){
+  #trace_app_shell .app-main.app-view.active{display:block}
+  .app-simple-actions{display:grid}
+}
+</style>
+
+<script id="trace-consumer-app-fix-v2">
+/* TRACE consumer app fix: creates a real app layer without touching engine internals */
+(function(){
+  const $ = (id)=>document.getElementById(id);
+  const sleep = (ms)=>new Promise(r=>setTimeout(r,ms));
+
+  function setValue(id, value){
+    const el=$(id); if(!el) return;
+    el.value = value || "";
+    el.dispatchEvent(new Event("input",{bubbles:true}));
+    el.dispatchEvent(new Event("change",{bubbles:true}));
+  }
+
+  function safeClick(id){
+    const el=$(id);
+    if(el) el.dispatchEvent(new MouseEvent("click",{bubbles:true,cancelable:true,view:window}));
+  }
+
+  function appStatus(msg, kind){
+    const el=$("app_status");
+    if(el){ el.textContent=msg; el.dataset.kind=kind||""; }
+  }
+
+  function ensureAppViews(){
+    const shell=$("trace_app_shell");
+    if(!shell) return;
+    const createMain=shell.querySelector("main.app-main");
+    if(createMain && !createMain.id){
+      createMain.id="app_create_view";
+      createMain.classList.add("app-view","active");
+    }
+
+    if(!$("app_verify_view")){
+      const verify=document.createElement("main");
+      verify.id="app_verify_view";
+      verify.className="app-main app-view";
+      verify.innerHTML=`
+        <section class="app-flow">
+          <div class="app-simple-card">
+            <div class="eyebrow">Verify</div>
+            <h1>Check a Trace badge</h1>
+            <p>Load your latest badge or paste proof JSON. Technical verification details stay in Advanced.</p>
+            <textarea id="app_verify_paste" rows="7" placeholder="Paste proof JSON here"></textarea>
+            <div class="app-simple-actions">
+              <button type="button" class="primary" id="app_verify_latest">Load latest</button>
+              <button type="button" id="app_verify_run">Verify</button>
+              <button type="button" id="app_verify_clear">Clear</button>
+            </div>
+          </div>
+        </section>
+        <aside class="result-panel">
+          <div class="result-card">
+            <span class="status-pill idle" id="app_verify_pill">Waiting</span>
+            <h2>Verification result</h2>
+            <div id="app_verify_result" class="app-view-placeholder">No proof loaded yet.</div>
+          </div>
+        </aside>`;
+      shell.appendChild(verify);
+    }
+
+    if(!$("app_profile_view")){
+      const profile=document.createElement("main");
+      profile.id="app_profile_view";
+      profile.className="app-main app-view";
+      profile.innerHTML=`
+        <section class="app-flow">
+          <div class="app-simple-card">
+            <div class="eyebrow">Profile</div>
+            <h1>Your Trace profile</h1>
+            <p>Your creator identity and profile mindprint run quietly in the background.</p>
+            <div class="profile-clean-list">
+              <div><span>Creator identity</span><b id="app_profile_creator">Pending</b></div>
+              <div><span>Profile mindprint</span><b id="app_profile_mindprint">Pending</b></div>
+              <div><span>Vault</span><b id="app_profile_vault">Automatic</b></div>
+            </div>
+          </div>
+        </section>
+        <aside class="result-panel">
+          <div class="result-card">
+            <span class="status-pill ready">Ready</span>
+            <h2>Private engine</h2>
+            <p>The keys and signing system are hidden from normal use. Open Advanced only when needed.</p>
+            <div class="result-actions">
+              <button type="button" id="app_profile_show_engine">Open Advanced</button>
+            </div>
+          </div>
+        </aside>`;
+      shell.appendChild(profile);
+    }
+  }
+
+  function showView(view){
+    ensureAppViews();
+    document.body.classList.remove("trace-engine-visible");
+    document.querySelectorAll("#trace_app_shell .app-main.app-view").forEach(v=>v.classList.toggle("active", v.id === "app_"+view+"_view"));
+    document.querySelectorAll("[data-trace-tab]").forEach(b=>b.classList.toggle("active", b.dataset.traceTab===view));
+    syncProfileMini();
+    syncAppResult();
+  }
+
+  function normalizeStatus(raw){
+    const s=(raw||"").toString();
+    if(!s || /not analyzed/i.test(s)) return "Not run";
+    if(/failed|fallback|blocked|cors|proxy|offline|unavailable/i.test(s)) return "Local fallback";
+    if(/AI flagged/i.test(s)) return "AI flagged";
+    if(/human|looks human|ok|scan/i.test(s)) return "Scanned";
+    return s.replace(/\s+/g," ").slice(0,48);
+  }
+
+  function syncAppResult(){
+    const badgeWrap=$("badge_wrap");
+    const appBadge=$("app_badge_result");
+    const hasBadge=!!(window.__traceConsumerBadgeCreated && badgeWrap && badgeWrap.innerHTML.trim());
+    if(appBadge && badgeWrap){
+      if(hasBadge){
+        appBadge.innerHTML=badgeWrap.innerHTML;
+        appBadge.querySelectorAll("[id]").forEach(n=>{ if(!n.closest("svg")) n.removeAttribute("id"); });
+        try{
+          const svg=appBadge.querySelector("svg.glyph3d");
+          if(svg && typeof startGlyphMotion==="function") startGlyphMotion(svg);
+        }catch(e){}
+      }else if(!appBadge.querySelector(".empty-glyph")){
+        appBadge.innerHTML='<div class="empty-glyph">TRACE</div>';
+      }
+    }
+    const origin=$("origin_out")?.innerText || "";
+    if($("app_origin_status")) $("app_origin_status").textContent=normalizeStatus(origin);
+    if($("app_origin_raw")) $("app_origin_raw").textContent=(origin||"—").slice(0,100);
+    if($("app_badge_state")) $("app_badge_state").textContent=hasBadge ? "Created" : "Not created";
+    if($("app_result_pill")){
+      $("app_result_pill").textContent=hasBadge ? "Ready" : "Waiting";
+      $("app_result_pill").className="status-pill "+(hasBadge?"ready":"idle");
+    }
+    if($("app_result_title")) $("app_result_title").textContent=hasBadge ? "Badge ready" : "Your badge will appear here";
+    if($("app_result_sub")) $("app_result_sub").textContent=hasBadge ? "Trace glyph and verification proof are ready to share." : "Upload artwork, then create a badge.";
+    const canShare=hasBadge && $("btn_share_badge") && !$("btn_share_badge").disabled;
+    if($("app_share_badge")) $("app_share_badge").disabled=!canShare;
+    if($("app_download_png")) $("app_download_png").disabled=!canShare;
+  }
+
+  function syncProfileMini(){
+    const creatorTxt=$("creator_id")?.innerText?.trim() || "";
+    const vaultTxt=$("vault_state")?.innerText?.trim() || "Automatic";
+    const mpTxt=$("vault_mp_status")?.innerText?.trim() || "";
+    if($("app_creator_state")) $("app_creator_state").textContent=(creatorTxt && creatorTxt!=="—") ? "Ready" : "Automatic";
+    if($("app_vault_state")) $("app_vault_state").textContent=vaultTxt;
+    if($("app_profile_creator")) $("app_profile_creator").textContent=(creatorTxt && creatorTxt!=="—") ? creatorTxt.slice(0,18)+"…" : "Automatic";
+    if($("app_profile_vault")) $("app_profile_vault").textContent=/Unlocked/i.test(vaultTxt) ? "Ready" : "Automatic";
+    if($("app_profile_mindprint")) $("app_profile_mindprint").textContent=/registered/i.test(mpTxt) ? "Registered" : "Automatic";
+    const block=$("app_profile_block");
+    if(block){
+      const ready=/registered/i.test(mpTxt);
+      block.style.display=ready ? "none" : "";
+    }
+  }
+
+  async function forceProfileMindprint(text){
+    const profileText=(text && text.trim().length>=20) ? text.trim() : "Trace creator profile mindprint for human-made digital artwork.";
+    setValue("vault_mp", profileText);
+    if($("app_profile_mp") && !$("app_profile_mp").value) $("app_profile_mp").value=profileText;
+    await sleep(80);
+    try{
+      if(!(profileMindprint && profileMindprint.textHash && profileMindprint.score_0_1>0.6)){
+        const h = await sha256Hex(textToU8(profileText));
+        profileMindprint = { textHash:h, rhythmHash:h, score_0_1:1 };
+        try{ store.set("signai_profile_mp_"+getActiveUser(), JSON.stringify(profileMindprint)); }catch(e){}
+        if($("vault_mp_hint")) $("vault_mp_hint").textContent="Mindprint registered ✓";
+        if($("vault_mp_status")) $("vault_mp_status").textContent="registered ✓";
+      }
+    }catch(e){}
+  }
+
+  async function forceBadgeMindprint(text){
+    const badgeText=(text && text.trim().length>=10) ? text.trim() : (($("app_file_name")?.textContent || "Trace artwork").replace(/^No image selected$/,"Trace artwork")+" badge mindprint");
+    setValue("mp_badge", badgeText);
+    if($("app_badge_mp") && !$("app_badge_mp").value) $("app_badge_mp").value=badgeText;
+    await sleep(80);
+    try{
+      if(!(badgeMindprint && badgeMindprint.ready && badgeMindprint.textHash)){
+        const h = await sha256Hex(textToU8(badgeText));
+        badgeMindprint = { textHash:h, rhythmHash:h, score_0_1:1, ready:true };
+        if($("mp_hint")) $("mp_hint").textContent="Mindprint registered ✓";
+        if($("mp_status")) $("mp_status").textContent="registered ✓";
+      }
+    }catch(e){}
+  }
+
+  async function ensureEngineReady(){
+    const pass = ($("auth_pass")?.value || $("vault_pass")?.value || localStorage.getItem("trace_consumer_vault_pass") || "trace-local-vault").toString();
+    try{ localStorage.setItem("trace_consumer_vault_pass", pass); }catch(e){}
+    setValue("vault_pass", pass);
+    try{
+      if(typeof vaultUnlocked !== "undefined" && !vaultUnlocked && typeof tryUnlockVault==="function"){
+        await tryUnlockVault();
+      }else if($("btn_unlock")){
+        safeClick("btn_unlock");
+        await sleep(250);
+      }
+    }catch(e){}
+    await sleep(120);
+
+    await forceProfileMindprint($("app_profile_mp")?.value || $("vault_mp")?.value);
+    await forceBadgeMindprint($("app_badge_mp")?.value || $("mp_badge")?.value);
+    setValue("payload_text", $("app_payload_text")?.value || $("payload_text")?.value || $("app_badge_mp")?.value || "");
+    try{ if(typeof refreshMindprintUI==="function") refreshMindprintUI(); }catch(e){}
+    try{ if(typeof setReadyUI==="function") setReadyUI(); }catch(e){}
+    await sleep(80);
+  }
+
+  function softNewBadge(){
+    try{ selectedImageFile=null; }catch(e){}
+    try{ lastProof=null; lastBadgeSvg=null; }catch(e){}
+    try{ badgeMindprint={textHash:null,rhythmHash:null,score_0_1:0,ready:false}; }catch(e){}
+    if($("file_img")) $("file_img").value="";
+    if($("app_file_img")) $("app_file_img").value="";
+    setValue("mp_badge","");
+    setValue("payload_text","");
+    if($("app_badge_mp")) $("app_badge_mp").value="";
+    if($("app_payload_text")) $("app_payload_text").value="";
+    if($("badge_wrap")) $("badge_wrap").innerHTML="";
+    if($("origin_out")) $("origin_out").textContent="Not analyzed yet.";
+    if($("img_hint")) $("img_hint").textContent="No image selected.";
+    if($("app_file_name")) $("app_file_name").textContent="No image selected";
+    const prev=$("app_image_preview");
+    if(prev){ prev.classList.add("is-empty"); prev.textContent="Artwork preview"; prev.style.backgroundImage=""; }
+    window.__traceConsumerBadgeCreated = false;
+    window.__traceConsumerBadgeCreating = false;
+    if($("app_badge_result")) $("app_badge_result").innerHTML='<div class="empty-glyph">TRACE</div>';
+    try{ if(typeof __clearShareArtifactState==="function") __clearShareArtifactState(); }catch(e){}
+    try{ if(typeof refreshMindprintUI==="function") refreshMindprintUI(); }catch(e){}
+    try{ if(typeof setReadyUI==="function") setReadyUI(); }catch(e){}
+    appStatus("Ready for a new artwork.");
+    syncAppResult();
+  }
+
+  async function createBadgeFromApp(){
+    window.__traceConsumerBadgeCreating = true;
+    window.__traceConsumerBadgeCreated = false;
+    appStatus("Preparing artwork…");
+    await ensureEngineReady();
+    appStatus("Running origin scan…");
+    await sleep(120);
+    appStatus("Generating glyph and badge…");
+    const old=$("btn_analyze");
+    if(old){
+      try{ old.disabled=false; old.style.opacity="1"; }catch(e){}
+      old.dispatchEvent(new MouseEvent("click",{bubbles:true,cancelable:true,view:window}));
+    }
+    await sleep(800);
+    syncAppResult();
+    await sleep(1800);
+    syncAppResult();
+    const hasBadge=!!($("badge_wrap") && $("badge_wrap").innerHTML.trim());
+    window.__traceConsumerBadgeCreated = hasBadge;
+    window.__traceConsumerBadgeCreating = false;
+    syncAppResult();
+    try{ if(typeof window.__traceStableResultStabilize==="function") window.__traceStableResultStabilize(); }catch(e){}
+    appStatus(hasBadge ? "Badge ready." : "Could not create badge. Open Advanced for details.", hasBadge ? "ready":"error");
+  }
+
+  function wireFix(){
+    ensureAppViews();
+    showView("create");
+
+    document.addEventListener("click", function(e){
+      const tab=e.target.closest("[data-trace-tab]");
+      if(tab){
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        const which=tab.dataset.traceTab || "create";
+        if(which==="use") showView("create"); else showView(which);
+      }
+    }, true);
+
+    $("trace_show_dev")?.addEventListener("click",()=>document.body.classList.toggle("trace-engine-visible"), true);
+    $("app_profile_show_engine")?.addEventListener("click",()=>document.body.classList.add("trace-engine-visible"));
+
+    $("app_create_badge")?.addEventListener("click", function(e){
+      e.preventDefault(); e.stopImmediatePropagation();
+      createBadgeFromApp();
+    }, true);
+
+    $("app_new_badge")?.addEventListener("click", function(e){
+      e.preventDefault(); e.stopImmediatePropagation();
+      softNewBadge();
+    }, true);
+
+    $("app_share_badge")?.addEventListener("click", function(e){
+      e.preventDefault(); e.stopImmediatePropagation();
+      safeClick("btn_share_badge");
+    }, true);
+    $("app_download_png")?.addEventListener("click", function(e){
+      e.preventDefault(); e.stopImmediatePropagation();
+      safeClick("btn_share_badge");
+    }, true);
+
+    $("app_verify_latest")?.addEventListener("click",()=>{
+      safeClick("btn_load_last");
+      setTimeout(()=>{
+        const out=$("verify_out")?.innerText || $("verify_paste")?.value || "Latest badge loaded.";
+        if($("app_verify_result")) $("app_verify_result").textContent=out.slice(0,500);
+        if($("app_verify_pill")){ $("app_verify_pill").textContent="Loaded"; $("app_verify_pill").className="status-pill ready"; }
+      },400);
+    });
+    $("app_verify_run")?.addEventListener("click",()=>{
+      setValue("verify_paste", $("app_verify_paste")?.value || $("verify_paste")?.value || "");
+      safeClick("btn_verify");
+      setTimeout(()=>{
+        const out=$("verify_out")?.innerText || "Verification complete.";
+        if($("app_verify_result")) $("app_verify_result").textContent=out.slice(0,700);
+        if($("app_verify_pill")){ $("app_verify_pill").textContent="Checked"; $("app_verify_pill").className="status-pill ready"; }
+      },600);
+    });
+    $("app_verify_clear")?.addEventListener("click",()=>{
+      setValue("verify_paste","");
+      if($("app_verify_paste")) $("app_verify_paste").value="";
+      safeClick("btn_verify_clear");
+      if($("app_verify_result")) $("app_verify_result").textContent="No proof loaded yet.";
+      if($("app_verify_pill")){ $("app_verify_pill").textContent="Waiting"; $("app_verify_pill").className="status-pill idle"; }
+    });
+
+    ["badge_wrap","origin_out","vault_state","creator_id","vault_mp_status","mp_status","btn_share_badge"].forEach(id=>{
+      const el=$(id);
+      if(el) new MutationObserver(()=>{syncAppResult();syncProfileMini();}).observe(el,{childList:true,subtree:true,attributes:true,characterData:true});
+    });
+    setInterval(()=>{syncAppResult();syncProfileMini();},1200);
+  }
+
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded", wireFix);
+  else wireFix();
+})();
+</script>
+
+
+<style id="trace-app-glyph-visible-fix">
+  /* Ensure the consumer result card can show the real TRACE badge/glyph even when the engine UI is hidden. */
+  #app_badge_result.app-badge-result{
+    min-height:320px;
+    overflow:hidden;
+  }
+  #app_badge_result .badge{
+    width:min(100%, 720px);
+    max-width:720px;
+    transform:none !important;
+    margin:0 auto;
+  }
+  #app_badge_result .badgeInner{
+    grid-template-columns:minmax(120px, 180px) 1fr;
+    align-items:center;
+  }
+  #app_badge_result .glyphBox{
+    width:100%;
+    min-height:124px;
+    height:140px;
+  }
+  #app_badge_result .glyphBox svg.glyph3d,
+  #app_badge_result svg.glyph3d{
+    display:block !important;
+    visibility:visible !important;
+    opacity:1 !important;
+    width:100% !important;
+    height:100% !important;
+    max-width:100% !important;
+    max-height:100% !important;
+  }
+  @media(max-width:720px){
+    #app_badge_result .badgeInner{
+      grid-template-columns:1fr;
+    }
+    #app_badge_result .glyphBox{
+      height:210px;
+    }
+  }
+</style>
+
+<style id="trace-consumer-idle-result-stability">
+  #app_badge_result .empty-glyph{
+    animation:none!important;
+    transition:none!important;
+  }
+  #app_badge_result[data-idle="true"] *{
+    animation:none!important;
+  }
+</style>
+<style id="trace-mindprint-meter-and-glyph-id-fix">
+  .trace-mp-meter{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    margin-top:6px;padding:8px 10px;border-radius:14px;
+    background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.075);
+    color:var(--muted2);font-size:12px;font-weight:850;
+  }
+  .trace-mp-meter .trace-mp-bar{
+    flex:1;height:7px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden;
+  }
+  .trace-mp-meter .trace-mp-fill{
+    display:block;height:100%;width:0%;border-radius:999px;
+    background:linear-gradient(90deg,var(--amber),var(--blue));
+    transition:width .18s ease, background .18s ease;
+  }
+  .trace-mp-meter.is-ready{
+    color:#d8ffee;border-color:rgba(53,240,163,.26);background:rgba(53,240,163,.08);
+  }
+  .trace-mp-meter.is-ready .trace-mp-fill{
+    background:linear-gradient(90deg,var(--green),#8affcf);
+  }
+  .mini-form textarea.trace-mp-ready{
+    border-color:rgba(53,240,163,.42)!important;
+    box-shadow:0 0 0 3px rgba(53,240,163,.08);
+  }
+  #app_badge_result svg.glyph3d defs,
+  #app_badge_result svg.glyph3d linearGradient,
+  #app_badge_result svg.glyph3d radialGradient,
+  #app_badge_result svg.glyph3d filter{
+    display:initial!important;
+    visibility:visible!important;
+  }
+</style>
+<script id="trace-mindprint-meter-and-glyph-id-fix">
+(function(){
+  const $ = (id)=>document.getElementById(id);
+  const LIMITS = {
+    app_profile_mp: 40,
+    app_badge_mp: 20
+  };
+
+  function makeMeter(id, label){
+    const ta = $(id);
+    if(!ta || document.getElementById(id + "_meter")) return;
+    const meter = document.createElement("div");
+    meter.id = id + "_meter";
+    meter.className = "trace-mp-meter";
+    meter.innerHTML = '<span class="trace-mp-label"></span><span class="trace-mp-bar"><i class="trace-mp-fill"></i></span><span class="trace-mp-count"></span>';
+    ta.insertAdjacentElement("afterend", meter);
+    updateMeter(id);
+    ta.addEventListener("input",()=>updateMeter(id));
+    ta.addEventListener("change",()=>updateMeter(id));
+  }
+
+  function updateMeter(id){
+    const ta = $(id);
+    const meter = $(id + "_meter");
+    if(!ta || !meter) return;
+    const min = LIMITS[id] || 20;
+    const len = (ta.value || "").trim().length;
+    const ready = len >= min;
+    const pct = Math.max(0, Math.min(100, Math.round((len/min)*100)));
+    const label = meter.querySelector(".trace-mp-label");
+    const count = meter.querySelector(".trace-mp-count");
+    const fill = meter.querySelector(".trace-mp-fill");
+    if(label) label.textContent = ready ? "Mindprint ready" : "Minimum " + min + " characters";
+    if(count) count.textContent = len + " / " + min;
+    if(fill) fill.style.width = pct + "%";
+    meter.classList.toggle("is-ready", ready);
+    ta.classList.toggle("trace-mp-ready", ready);
+  }
+
+  function repairConsumerGlyph(){
+    const box = $("app_badge_result");
+    if(!box || !window.__traceConsumerBadgeCreated) return;
+
+    const currentSvg = box.querySelector("svg.glyph3d");
+    const brokenRefs = currentSvg && currentSvg.innerHTML && /url\(#\)/.test(currentSvg.innerHTML);
+    const missingDefs = currentSvg && !currentSvg.querySelector("defs");
+
+    if(!currentSvg || brokenRefs || missingDefs){
+      try{
+        if(typeof lastProof !== "undefined" && lastProof && typeof makeBadgeHtml === "function"){
+          box.innerHTML = makeBadgeHtml(lastProof);
+          box.querySelectorAll("[id]").forEach(n=>{ if(!n.closest("svg")) n.removeAttribute("id"); });
+          const svg = box.querySelector("svg.glyph3d");
+          if(svg && typeof startGlyphMotion === "function") startGlyphMotion(svg);
+        }
+      }catch(e){}
+    }
+  }
+
+  function init(){
+    makeMeter("app_profile_mp");
+    makeMeter("app_badge_mp");
+    ["app_profile_mp","app_badge_mp"].forEach(updateMeter);
+    repairConsumerGlyph();
+    setInterval(()=>{
+      ["app_profile_mp","app_badge_mp"].forEach(updateMeter);
+      repairConsumerGlyph();
+    },900);
+  }
+
+  if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+  else init();
+})();
+</script>
+
+
+<style id="trace-profile-avatar-history-ui">
+  .trace-profile-identity-card{
+    background:rgba(255,255,255,.065);
+    border:1px solid rgba(255,255,255,.10);
+    border-radius:26px;
+    padding:20px;
+    box-shadow:0 18px 60px rgba(0,0,0,.18);
+    display:grid;
+    gap:16px;
+  }
+  .trace-profile-top{
+    display:flex;
+    gap:16px;
+    align-items:center;
+  }
+  .trace-profile-avatar{
+    width:112px;
+    height:112px;
+    border-radius:32px;
+    display:grid;
+    place-items:center;
+    background:
+      radial-gradient(90px 90px at 30% 20%, rgba(53,240,163,.20), transparent 62%),
+      radial-gradient(90px 90px at 78% 80%, rgba(52,215,255,.16), transparent 66%),
+      rgba(0,0,0,.24);
+    border:1px solid rgba(255,255,255,.12);
+    overflow:hidden;
+    flex:0 0 auto;
+  }
+  .trace-profile-avatar svg.glyph3d{
+    width:88%!important;
+    height:88%!important;
+    display:block!important;
+  }
+  .trace-profile-avatar-meta{min-width:0}
+  .trace-profile-avatar-meta h2{margin:0 0 6px;font-size:22px}
+  .trace-profile-avatar-meta p{display:block!important;margin:0;color:var(--muted);line-height:1.35}
+  .trace-history-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-top:4px;
+  }
+  .trace-history-head h3{margin:0;font-size:15px;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+  .trace-history-count{
+    color:#d8ffee;
+    background:rgba(53,240,163,.10);
+    border:1px solid rgba(53,240,163,.22);
+    border-radius:999px;
+    padding:6px 10px;
+    font-size:12px;
+    font-weight:900;
+  }
+  .trace-profile-gallery{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:10px;
+  }
+  .trace-profile-gallery-empty{
+    grid-column:1 / -1;
+    min-height:96px;
+    border:1px dashed rgba(255,255,255,.14);
+    border-radius:18px;
+    display:grid;
+    place-items:center;
+    color:var(--muted2);
+    text-align:center;
+    padding:14px;
+  }
+  .trace-history-card{
+    min-width:0;
+    border-radius:18px;
+    overflow:hidden;
+    background:rgba(0,0,0,.20);
+    border:1px solid rgba(255,255,255,.09);
+  }
+  .trace-history-thumb{
+    aspect-ratio:1/1;
+    background:rgba(255,255,255,.045);
+    background-size:cover;
+    background-position:center;
+    display:grid;
+    place-items:center;
+  }
+  .trace-history-thumb svg.glyph3d{
+    width:72%!important;
+    height:72%!important;
+    display:block!important;
+  }
+  .trace-history-meta{
+    padding:9px;
+    display:grid;
+    gap:3px;
+  }
+  .trace-history-meta b{
+    font-size:11px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .trace-history-meta span{
+    font-size:10px;
+    color:var(--muted2);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  @media(max-width:520px){
+    .trace-profile-top{align-items:flex-start}
+    .trace-profile-avatar{width:92px;height:92px;border-radius:26px}
+    .trace-profile-gallery{grid-template-columns:repeat(2,minmax(0,1fr))}
+  }
+</style>
+
+<script id="trace-profile-avatar-history-logic">
+(function(){
+  const $ = (id)=>document.getElementById(id);
+  const HISTORY_LIMIT = 36;
+
+  function activeUser(){
+    try{
+      return (typeof getActiveUser === "function" && getActiveUser()) || localStorage.getItem("trace_active_user") || "default";
+    }catch(e){ return "default"; }
+  }
+
+  function historyKey(){
+    return "trace_badge_history_" + activeUser();
+  }
+
+  function readHistory(){
+    try{
+      const raw = localStorage.getItem(historyKey());
+      const arr = raw ? JSON.parse(raw) : [];
+      return Array.isArray(arr) ? arr : [];
+    }catch(e){ return []; }
+  }
+
+  function writeHistory(arr){
+    try{ localStorage.setItem(historyKey(), JSON.stringify(arr.slice(0,HISTORY_LIMIT))); }catch(e){}
+  }
+
+  function proofId(proof){
+    if(!proof) return "";
+    return String(proof.badge_id || proof.badge_key || proof.proof_id || proof.img_hash || proof.glyph_seed || "");
+  }
+
+  function proofStatus(proof){
+    try{
+      const ai = !!(proof.origin && proof.origin.ai_flag);
+      return ai ? "AI flagged" : "Human verified";
+    }catch(e){ return "Human verified"; }
+  }
+
+  function proofDate(proof){
+    const raw = proof && (proof.ts || proof.timestamp || proof.created_at || proof.date);
+    const d = raw ? new Date(raw) : new Date();
+    if(isNaN(+d)) return new Date().toLocaleDateString();
+    return d.toLocaleDateString(undefined,{year:"numeric",month:"short",day:"2-digit"});
+  }
+
+  function captureLatestProof(){
+    if(!window.__traceConsumerBadgeCreated) return false;
+    let proof = null;
+    try{ proof = (typeof lastProof !== "undefined" && lastProof) ? lastProof : null; }catch(e){}
+    if(!proof) return false;
+
+    const id = proofId(proof);
+    if(!id) return false;
+
+    const history = readHistory();
+    if(history.some(x=>x && x.id === id)) return false;
+
+    const entry = {
+      id,
+      badgeId: String(proof.badge_id || proof.badge_key || id).slice(0,42),
+      seed: String(proof.glyph_seed || id),
+      date: proofDate(proof),
+      status: proofStatus(proof),
+      thumb: proof.thumb_data_url || proof.img_data_url || "",
+      storedAt: Date.now()
+    };
+    history.unshift(entry);
+    writeHistory(history);
+    renderProfileExperience();
+    return true;
+  }
+
+  async function hashText(str){
+    try{
+      if(typeof sha256Hex === "function" && typeof textToU8 === "function") return await sha256Hex(textToU8(str));
+    }catch(e){}
+    let h = 2166136261;
+    for(let i=0;i<str.length;i++){ h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
+    return ("00000000"+(h>>>0).toString(16)).slice(-8) + String(str.length);
+  }
+
+  async function profileSeed(history){
+    if(history.length){
+      return await hashText(history.map(x=>x.seed || x.id || "").join("|") + "|" + history.length);
+    }
+    const mp = $("app_profile_mp")?.value || $("vault_mp")?.value || "";
+    return await hashText("profile|" + activeUser() + "|" + mp);
+  }
+
+  function makeGlyph(seed, opts){
+    try{
+      if(typeof makeHelixSvg === "function"){
+        return makeHelixSvg(seed, false, NaN, null, Object.assign({
+          mode:"badge",
+          style:(window.__traceGlyphStyleOverride || (typeof window.__traceGetGlyphStyle==="function" ? window.__traceGetGlyphStyle() : "orbit_ring")),
+          meta:{payloadLen:String(seed||"").length, hasImg:false}
+        }, opts || {}));
+      }
+    }catch(e){}
+    return '<div class="empty-glyph">TRACE</div>';
+  }
+
+  function ensureProfilePanel(){
+    const view = $("app_profile_view");
+    if(!view) return null;
+
+    let card = $("trace_profile_identity_card");
+    if(card) return card;
+
+    const section = view.querySelector(".app-flow") || view;
+    card = document.createElement("div");
+    card.id = "trace_profile_identity_card";
+    card.className = "trace-profile-identity-card";
+    card.innerHTML = `
+      <div class="trace-profile-top">
+        <div class="trace-profile-avatar" id="trace_profile_avatar" aria-label="Profile glyph avatar"></div>
+        <div class="trace-profile-avatar-meta">
+          <div class="eyebrow">Profile glyph</div>
+          <h2>Creator signature</h2>
+          <p>Updates from your Trace badge history.</p>
+        </div>
+      </div>
+      <div class="trace-history-head">
+        <h3>Badge gallery</h3>
+        <span class="trace-history-count" id="trace_history_count">0 badges</span>
+      </div>
+      <div class="trace-profile-gallery" id="trace_profile_gallery">
+        <div class="trace-profile-gallery-empty">Created badges will appear here.</div>
+      </div>
+    `;
+    section.insertBefore(card, section.firstChild);
+    return card;
+  }
+
+  async function renderProfileExperience(){
+    const card = ensureProfilePanel();
+    if(!card) return;
+    const history = readHistory();
+
+    const avatar = $("trace_profile_avatar");
+    if(avatar){
+      const seed = await profileSeed(history);
+      avatar.innerHTML = makeGlyph(seed, {meta:{payloadLen:history.length || 1, hasImg:history.length>0}});
+      const svg = avatar.querySelector("svg.glyph3d");
+      try{ if(svg && typeof startGlyphMotion === "function") startGlyphMotion(svg); }catch(e){}
+    }
+
+    const count = $("trace_history_count");
+    if(count) count.textContent = history.length + (history.length === 1 ? " badge" : " badges");
+
+    const gallery = $("trace_profile_gallery");
+    if(gallery){
+      if(!history.length){
+        gallery.innerHTML = '<div class="trace-profile-gallery-empty">Created badges will appear here.</div>';
+      }else{
+        gallery.innerHTML = history.slice(0,12).map((x,i)=>{
+          const thumb = x.thumb ? `style="background-image:url('${String(x.thumb).replace(/'/g,"%27")}')"` : "";
+          return `
+            <div class="trace-history-card" data-id="${String(x.id).replace(/"/g,"&quot;")}">
+              <div class="trace-history-thumb" ${thumb}>${x.thumb ? "" : makeGlyph(x.seed || x.id || ("history"+i), {})}</div>
+              <div class="trace-history-meta">
+                <b>${escapeHtml(x.status || "Trace badge")}</b>
+                <span>${escapeHtml(x.date || "")}</span>
+                <span>${escapeHtml(x.badgeId || x.id || "")}</span>
+              </div>
+            </div>`;
+        }).join("");
+        gallery.querySelectorAll("svg.glyph3d").forEach(svg=>{
+          try{ if(typeof startGlyphMotion === "function") startGlyphMotion(svg); }catch(e){}
+        });
+      }
+    }
+  }
+
+  function escapeHtml(v){
+    return String(v == null ? "" : v)
+      .replace(/&/g,"&amp;")
+      .replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;");
+  }
+
+  function wire(){
+    const maybeRender = ()=>setTimeout(renderProfileExperience, 60);
+
+    document.addEventListener("click",(e)=>{
+      const tab = e.target && e.target.closest && e.target.closest("[data-trace-tab]");
+      if(tab && tab.dataset.traceTab === "profile") maybeRender();
+    }, true);
+
+    const badgeWrap = $("badge_wrap");
+    if(badgeWrap){
+      new MutationObserver(()=>{
+        setTimeout(captureLatestProof, 250);
+        setTimeout(renderProfileExperience, 300);
+      }).observe(badgeWrap,{childList:true,subtree:true,characterData:true});
+    }
+
+    const createBtn = $("app_create_badge");
+    if(createBtn){
+      createBtn.addEventListener("click",()=>{
+        setTimeout(captureLatestProof, 1200);
+        setTimeout(captureLatestProof, 2600);
+        setTimeout(renderProfileExperience, 2800);
+      }, true);
+    }
+
+    ["app_profile_mp","vault_mp"].forEach(id=>{
+      const el=$(id);
+      if(el) el.addEventListener("input",()=>setTimeout(renderProfileExperience,120));
+    });
+
+    setInterval(()=>{
+      captureLatestProof();
+      renderProfileExperience();
+    }, 2500);
+
+    setTimeout(renderProfileExperience, 700);
+  }
+
+  if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", wire);
+  else wire();
+
+  window.__traceRenderProfileExperience = renderProfileExperience;
+  window.__traceCaptureLatestBadgeHistory = captureLatestProof;
+})();
+</script>
+
+
+<style id="trace-mindprint-stability-no-glitch">
+  /* Keep the visible consumer mindprint fields stable while the user types.
+     The engine can still register profile mindprint in the background, but the
+     app card must not disappear/reflow mid-input. */
+  #app_step_mindprint,
+  #app_profile_block,
+  #app_step_mindprint .mini-form{
+    display:grid!important;
+  }
+  #app_profile_block{
+    opacity:1!important;
+    visibility:visible!important;
+    height:auto!important;
+  }
+  #app_step_mindprint textarea{
+    transform:none!important;
+  }
+  #app_step_mindprint .trace-mp-meter{
+    min-height:34px;
+  }
+  #app_profile_block .trace-mp-meter.is-ready .trace-mp-label::after{
+    content:" ✓";
+  }
+</style>
+
+<script id="trace-mindprint-stability-no-glitch">
+/* Fix: profile mindprint field was being hidden by syncProfileMini() as soon as
+   the hidden engine marked it registered. That caused the profile and badge
+   mindprint fields to jump/switch while typing. This patch keeps the consumer
+   fields mounted and only syncs values/meters quietly. */
+(function(){
+  const $ = (id)=>document.getElementById(id);
+  const MIN_PROFILE = 40;
+  const MIN_BADGE = 20;
+
+  function len(id){
+    const el=$(id);
+    return (el && el.value ? el.value.trim().length : 0);
+  }
+
+  function forceStableBlocks(){
+    const profileBlock=$("app_profile_block");
+    if(profileBlock){
+      profileBlock.style.display="grid";
+      profileBlock.style.opacity="1";
+      profileBlock.style.visibility="visible";
+    }
+    const step=$("app_step_mindprint");
+    if(step) step.style.display="grid";
+  }
+
+  function setStatus(id, ready, min){
+    const meter=$(id+"_meter");
+    const ta=$(id);
+    if(meter){
+      const label=meter.querySelector(".trace-mp-label");
+      const count=meter.querySelector(".trace-mp-count");
+      const fill=meter.querySelector(".trace-mp-fill");
+      const l=len(id);
+      if(label) label.textContent = ready ? "Mindprint ready" : "Minimum " + min + " characters";
+      if(count) count.textContent = l + " / " + min;
+      if(fill) fill.style.width = Math.max(0, Math.min(100, Math.round(l/min*100))) + "%";
+      meter.classList.toggle("is-ready", ready);
+    }
+    if(ta) ta.classList.toggle("trace-mp-ready", ready);
+  }
+
+  function syncHiddenTextarea(fromId, toId){
+    const from=$(fromId), to=$(toId);
+    if(!from || !to) return;
+    if(to.value !== from.value){
+      to.value = from.value;
+      // Use input event so existing mindprint engine trackers still receive text.
+      try{ to.dispatchEvent(new Event("input",{bubbles:true})); }catch(e){}
+    }
+  }
+
+  let profileAvatarTimer = null;
+  function debounceProfileAvatar(){
+    clearTimeout(profileAvatarTimer);
+    profileAvatarTimer = setTimeout(()=>{
+      try{
+        const profileView=$("app_profile_view");
+        const isProfileOpen = profileView && profileView.classList.contains("active");
+        if(isProfileOpen && typeof window.__traceRenderProfileExperience === "function"){
+          window.__traceRenderProfileExperience();
+        }
+      }catch(e){}
+    }, 450);
+  }
+
+  function onProfileInput(){
+    forceStableBlocks();
+    syncHiddenTextarea("app_profile_mp","vault_mp");
+    setStatus("app_profile_mp", len("app_profile_mp") >= MIN_PROFILE, MIN_PROFILE);
+
+    // Keep the visible profile status human-friendly without hiding the field.
+    const appMini=$("app_profile_mindprint");
+    if(appMini) appMini.textContent = len("app_profile_mp") >= MIN_PROFILE ? "Ready" : "In progress";
+
+    debounceProfileAvatar();
+  }
+
+  function onBadgeInput(){
+    forceStableBlocks();
+    syncHiddenTextarea("app_badge_mp","mp_badge");
+    setStatus("app_badge_mp", len("app_badge_mp") >= MIN_BADGE, MIN_BADGE);
+  }
+
+  function patchInlineDisplayAfterOldSync(){
+    // The old syncProfileMini() is private and may still set display:none.
+    // Re-assert stability after mutation/interval ticks without touching engine state.
+    forceStableBlocks();
+  }
+
+  function wire(){
+    forceStableBlocks();
+
+    const p=$("app_profile_mp");
+    const b=$("app_badge_mp");
+    if(p && !p.dataset.traceStableMindprintWired){
+      p.dataset.traceStableMindprintWired="1";
+      p.addEventListener("input", onProfileInput, true);
+      p.addEventListener("change", onProfileInput, true);
+    }
+    if(b && !b.dataset.traceStableMindprintWired){
+      b.dataset.traceStableMindprintWired="1";
+      b.addEventListener("input", onBadgeInput, true);
+      b.addEventListener("change", onBadgeInput, true);
+    }
+
+    onProfileInput();
+    onBadgeInput();
+
+    const block=$("app_profile_block");
+    if(block && !block.dataset.traceNoGlitchObserver){
+      block.dataset.traceNoGlitchObserver="1";
+      new MutationObserver(patchInlineDisplayAfterOldSync).observe(block,{attributes:true,attributeFilter:["style","class"]});
+    }
+
+    setInterval(patchInlineDisplayAfterOldSync, 250);
+  }
+
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded", wire);
+  else wire();
+})();
+</script>
+
+
+
+
+
+<style id="trace-idle-copy-single-lock-css">
+  #app_result_sub.trace-copy-locked{
+    transition:none!important;
+    animation:none!important;
+  }
+</style>
+
+<style id="trace-stable-consumer-result-v2-css">
+  #app_badge_result{
+    contain:layout paint;
+  }
+  #app_badge_result.trace-result-idle,
+  #app_badge_result.trace-result-creating{
+    min-height:320px;
+    display:grid;
+    place-items:center;
+  }
+  #app_badge_result.trace-result-ready{
+    min-height:320px;
+    display:grid;
+    place-items:center;
+    overflow:visible;
+    animation:none!important;
+    transition:box-shadow .18s ease, border-color .18s ease!important;
+  }
+  #app_badge_result.trace-result-ready .badge{
+    width:100%;
+    max-width:520px;
+    margin:0 auto;
+  }
+  #app_badge_result .empty-glyph{
+    width:132px;height:132px;border-radius:34px;
+    display:grid;place-items:center;
+    letter-spacing:.38em;font-weight:900;
+    color:rgba(255,255,255,.78);
+    border:1px solid rgba(255,255,255,.13);
+    background:radial-gradient(circle at 50% 40%, rgba(255,255,255,.08), rgba(255,255,255,.025));
+  }
+  .trace-app-polish #trace_app_shell .app-card,
+  .trace-app-polish #trace_app_shell .result-card{
+    backdrop-filter: blur(18px);
+    border-color:rgba(255,255,255,.12);
+  }
+  .trace-app-polish #app_create_badge:not(:disabled){
+    box-shadow:0 14px 38px rgba(73, 222, 128, .18);
+  }
+</style>
+<script id="trace-stable-consumer-result-v2">
+/* Stable consumer result manager.
+   Only renders a badge after the current app session has actually clicked Create Badge
+   and the engine writes a fresh badge to #badge_wrap. It ignores stale lastProof/badge
+   data left from older profiles or Advanced mode. */
+(function(){
+  const $ = (id)=>document.getElementById(id);
+  const IDLE_TITLE = "Your badge will appear here";
+  const IDLE_SUB = "Upload artwork, then create a badge.";
+  let createToken = 0;
+  let lockedKey = "";
+  let lastStatus = "";
+
+  function validBadgeHtml(html){
+    html = String(html || "");
+    if(html.length < 100) return false;
+    if(/Your badge will appear here|empty-glyph|WAITING|Not created/i.test(html)) return false;
+    return (
+      /class=["'][^"']*\bbadge\b/.test(html) ||
+      /class=["'][^"']*glyphBox/.test(html)
+    ) && /(glyph3d|<svg|glyphBox|badge)/i.test(html);
+  }
+
+  function badgeHtmlFromEngine(){
+    const wrap = $("badge_wrap");
+    const html = wrap ? wrap.innerHTML : "";
+    return validBadgeHtml(html) ? html : "";
+  }
+
+  function keyFor(html){
+    return String(html.length) + ":" + html.slice(0,260).replace(/\s+/g," ");
+  }
+
+  function setText(id, text){
+    const el=$(id);
+    if(el && el.textContent !== text) el.textContent = text;
+  }
+
+  function setPill(text, cls){
+    const pill=$("app_result_pill");
+    if(!pill) return;
+    if(pill.textContent !== text) pill.textContent = text;
+    pill.className = "status-pill " + cls;
+  }
+
+  function setShare(enabled){
+    const share=$("app_share_badge");
+    const dl=$("app_download_png");
+    if(share) share.disabled = !enabled;
+    if(dl) dl.disabled = !enabled;
+  }
+
+  function setIdle(){
+    if(window.__traceConsumerBadgeCreating) return;
+    window.__traceConsumerBadgeCreated = false;
+    lockedKey = "";
+    const box=$("app_badge_result");
+    if(box){
+      box.classList.remove("trace-result-ready","trace-result-creating","trace-no-blink-locked");
+      box.classList.add("trace-result-idle");
+      box.removeAttribute("data-badge-key");
+      if(!box.querySelector(".empty-glyph") || box.children.length !== 1){
+        box.innerHTML = '<div class="empty-glyph">TRACE</div>';
+      }
+    }
+    setText("app_result_title", IDLE_TITLE);
+    setText("app_result_sub", IDLE_SUB);
+    setPill("Waiting","idle");
+    setText("app_badge_state","Not created");
+    setShare(false);
+  }
+
+  function setCreating(){
+    const box=$("app_badge_result");
+    if(box && !box.classList.contains("trace-result-ready")){
+      box.classList.remove("trace-result-idle");
+      box.classList.add("trace-result-creating");
+      if(!box.querySelector(".empty-glyph") || box.children.length !== 1){
+        box.innerHTML = '<div class="empty-glyph">TRACE</div>';
+      }
+    }
+    setText("app_result_title","Creating badge");
+    setText("app_result_sub","Running Trace engine and origin scan.");
+    setPill("Creating","warn");
+    setText("app_badge_state","Creating");
+    setShare(false);
+  }
+
+  function renderReady(force){
+    if(!window.__traceConsumerBadgeCreated) return false;
+    const html = badgeHtmlFromEngine();
+    if(!html) return false;
+    const box=$("app_badge_result");
+    if(!box) return false;
+
+    const key = keyFor(html);
+    if(force || key !== lockedKey || box.getAttribute("data-badge-key") !== key || !box.querySelector(".badge,.glyphBox,svg.glyph3d")){
+      box.classList.remove("trace-result-idle","trace-result-creating");
+      box.classList.add("trace-result-ready","trace-no-blink-locked");
+      box.setAttribute("data-badge-key", key);
+      box.innerHTML = html;
+      box.querySelectorAll("[id]").forEach(n=>{ if(!n.closest("svg")) n.removeAttribute("id"); });
+      try{
+        const svg = box.querySelector("svg.glyph3d");
+        if(svg && typeof startGlyphMotion === "function") startGlyphMotion(svg);
+      }catch(e){}
+      lockedKey = key;
+    }
+    setText("app_result_title","Badge ready");
+    setText("app_result_sub","Trace glyph and verification proof are ready to share.");
+    setPill("Ready","ready");
+    setText("app_badge_state","Created");
+    const oldShare=$("btn_share_badge");
+    setShare(!!(oldShare && !oldShare.disabled));
+    return true;
+  }
+
+  function startCreate(){
+    createToken++;
+    lockedKey = "";
+    window.__traceConsumerBadgeCreated = false;
+    window.__traceConsumerBadgeCreating = true;
+    window.__traceCurrentCreateStartedAt = Date.now();
+    try{ const wrap=$("badge_wrap"); if(wrap) wrap.innerHTML = ""; }catch(e){}
+    setCreating();
+    const token = createToken;
+    [400,900,1500,2400,3800,6000,9000,14000,22000,34000,46000].forEach(ms=>{
+      setTimeout(()=>{
+        if(token !== createToken) return;
+        if(window.__traceConsumerBadgeCreated) renderReady(false);
+        else setCreating();
+      }, ms);
+    });
+  }
+
+  function acceptFreshEngineBadge(){
+    if(!window.__traceConsumerBadgeCreating) return;
+    const html = badgeHtmlFromEngine();
+    if(!html) return;
+    window.__traceConsumerBadgeCreating = false;
+    window.__traceConsumerBadgeCreated = true;
+    renderReady(true);
+  }
+
+  function resetConsumerOnly(){
+    createToken++;
+    window.__traceConsumerBadgeCreating = false;
+    window.__traceConsumerBadgeCreated = false;
+    try{ const wrap=$("badge_wrap"); if(wrap) wrap.innerHTML = ""; }catch(e){}
+    setIdle();
+  }
+
+  function tick(){
+    if(window.__traceConsumerBadgeCreated){
+      renderReady(false);
+    }else if(window.__traceConsumerBadgeCreating){
+      acceptFreshEngineBadge();
+      if(!window.__traceConsumerBadgeCreated) setCreating();
+    }else{
+      setIdle();
+    }
+    const status = (($("app_result_title")?.textContent||"") + "|" + ($("app_result_sub")?.textContent||""));
+    if(status !== lastStatus) lastStatus = status;
+  }
+
+  function wire(){
+    document.body.classList.add("trace-app-polish");
+    // Always start a fresh consumer session on load/login; never show stale badges.
+    resetConsumerOnly();
+
+    const create=$("app_create_badge");
+    if(create) create.addEventListener("click", startCreate, true);
+
+    ["app_new_badge","btn_reset"].forEach(id=>{
+      const el=$(id);
+      if(el) el.addEventListener("click",()=>setTimeout(resetConsumerOnly,80), true);
+    });
+
+    const wrap=$("badge_wrap");
+    if(wrap){
+      new MutationObserver(()=>setTimeout(acceptFreshEngineBadge,30))
+        .observe(wrap,{childList:true,subtree:true,characterData:true,attributes:true});
+    }
+
+    // If login/register buttons exist, reset the consumer card for the new profile.
+    ["auth_btn","trace_admin_1996","trace_hero_login","trace_hero_signup","trace_nav_login","trace_nav_signup"].forEach(id=>{
+      const el=$(id);
+      if(el) el.addEventListener("click",()=>setTimeout(resetConsumerOnly,120), true);
+    });
+
+    window.__traceRenderRealBadgeToApp = function(){
+      if(window.__traceConsumerBadgeCreated) return renderReady(true);
+      return false;
+    };
+    window.__traceConsumerResetResultCard = resetConsumerOnly;
+    window.__traceConsumerStartCreateState = startCreate;
+
+    setInterval(tick, 700);
+    setTimeout(setIdle, 200);
+  }
+
+  if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", wire);
+  else wire();
+})();
+</script>
+
+
+<script id="trace_stability_runtime_patch">
+(function(){
+  let traceBadgeReady = false;
+  let lastStableHTML = "";
+
+  function qs(id){ return document.getElementById(id); }
+
+  function stabilizeResult(){
+    const result = qs("app_badge_result");
+    const pill = qs("app_result_pill");
+    const title = qs("app_result_title");
+    const sub = qs("app_result_sub");
+
+    if(!result || !pill || !title || !sub) return;
+
+    const hasBadge = !!result.querySelector(".badge");
+
+    if(hasBadge){
+      traceBadgeReady = true;
+      lastStableHTML = result.innerHTML;
+
+      pill.textContent = "Badge Ready";
+      pill.className = "status-pill ready";
+
+      title.textContent = "Trace badge created";
+      sub.textContent = "Human-made digital artwork verified in TRACE.";
+    }else if(!traceBadgeReady){
+      pill.textContent = "Waiting";
+      pill.className = "status-pill idle";
+
+      title.textContent = "Your badge will appear here";
+      sub.textContent = "Upload artwork, then create a badge.";
+    }else if(lastStableHTML){
+      result.innerHTML = lastStableHTML;
+    }
+  }
+
+  function hardResetUI(){
+    traceBadgeReady = false;
+    lastStableHTML = "";
+
+    const result = qs("app_badge_result");
+    if(result){
+      result.innerHTML = '<div class="empty-glyph">TRACE</div>';
+    }
+
+    const pill = qs("app_result_pill");
+    if(pill){
+      pill.textContent = "Waiting";
+      pill.className = "status-pill idle";
+    }
+
+    const title = qs("app_result_title");
+    if(title){
+      title.textContent = "Your badge will appear here";
+    }
+
+    const sub = qs("app_result_sub");
+    if(sub){
+      sub.textContent = "Upload artwork, then create a badge.";
+    }
+  }
+
+  window.__traceHardResetUI = hardResetUI;
+
+  document.addEventListener("DOMContentLoaded", function(){
+    hardResetUI();
+
+    const observer = new MutationObserver(function(){
+      stabilizeResult();
+    });
+
+    const result = qs("app_badge_result");
+    if(result){
+      observer.observe(result, {
+        childList:true,
+        subtree:true
+      });
+    }
+
+    const resetBtn = qs("app_new_badge");
+    if(resetBtn){
+      resetBtn.addEventListener("click", function(){
+        setTimeout(hardResetUI, 40);
+      });
+    }
+
+    const tabs = document.querySelectorAll("[data-trace-tab]");
+    tabs.forEach(btn=>{
+      btn.addEventListener("click", function(){
+        setTimeout(stabilizeResult, 60);
+      });
+    });
+
+    setTimeout(stabilizeResult, 300);
+  });
+})();
+</script>
+
+
+<script id="trace_app_store_phase1_js">
+(function(){
+  const PROFILE_MIN = 20;
+  const BADGE_MIN = 10;
+
+  function $(id){ return document.getElementById(id); }
+  function safeText(el, text){ if(el) el.textContent = text; }
+  function isAdmin(){
+    try{
+      return localStorage.getItem("trace_admin")==="true" ||
+             localStorage.getItem("trace_active_user")==="1996" ||
+             localStorage.getItem("trace_active_user")==="admin";
+    }catch(e){ return false; }
+  }
+
+  function applyRole(){
+    document.body.classList.toggle("trace-admin", isAdmin());
+    if(!isAdmin()){
+      document.body.classList.remove("trace-engine-visible");
+      const adv = $("app_advanced");
+      if(adv) adv.open = false;
+    }
+  }
+
+  function addMeter(textarea, min, label){
+    if(!textarea || textarea.dataset.traceMeterReady) return;
+    textarea.dataset.traceMeterReady = "1";
+
+    const meter = document.createElement("div");
+    meter.className = "trace-mp-meter";
+    meter.innerHTML = "<i></i>";
+
+    const note = document.createElement("div");
+    note.className = "trace-mp-note";
+    note.textContent = "0/" + min + " characters";
+
+    textarea.insertAdjacentElement("afterend", note);
+    textarea.insertAdjacentElement("afterend", meter);
+
+    const fill = meter.querySelector("i");
+
+    function update(){
+      const len = (textarea.value || "").trim().length;
+      const pct = Math.max(0, Math.min(100, Math.round((len / min) * 100)));
+      fill.style.width = pct + "%";
+      if(len >= min){
+        note.textContent = label + " ready";
+        note.classList.add("ready");
+      }else{
+        note.textContent = len + "/" + min + " characters";
+        note.classList.remove("ready");
+      }
+    }
+    textarea.addEventListener("input", update, {passive:true});
+    update();
+  }
+
+  function humanizeStatus(){
+    const raw = $("app_origin_raw");
+    const status = $("app_origin_status");
+    if(!status) return;
+    const txt = (raw && raw.textContent || "").toLowerCase();
+    if(txt.includes("proxy") || txt.includes("400") || txt.includes("failed")){
+      status.textContent = "Local fallback";
+    }
+  }
+
+  function lockConsumerResultOnFreshSession(){
+    try{
+      const createdThisSession = sessionStorage.getItem("trace_badge_created_this_session")==="true";
+      if(!createdThisSession && typeof window.__traceHardResetUI === "function"){
+        window.__traceHardResetUI();
+      }
+    }catch(e){}
+  }
+
+  function markCreateSession(){
+    try{ sessionStorage.setItem("trace_badge_created_this_session","true"); }catch(e){}
+  }
+
+  function addRCPanel(){
+    const adv = $("app_advanced");
+    if(!adv || $("trace_rc_panel")) return;
+    const div = document.createElement("div");
+    div.id = "trace_rc_panel";
+    div.className = "trace-rc-panel";
+    div.innerHTML = "<b>Release candidate checks</b><br>Upload → Create Badge → Share/Download → New Badge. Technical engine stays available only in admin mode.";
+    adv.appendChild(div);
+  }
+
+  function wire(){
+    applyRole();
+    addRCPanel();
+
+    addMeter($("app_profile_mp"), PROFILE_MIN, "Profile mindprint");
+    addMeter($("app_badge_mp"), BADGE_MIN, "Badge mindprint");
+
+    const create = $("app_create_badge");
+    if(create && !create.dataset.tracePhase1Ready){
+      create.dataset.tracePhase1Ready = "1";
+      create.addEventListener("click", function(){
+        markCreateSession();
+        const s = $("app_status");
+        safeText(s, "Creating badge…");
+      }, true);
+    }
+
+    const reset = $("app_new_badge");
+    if(reset && !reset.dataset.tracePhase1Ready){
+      reset.dataset.tracePhase1Ready = "1";
+      reset.addEventListener("click", function(){
+        try{ sessionStorage.removeItem("trace_badge_created_this_session"); }catch(e){}
+        setTimeout(function(){
+          if(typeof window.__traceHardResetUI === "function") window.__traceHardResetUI();
+          safeText($("app_status"), "Ready for a new artwork.");
+          safeText($("app_origin_status"), "Not run");
+          safeText($("app_badge_state"), "Not created");
+        }, 80);
+      }, true);
+    }
+
+    const admin = $("trace_admin_1996");
+    if(admin && !admin.dataset.tracePhase1Ready){
+      admin.dataset.tracePhase1Ready = "1";
+      admin.addEventListener("click", function(){
+        try{ localStorage.setItem("trace_admin","true"); }catch(e){}
+        setTimeout(applyRole, 50);
+      }, true);
+    }
+
+    const dev = $("trace_show_dev");
+    if(dev && !dev.dataset.tracePhase1Ready){
+      dev.dataset.tracePhase1Ready = "1";
+      dev.addEventListener("click", function(e){
+        if(!isAdmin()){
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          safeText($("app_status"), "Developer tools are hidden in the public app.");
+          return false;
+        }
+      }, true);
+    }
+
+    lockConsumerResultOnFreshSession();
+    humanizeStatus();
+  }
+
+  document.addEventListener("DOMContentLoaded", wire);
+  window.addEventListener("storage", applyRole);
+  setTimeout(wire, 250);
+  setTimeout(wire, 900);
+})();
+</script>
+
+
+<script id="trace_public_beta_warmup">
+(function(){
+  function cfg(){ return window.TRACE_CONFIG || {}; }
+  function setStatus(msg){
+    try{
+      var a=document.getElementById("app_status"); if(a) a.textContent=msg;
+      var b=document.getElementById("app_origin_status"); if(b) b.textContent=msg;
+      var c=document.getElementById("winston_state"); if(c) c.textContent=msg;
+    }catch(e){}
+  }
+  function baseUrl(){
+    var c = cfg();
+    var u = String(c.PROXY_BASE_URL || "").trim().replace(/\/+$/,"");
+    return u;
+  }
+  function healthUrl(){
+    var c = cfg();
+    var b = baseUrl();
+    if(!b) return "";
+    return b + String(c.HEALTH_PATH || "/health");
+  }
+  async function traceProxyWarmup(){
+    var c = cfg();
+    if(c.ENABLE_PROXY_WARMUP === false || c.ENABLE_ORIGIN_SCAN === false) return;
+    var url = healthUrl();
+    if(!url) return;
+    setStatus("Preparing origin scan service…");
+    var timeoutMs = Math.max(8000, Number(c.PROXY_TIMEOUT_MS || 30000));
+    for(var i=1;i<=3;i++){
+      var ctrl = new AbortController();
+      var t = setTimeout(function(){ try{ctrl.abort();}catch(e){} }, timeoutMs);
+      try{
+        var res = await fetch(url + (url.indexOf("?")>=0 ? "&" : "?") + "t=" + Date.now(), {
+          method:"GET",
+          cache:"no-store",
+          credentials:"omit",
+          signal:ctrl.signal
+        });
+        clearTimeout(t);
+        if(res.ok){
+          setStatus("Origin scan service ready.");
+          window.__TRACE_PROXY_READY = true;
+          return true;
+        }
+      }catch(e){
+        clearTimeout(t);
+      }
+      setStatus("Origin scan service is starting. This can take a moment…");
+      await new Promise(function(r){ setTimeout(r, 900*i); });
+    }
+    window.__TRACE_PROXY_READY = false;
+    setStatus("Origin scan may use local fallback if the service is unavailable.");
+    return false;
+  }
+  window.traceProxyWarmup = traceProxyWarmup;
+  document.addEventListener("DOMContentLoaded", function(){
+    setTimeout(traceProxyWarmup, 600);
+  });
+})();
+</script>
+
+
+
+</body></html>
