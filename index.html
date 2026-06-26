@@ -1,6 +1,8 @@
-<html lang="sv"><head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>TRACE — BETA 1.0 (H.O.P 8.0)</title>
 <style>
   :root{
@@ -446,71 +448,6 @@
     opacity:.48;
   }
   .thumbWatermark.clickable:hover{ opacity:.56; }
-
-  /* Clear artwork preview inside the badge itself */
-  .badge.withArtworkThumb .badgeInner{
-    padding-right:92px;
-    min-height:122px;
-  }
-  .badgeArtworkThumb{
-    position:absolute;
-    right:14px;
-    bottom:14px;
-    width:66px;
-    height:66px;
-    border-radius:18px;
-    border:1px solid rgba(255,255,255,.16);
-    background:#070b12 center / cover no-repeat;
-    box-shadow:
-      0 14px 34px rgba(0,0,0,.36),
-      inset 0 0 0 1px rgba(255,255,255,.04);
-    z-index:4;
-    overflow:hidden;
-    pointer-events:none;
-  }
-  .badgeArtworkThumb::after{
-    content:"";
-    position:absolute;
-    inset:0;
-    background:
-      linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,0) 45%),
-      radial-gradient(80% 80% at 20% 0%, rgba(52,215,255,.16), transparent 70%);
-    pointer-events:none;
-  }
-  .badgeArtworkThumb.clickable{
-    pointer-events:auto;
-    cursor:pointer;
-  }
-  .badgeArtworkThumbLabel{
-    position:absolute;
-    left:6px;
-    right:6px;
-    bottom:5px;
-    font-size:7px;
-    line-height:1;
-    font-weight:900;
-    letter-spacing:.08em;
-    text-transform:uppercase;
-    color:rgba(233,243,255,.78);
-    text-shadow:0 1px 6px rgba(0,0,0,.75);
-    z-index:2;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-  }
-  @media (max-width:560px){
-    .badge.withArtworkThumb .badgeInner{
-      padding-right:78px;
-      min-height:116px;
-    }
-    .badgeArtworkThumb{
-      width:56px;
-      height:56px;
-      right:12px;
-      bottom:12px;
-      border-radius:16px;
-    }
-  }
 
   /* Image preview modal */
   .imgModal{
@@ -1147,33 +1084,6 @@ body.trace-engine-visible #trace_app_shell{display:none!important}
 
 </style>
 
-
-<script>
-const LS = {
-  getItem(k){ try{return localStorage.getItem(k);}catch(e){return null;} },
-  setItem(k,v){ try{return localStorage.setItem(k,v);}catch(e){} },
-  removeItem(k){ try{return localStorage.removeItem(k);}catch(e){} }
-};
-</script>
-<script id="trace_public_beta_config">
-/*
-  TRACE public beta config.
-  Change PROXY_BASE_URL to your live Winston/proxy backend root URL.
-  Example: https://trace-proxy-yourname.onrender.com
-*/
-var TRACE_CONFIG = window.TRACE_CONFIG || {
-  PROXY_BASE_URL: "https://signai-tamy.onrender.com",
-  DETECT_IMAGE_PATH: "/detect-image",
-  HEALTH_PATH: "/health",
-  ENABLE_ORIGIN_SCAN: true,
-  ENABLE_PROXY_WARMUP: true,
-  PROXY_TIMEOUT_MS: 30000,
-  PROXY_RETRIES: 4,
-  PROXY_RETRY_BASE_DELAY_MS: 900
-};
-window.TRACE_CONFIG = TRACE_CONFIG;
-</script>
-
 <script>
 function getActiveUser(){
   return LS.getItem("trace_active_user") || "default";
@@ -1326,311 +1236,8 @@ function getActiveUser(){
 .section h2{margin-top:0;font-size:18px}
 </style>
 
-
-<style id="trace_final_mobile_tight_polish">
-/* Final landing cleanup: one auth surface only, no duplicate CTA rows, no 01/02/03 explainer */
-.public-nav{
-  min-height:72px;
-  height:auto;
-}
-.public-nav nav,
-.hero-actions,
-.public-features{
-  display:none !important;
-}
-
-.public-hero{
-  padding-top:clamp(24px, 5vw, 56px) !important;
-  padding-bottom:clamp(24px, 5vw, 56px) !important;
-  gap:clamp(18px, 4vw, 44px) !important;
-  align-items:start !important;
-}
-
-.public-copy{
-  padding-top:0 !important;
-}
-
-.public-copy .eyebrow{
-  margin-bottom:10px !important;
-}
-
-.public-copy h1{
-  margin:10px 0 14px !important;
-  line-height:.96 !important;
-  letter-spacing:-.065em !important;
-}
-
-.public-copy p{
-  margin:0 !important;
-  max-width:580px !important;
-}
-
-.auth-card{
-  align-self:start !important;
-  margin-top:0 !important;
-}
-
-/* Make the login/create profile form feel like the single primary action */
-.auth-tabs{
-  margin-bottom:14px !important;
-}
-.auth-submit{
-  margin-top:14px !important;
-}
-
-/* Remove excess onboarding/landing vertical bulk on phones */
-@media (max-width: 860px){
-  .public-hero{
-    grid-template-columns:1fr !important;
-    padding:24px 16px 30px !important;
-    gap:18px !important;
-  }
-  .public-copy h1{
-    font-size:clamp(34px, 11vw, 46px) !important;
-    max-width:10.5ch;
-  }
-  .public-copy p{
-    font-size:16px !important;
-    line-height:1.45 !important;
-  }
-  .auth-card{
-    width:100% !important;
-    border-radius:22px !important;
-    padding:16px !important;
-  }
-}
-
-@media (max-width: 520px){
-  .public-nav{
-    padding:14px 16px !important;
-  }
-  .public-brand{
-    width:100%;
-  }
-  .public-logo{
-    width:34px !important;
-    height:34px !important;
-    border-radius:12px !important;
-  }
-  .public-brand strong{
-    font-size:16px !important;
-  }
-  .public-brand span{
-    font-size:12px !important;
-    line-height:1.25 !important;
-  }
-  .public-copy .eyebrow{
-    font-size:11px !important;
-    letter-spacing:.16em !important;
-  }
-  .public-copy h1{
-    font-size:38px !important;
-  }
-  .public-copy p{
-    font-size:15px !important;
-  }
-}
-</style>
-
-
-<style id="trace_stability_patch">
-#app_badge_result{
-  transition:none !important;
-  animation:none !important;
-}
-#app_badge_result *{
-  animation:none !important;
-}
-.status-pill{
-  transition:none !important;
-}
-.app-badge-result .badge{
-  transform:none !important;
-  width:100%;
-  max-width:760px;
-}
-.app-badge-result{
-  display:flex !important;
-  align-items:center;
-  justify-content:center;
-  min-height:340px;
-}
-.empty-glyph{
-  opacity:.75;
-}
-</style>
-
-
-<style id="trace_app_store_phase1_css">
-/* === App Store Phase 1: consumer release candidate polish === */
-body:not(.trace-admin) #trace_show_dev,
-body:not(.trace-admin) #app_advanced,
-body:not(.trace-admin) .dev-only-toggle,
-body:not(.trace-admin) .debug-readout,
-body:not(.trace-admin) .advanced-card,
-body:not(.trace-admin) body.trace-engine-visible,
-body:not(.trace-admin) .topbar,
-body:not(.trace-admin) #panel_admin{
-  display:none !important;
-}
-
-/* Keep engine DOM alive but visually sealed for normal users */
-body:not(.trace-admin).trace-engine-visible #trace_app_shell{
-  display:block !important;
-}
-body:not(.trace-admin).trace-engine-visible .wrap > .topbar,
-body:not(.trace-admin).trace-engine-visible .wrap > .panel:not(.hide){
-  display:none !important;
-}
-
-/* Release candidate landing polish */
-.auth-smalltext{
-  display:none !important;
-}
-.auth-card::before{
-  content:"Creator access";
-  display:block;
-  margin-bottom:12px;
-  color:rgba(233,243,255,.62);
-  font-size:12px;
-  letter-spacing:.14em;
-  text-transform:uppercase;
-  font-weight:900;
-}
-.auth-admin{
-  opacity:.72;
-}
-body:not(.trace-admin) .auth-admin{
-  font-size:12px;
-}
-.public-copy p{
-  max-width:520px !important;
-}
-
-/* Compact app flow for mobile release */
-.hero-card{
-  padding:20px !important;
-}
-.hero-card p{
-  display:none;
-}
-.step-head{
-  margin-bottom:12px !important;
-}
-.step-number{
-  display:none !important;
-}
-.flow-card{
-  padding:18px !important;
-}
-.app-status{
-  min-height:44px;
-}
-.app-badge-result{
-  overscroll-behavior:contain;
-  contain:layout paint;
-}
-
-/* Mindprint readiness bars */
-.trace-mp-meter{
-  height:8px;
-  border-radius:999px;
-  background:rgba(255,255,255,.08);
-  overflow:hidden;
-  border:1px solid rgba(255,255,255,.07);
-  margin-top:-4px;
-}
-.trace-mp-meter > i{
-  display:block;
-  height:100%;
-  width:0%;
-  background:linear-gradient(90deg, rgba(255,211,106,.85), rgba(53,240,163,.95));
-  border-radius:999px;
-  transition:width .18s ease;
-}
-.trace-mp-note{
-  color:rgba(233,243,255,.56);
-  font-size:12px;
-  margin-top:-2px;
-}
-.trace-mp-note.ready{
-  color:rgba(53,240,163,.92);
-}
-
-/* Release candidate QA notice hidden unless admin */
-.trace-rc-panel{
-  display:none;
-  margin-top:14px;
-  padding:14px;
-  border-radius:18px;
-  border:1px solid rgba(53,240,163,.20);
-  background:rgba(53,240,163,.055);
-  color:rgba(233,243,255,.72);
-  font-size:13px;
-  line-height:1.45;
-}
-body.trace-admin .trace-rc-panel{
-  display:block;
-}
-
-/* Premium app tweaks */
-.app-header{
-  position:sticky;
-  top:0;
-  z-index:8;
-  padding-top:12px !important;
-  backdrop-filter:blur(18px);
-}
-.trace-app-shell{
-  max-width:1180px;
-}
-.result-card{
-  border-color:rgba(255,255,255,.12);
-}
-.upload-drop:active,
-.app-primary:active,
-.result-actions button:active{
-  transform:scale(.99);
-}
-@media(max-width:520px){
-  .app-header{
-    position:relative;
-    padding-bottom:12px !important;
-  }
-  .app-nav{
-    width:100%;
-    display:grid !important;
-    grid-template-columns:repeat(3,1fr);
-  }
-  .app-nav button{
-    width:100%;
-    text-align:center;
-    padding:11px 8px !important;
-  }
-  .hero-card{
-    padding:18px !important;
-  }
-  .hero-card h1{
-    font-size:30px !important;
-  }
-  .upload-drop{
-    min-height:144px !important;
-  }
-  .app-image-preview:not(.is-empty){
-    min-height:220px !important;
-  }
-  .app-badge-result{
-    min-height:260px !important;
-    padding:10px !important;
-  }
-  .result-meta{
-    grid-template-columns:1fr !important;
-  }
-}
-</style>
-
 </head>
-<body class="trace-app-polish">
+<body>
 
 
 <!-- AUTH MODAL / PUBLIC LANDING -->
@@ -1643,6 +1250,10 @@ body.trace-admin .trace-rc-panel{
         <span>Human verification for digital work</span>
       </div>
     </div>
+    <nav>
+      <button id="trace_nav_login" class="nav-link" type="button">Logga in</button>
+      <button id="trace_nav_signup" class="nav-cta" type="button">Skapa profil</button>
+    </nav>
   </header>
 
   <main class="public-hero">
@@ -1650,6 +1261,15 @@ body.trace-admin .trace-rc-panel{
       <div class="eyebrow">Human authenticity layer</div>
       <h1>Verify and share digital artwork with a Trace badge.</h1>
       <p>Create a clean provenance badge, glyph signature and share artifact — without showing the technical engine to your audience.</p>
+      <div class="hero-actions">
+        <button id="trace_hero_signup" class="hero-primary" type="button">Create profile</button>
+        <button id="trace_hero_login" class="hero-secondary" type="button">Log in</button>
+      </div>
+      <div class="public-features">
+        <div><b>01</b><span>Upload artwork</span></div>
+        <div><b>02</b><span>Create badge</span></div>
+        <div><b>03</b><span>Share proof</span></div>
+      </div>
     </section>
 
     <section class="auth-card" aria-label="TRACE login">
@@ -1674,7 +1294,7 @@ body.trace-admin .trace-rc-panel{
       </label>
 
       <button id="auth_btn" class="auth-submit" type="button">Continue</button>
-      <button id="trace_admin_1996" class="auth-admin" type="button" data-trace-phase1-ready="1">Admin login · 1996</button>
+      <button id="trace_admin_1996" class="auth-admin" type="button">Admin login · 1996</button>
 
       <div id="auth_hint" class="auth-hint"></div>
       <p id="auth_smalltext" class="auth-smalltext">Keys and vault are created locally. In the normal app they stay behind the scenes.</p>
@@ -1691,14 +1311,14 @@ body.trace-admin .trace-rc-panel{
         <p>Verify human-made digital work.</p>
       </div>
       <div class="app-nav">
-        <button type="button" data-trace-tab="use" class="">Create</button>
+        <button type="button" data-trace-tab="use" class="active">Create</button>
         <button type="button" data-trace-tab="verify">Verify</button>
         <button type="button" data-trace-tab="profile">Profile</button>
-        <button type="button" id="trace_show_dev" class="dev-only-toggle" data-trace-phase1-ready="1">Advanced</button>
+        <button type="button" id="trace_show_dev" class="dev-only-toggle">Advanced</button>
       </div>
     </header>
 
-    <main class="app-main app-view active" id="app_create_view">
+    <main class="app-main">
       <section class="app-flow">
         <div class="flow-card hero-card">
           <div class="eyebrow">Create a Trace badge</div>
@@ -1723,7 +1343,7 @@ body.trace-admin .trace-rc-panel{
           <div id="app_image_preview" class="app-image-preview is-empty">Artwork preview</div>
         </div>
 
-        <div class="flow-card" id="app_step_mindprint" style="display: grid;">
+        <div class="flow-card" id="app_step_mindprint">
           <div class="step-head">
             <span class="step-number">2</span>
             <div>
@@ -1732,17 +1352,17 @@ body.trace-admin .trace-rc-panel{
             </div>
           </div>
 
-          <div class="mini-form" id="app_profile_block" style="opacity: 1; visibility: visible; display: grid;" data-trace-no-glitch-observer="1">
+          <div class="mini-form" id="app_profile_block">
             <label>
               <span>Profile mindprint <small>once</small></span>
-              <textarea id="app_profile_mp" rows="3" placeholder="Describe your creative identity." data-trace-stable-mindprint-wired="1" data-trace-meter-ready="1"></textarea><div class="trace-mp-meter"><i style="width: 0%;"></i></div><div class="trace-mp-note">0/20 characters</div><div id="app_profile_mp_meter" class="trace-mp-meter"><span class="trace-mp-label">Minimum 40 characters</span><span class="trace-mp-bar"><i class="trace-mp-fill" style="width: 0%;"></i></span><span class="trace-mp-count">0 / 40</span></div>
+              <textarea id="app_profile_mp" rows="3" placeholder="Describe your creative identity."></textarea>
             </label>
           </div>
 
           <div class="mini-form">
             <label>
               <span>Badge mindprint <small>this artwork</small></span>
-              <textarea id="app_badge_mp" rows="3" placeholder="Short note about this artwork." data-trace-stable-mindprint-wired="1" data-trace-meter-ready="1"></textarea><div class="trace-mp-meter"><i style="width: 0%;"></i></div><div class="trace-mp-note">0/10 characters</div><div id="app_badge_mp_meter" class="trace-mp-meter"><span class="trace-mp-label">Minimum 20 characters</span><span class="trace-mp-bar"><i class="trace-mp-fill" style="width: 0%;"></i></span><span class="trace-mp-count">0 / 20</span></div>
+              <textarea id="app_badge_mp" rows="3" placeholder="Short note about this artwork."></textarea>
             </label>
             <label>
               <span>Title or caption <small>optional</small></span>
@@ -1756,8 +1376,8 @@ body.trace-admin .trace-rc-panel{
             <h2>Create Badge</h2>
             <p>Generates the Trace glyph, signs the badge and runs the origin scan at the correct point in the flow.</p>
           </div>
-          <button id="app_create_badge" class="app-primary" type="button" data-trace-phase1-ready="1">Create Badge</button>
-          <div id="app_status" class="app-status">Origin scan service ready.</div>
+          <button id="app_create_badge" class="app-primary" type="button">Create Badge</button>
+          <div id="app_status" class="app-status">Ready when artwork and mindprint are added.</div>
         </div>
       </section>
 
@@ -1765,12 +1385,14 @@ body.trace-admin .trace-rc-panel{
         <div class="result-card">
           <div class="result-top">
             <span id="app_result_pill" class="status-pill idle">Waiting</span>
-            <button id="app_new_badge" class="text-btn" type="button" data-trace-phase1-ready="1">New</button>
+            <button id="app_new_badge" class="text-btn" type="button">New</button>
           </div>
           <h2 id="app_result_title">Your badge will appear here</h2>
           <p id="app_result_sub">Upload artwork, then create a badge.</p>
 
-          <div id="app_badge_result" class="app-badge-result trace-result-idle"><div class="empty-glyph">TRACE</div></div>
+          <div id="app_badge_result" class="app-badge-result">
+            <div class="empty-glyph">TRACE</div>
+          </div>
 
           <div class="result-meta">
             <div><span>Origin scan</span><b id="app_origin_status">Not run</b></div>
@@ -1778,8 +1400,8 @@ body.trace-admin .trace-rc-panel{
           </div>
 
           <div class="result-actions">
-            <button id="app_share_badge" type="button" disabled="">Share Badge</button>
-            <button id="app_download_png" type="button" disabled="">Download PNG</button>
+            <button id="app_share_badge" type="button" disabled>Share Badge</button>
+            <button id="app_download_png" type="button" disabled>Download PNG</button>
           </div>
         </div>
 
@@ -1790,76 +1412,20 @@ body.trace-admin .trace-rc-panel{
             <button type="button" id="app_hide_engine">Hide engine</button>
           </div>
           <div class="debug-readout">
-            <div><span>Vault</span><b id="app_vault_state">Status: Locked</b></div>
-            <div><span>Creator</span><b id="app_creator_state">Automatic</b></div>
-            <div><span>Raw origin</span><b id="app_origin_raw">Not analyzed yet.</b></div>
+            <div><span>Vault</span><b id="app_vault_state">—</b></div>
+            <div><span>Creator</span><b id="app_creator_state">—</b></div>
+            <div><span>Raw origin</span><b id="app_origin_raw">—</b></div>
           </div>
-        <div id="trace_rc_panel" class="trace-rc-panel"><b>Release candidate checks</b><br>Upload → Create Badge → Share/Download → New Badge. Technical engine stays available only in admin mode.</div></details>
+        </details>
       </aside>
     </main>
-  <main id="app_verify_view" class="app-main app-view">
-        <section class="app-flow">
-          <div class="app-simple-card">
-            <div class="eyebrow">Verify</div>
-            <h1>Check a Trace badge</h1>
-            <p>Load your latest badge or paste proof JSON. Technical verification details stay in Advanced.</p>
-            <textarea id="app_verify_paste" rows="7" placeholder="Paste proof JSON here"></textarea>
-            <div class="app-simple-actions">
-              <button type="button" class="primary" id="app_verify_latest">Load latest</button>
-              <button type="button" id="app_verify_run">Verify</button>
-              <button type="button" id="app_verify_clear">Clear</button>
-            </div>
-          </div>
-        </section>
-        <aside class="result-panel">
-          <div class="result-card">
-            <span class="status-pill idle" id="app_verify_pill">Waiting</span>
-            <h2>Verification result</h2>
-            <div id="app_verify_result" class="app-view-placeholder">No proof loaded yet.</div>
-          </div>
-        </aside></main><main id="app_profile_view" class="app-main app-view">
-        <section class="app-flow"><div id="trace_profile_identity_card" class="trace-profile-identity-card">
-      <div class="trace-profile-top">
-        <div class="trace-profile-avatar" id="trace_profile_avatar" aria-label="Profile glyph avatar"><div class="empty-glyph">TRACE</div></div>
-        <div class="trace-profile-avatar-meta">
-          <div class="eyebrow">Profile glyph</div>
-          <h2>Creator signature</h2>
-          <p>Updates from your Trace badge history.</p>
-        </div>
-      </div>
-      <div class="trace-history-head">
-        <h3>Badge gallery</h3>
-        <span class="trace-history-count" id="trace_history_count">0 badges</span>
-      </div>
-      <div class="trace-profile-gallery" id="trace_profile_gallery"><div class="trace-profile-gallery-empty">Created badges will appear here.</div></div>
-    </div>
-          <div class="app-simple-card">
-            <div class="eyebrow">Profile</div>
-            <h1>Your Trace profile</h1>
-            <p>Your creator identity and profile mindprint run quietly in the background.</p>
-            <div class="profile-clean-list">
-              <div><span>Creator identity</span><b id="app_profile_creator">Automatic</b></div>
-              <div><span>Profile mindprint</span><b id="app_profile_mindprint">Automatic</b></div>
-              <div><span>Vault</span><b id="app_profile_vault">Automatic</b></div>
-            </div>
-          </div>
-        </section>
-        <aside class="result-panel">
-          <div class="result-card">
-            <span class="status-pill ready">Ready</span>
-            <h2>Private engine</h2>
-            <p>The keys and signing system are hidden from normal use. Open Advanced only when needed.</p>
-            <div class="result-actions">
-              <button type="button" id="app_profile_show_engine">Open Advanced</button>
-            </div>
-          </div>
-        </aside></main></div>
+  </div>
 
 
   <div class="topbar">
     <div class="brand">
       <div class="logoBox" title="logo.png (placeholder)">
-        <img src="logo.png" alt="logo" onerror="this.style.display='none'" style="display: none;">
+        <img src="logo.png" alt="logo" onerror="this.style.display='none'">
       </div>
       <div>
         <div class="brandTitle">TRACE</div>
@@ -1899,7 +1465,7 @@ body.trace-admin .trace-rc-panel{
         <div style="height:10px"></div>
 
         <div class="row">
-          <input id="vault_pass" type="password" placeholder="Local vault password (nytt eller befintligt)">
+          <input id="vault_pass" type="password" placeholder="Local vault password (nytt eller befintligt)"/>
           <button class="btn primary" id="btn_unlock">Unlock vault</button>
           <button class="btn ghost" id="btn_lock">Lock</button>
           <button class="btn ghost mini" id="btn_reset">Reset</button>
@@ -1946,7 +1512,7 @@ body.trace-admin .trace-rc-panel{
 
         <div style="height:10px"></div>
         <div class="cardTitle" style="font-size:13px">Attach image (optional)</div>
-        <input id="file_img" type="file" accept="image/*">
+        <input id="file_img" type="file" accept="image/*"/>
         <div class="hint" id="img_hint">No image selected.</div>
 
         <div style="height:10px"></div>
@@ -1958,7 +1524,7 @@ body.trace-admin .trace-rc-panel{
         
 <div class="row" style="flex-wrap:wrap">
   <button class="btn primary" id="btn_analyze" type="button">Create badge</button>
-  <button class="btn good" id="btn_share_badge" type="button" disabled="">Share badge</button>
+  <button class="btn good" id="btn_share_badge" type="button" disabled>Share badge</button>
   <button class="btn" id="btn_download_svg" type="button">Download SVG</button>
   <button class="btn" id="btn_save_json" type="button">Save proof (.json)</button>
 </div>
@@ -1995,7 +1561,7 @@ body.trace-admin .trace-rc-panel{
         <div class="dropzone" id="verify_dropzone" role="button" tabindex="0" aria-label="Upload proof JSON">
           <div class="dzTitle">Släpp <b>.json</b> här eller klicka för att välja fil</div>
           <div class="dzSub">Tips: Om du klickade en badge nyss kan du trycka <b>Load last</b>.</div>
-          <input id="file_proof" class="fileHidden" type="file" accept=".json,application/json">
+          <input id="file_proof" class="fileHidden" type="file" accept=".json,application/json"/>
         </div>
 
         <div class="row" style="margin-top:12px; gap:10px; flex-wrap:wrap">
@@ -2014,7 +1580,7 @@ body.trace-admin .trace-rc-panel{
 
         <details class="details" style="margin-top:12px">
           <summary>Visa rå JSON</summary>
-          <textarea id="verify_raw" class="mono" placeholder="Raw proof JSON (read-only)" readonly=""></textarea>
+          <textarea id="verify_raw" class="mono" placeholder="Raw proof JSON (read-only)" readonly></textarea>
         </details>
       </div>
 
@@ -2056,7 +1622,7 @@ body.trace-admin .trace-rc-panel{
 
         <div class="row" style="margin-top:10px;gap:10px;flex-wrap:wrap;align-items:center">
           <button class="btn ghost" id="btn_vaultkey_toggle">Show vault key</button>
-          <button class="btn ghost" id="btn_vaultkey_copy" disabled="">Copy</button>
+          <button class="btn ghost" id="btn_vaultkey_copy" disabled>Copy</button>
           <span class="hint monoWrap" id="vaultkey_value" style="max-width:360px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">••••••••••</span>
           <span class="hint" id="vaultkey_hint" style="margin-left:auto;color:#888">Locked</span>
         </div>
@@ -2093,11 +1659,12 @@ body.trace-admin .trace-rc-panel{
         </div>
 
         <div class="row" style="flex-wrap:wrap; gap:10px">
-          <input id="admin_winston_proxy" type="text" placeholder="https://din-backend.onrender.com/detect-image" style="min-width:320px; flex:1 1 420px">
+          <input id="admin_winston_proxy" type="text" placeholder="https://din-backend.onrender.com/detect-image"
+                 style="min-width:320px; flex:1 1 420px"/>
           <button class="btn primary" id="btn_winston_save" type="button">Save</button>
           <button class="btn ghost" id="btn_winston_test" type="button">Test with selected image</button>
         </div>
-        <div class="hint" id="winston_state" style="min-height:18px; margin-top:8px">Origin scan service ready.</div>
+        <div class="hint" id="winston_state" style="min-height:18px; margin-top:8px"></div>
       </div>
 
 
@@ -2120,14 +1687,14 @@ body.trace-admin .trace-rc-panel{
           <span class="hint" id="admin_glyph_state" style="min-height:18px"></span>
         </div>
         <div class="hint" style="margin-top:8px">
-          Storage: <b id="admin_storage_state" class="warn">BLOCKED (session-mode)</b> · Om policy blockerar lagring kör vi i “session-mode” men du kan fortfarande rendera badges.
+          Storage: <b id="admin_storage_state">—</b> · Om policy blockerar lagring kör vi i “session-mode” men du kan fortfarande rendera badges.
         </div>
       </div>
 
       <div class="card">
         <div class="cardTitle">Access</div>
         <div class="row">
-          <input id="admin_pin" type="password" placeholder="PIN">
+          <input id="admin_pin" type="password" placeholder="PIN"/>
           <button class="btn primary" id="btn_admin_unlock">Unlock</button>
           <button class="btn ghost" id="btn_admin_lock">Lock</button>
         </div>
@@ -2156,10 +1723,10 @@ body.trace-admin .trace-rc-panel{
 
       <div class="card">
         <div class="cardTitle">Notes</div>
-        <textarea id="admin_notes" class="mono" placeholder="(Unlock för att skriva)" disabled=""></textarea>
+        <textarea id="admin_notes" class="mono" placeholder="(Unlock för att skriva)" disabled></textarea>
         <div class="row" style="margin-top:10px;gap:10px;flex-wrap:wrap">
-          <button class="btn ghost" id="admin_notes_save" disabled="">Save notes</button>
-          <button class="btn ghost" id="admin_notes_clear" disabled="">Clear</button>
+          <button class="btn ghost" id="admin_notes_save" disabled>Save notes</button>
+          <button class="btn ghost" id="admin_notes_clear" disabled>Clear</button>
           <div class="hint" id="admin_notes_state" style="margin-left:auto;color:#888">Locked</div>
         </div>
         <div class="hint">Anteckningar sparas lokalt per aktiv användare (Owner Console).</div>
@@ -2175,7 +1742,7 @@ body.trace-admin .trace-rc-panel{
 
 </div>
 
-
+</div>
 
 <script>
 /* ========= tiny helpers ========= */
@@ -3205,58 +2772,30 @@ $("#file_img").addEventListener("change", ()=>{
 
 async function attemptWinstonAI(file){
   const fallback = { ok:false, score_0_1:1.0, ai_flag:true, reason:"winston_unavailable_or_failed" };
-  const cfg = window.TRACE_CONFIG || {};
-  if(cfg.ENABLE_ORIGIN_SCAN === false){
-    return { ok:false, score_0_1:0.0, ai_flag:false, reason:"origin_scan_disabled" };
-  }
   if(!file) return { ok:false, score_0_1:0.0, ai_flag:false, reason:"no_image" };
 
-  function setHumanScanStatus(msg){
-    try{
-      const a = document.getElementById("app_status");
-      if(a) a.textContent = msg;
-      const b = document.getElementById("app_origin_status");
-      if(b) b.textContent = msg;
-      const c = document.getElementById("winston_state");
-      if(c) c.textContent = msg;
-    }catch(e){}
-  }
-
-  function normalizeProxyEndpoint(raw){
-    let u = String(raw || "").trim();
-    if(!u) return "";
-    u = u.replace(/\/+$/,"");
-    const detectPath = String(cfg.DETECT_IMAGE_PATH || "/detect-image");
-    if(u.endsWith(detectPath)) return u;
-    return u + detectPath;
-  }
-
-  function proxyBaseFromEndpoint(endpoint){
-    const detectPath = String(cfg.DETECT_IMAGE_PATH || "/detect-image");
-    return String(endpoint || "").replace(new RegExp(detectPath.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "$"), "");
-  }
-
-  // Accept File | Blob | dataURL string.
+  // Accept File | Blob | dataURL string (so we ALWAYS upload a real file)
   let uploadObj = file;
   try{
-    if(typeof uploadObj === "string" && uploadObj.indexOf("data:image/") === 0){
+    if(typeof uploadObj === "string" && uploadObj.startsWith("data:image/")){
       const blob = await (await fetch(uploadObj)).blob();
-      const ext = (blob.type && blob.type.indexOf("png") >= 0) ? "png" :
-                  (blob.type && blob.type.indexOf("webp") >= 0) ? "webp" : "jpg";
+      const ext = (blob.type && blob.type.includes("png")) ? "png" :
+                  (blob.type && blob.type.includes("webp")) ? "webp" : "jpg";
       uploadObj = new File([blob], "upload."+ext, { type: blob.type || "image/jpeg" });
     }else if(uploadObj instanceof Blob && !(uploadObj instanceof File)){
-      const ext = (uploadObj.type && uploadObj.type.indexOf("png") >= 0) ? "png" :
-                  (uploadObj.type && uploadObj.type.indexOf("webp") >= 0) ? "webp" : "jpg";
+      const ext = (uploadObj.type && uploadObj.type.includes("png")) ? "png" :
+                  (uploadObj.type && uploadObj.type.includes("webp")) ? "webp" : "jpg";
       uploadObj = new File([uploadObj], "upload."+ext, { type: uploadObj.type || "image/jpeg" });
     }
   }catch(e){
-    return { ...fallback, reason:"prep_upload_failed", detail:String((e && e.message) || e) };
+    return { ...fallback, reason:"prep_upload_failed", detail:String(e?.message||e) };
   }
 
   if(!(uploadObj instanceof Blob)){
     return { ...fallback, reason:"bad_image_input_type", detail: typeof uploadObj };
   }
 
+  // Proxy URL priority: URL param -> saved -> default
   let urlProxy = "";
   try{
     const sp = new URLSearchParams(location.search || "");
@@ -3264,35 +2803,28 @@ async function attemptWinstonAI(file){
   }catch(e){ urlProxy = ""; }
 
   const savedProxy = (store.get("winston_proxy_url") || "").trim();
-  const configProxy = (cfg.PROXY_BASE_URL || "").trim();
-  const endpointBase = normalizeProxyEndpoint(urlProxy || savedProxy || configProxy);
+  const defaultProxy = "https://signai-tamy.onrender.com/detect-image";
+  const endpointBase = urlProxy || savedProxy || defaultProxy;
 
   if(location.protocol === "file:" && !endpointBase){
     return { ...fallback, reason:"proxy_not_configured_file_protocol" };
   }
-  if(!endpointBase){
-    return { ...fallback, reason:"proxy_not_configured" };
-  }
 
   const sleep = (ms)=>new Promise(r=>setTimeout(r,ms));
-  const retries = Math.max(1, Number(cfg.PROXY_RETRIES || 4));
-  const timeoutMs = Math.max(8000, Number(cfg.PROXY_TIMEOUT_MS || 30000));
-  const baseDelay = Math.max(250, Number(cfg.PROXY_RETRY_BASE_DELAY_MS || 900));
 
-  async function doFetchOnce(attempt){
-    const endpoint = endpointBase + (endpointBase.indexOf("?") >= 0 ? "&" : "?") + "t=" + Date.now();
+  async function doFetchOnce(){
+    // Cache-buster + no-store (some corporate stacks cache POST weirdly)
+    const endpoint = endpointBase + (endpointBase.includes("?") ? "&" : "?") + "t=" + Date.now();
 
     const fd = new FormData();
+    // IMPORTANT: provide filename so multer always fills req.file
     const fname = (uploadObj instanceof File && uploadObj.name) ? uploadObj.name : "upload.jpg";
     fd.append("image", uploadObj, fname);
 
     const ctrl = new AbortController();
-    const timeout = setTimeout(()=>ctrl.abort(), timeoutMs);
+    const timeout = setTimeout(()=>ctrl.abort(), 20000);
 
     try{
-      if(attempt === 1) setHumanScanStatus("Origin scan service is starting…");
-      else setHumanScanStatus("Origin scan is retrying…");
-
       const res = await fetch(endpoint, {
         method:"POST",
         body: fd,
@@ -3318,6 +2850,7 @@ async function attemptWinstonAI(file){
         return { ...fallback, reason:"proxy_bad_json", endpoint:endpointBase };
       }
 
+      // Prefer precision fields if backend returns them (server_v3 does)
       let aiScore = null;
       const p = data.parsed || null;
 
@@ -3334,6 +2867,7 @@ async function attemptWinstonAI(file){
         }
       }
 
+      // Fallback: ai_score
       if(aiScore === null){
         let n = Number(data.ai_score ?? data.aiScore ?? data.score ?? NaN);
         if(Number.isFinite(n)){
@@ -3347,38 +2881,33 @@ async function attemptWinstonAI(file){
       }
 
       aiScore = clamp01(aiScore);
-      setHumanScanStatus("Origin scan complete.");
       return { ok:true, score_0_1: aiScore, ai_flag:(aiScore>=0.5), reason:"winston_proxy_ok", endpoint:endpointBase, raw:data };
     }catch(e){
-      return { ...fallback, reason:"proxy_network_or_blocked", detail:String((e && e.message) || e), endpoint:endpointBase };
+      return { ...fallback, reason:"proxy_network_or_blocked", detail:String(e?.message||e), endpoint:endpointBase };
     }finally{
       clearTimeout(timeout);
     }
   }
 
+  // Retry once on transient errors
   let last = null;
-  for(let attempt=1; attempt<=retries; attempt++){
-    const r = await doFetchOnce(attempt);
+  for(let attempt=1; attempt<=2; attempt++){
+    const r = await doFetchOnce();
     if(r.ok) return r;
 
     last = r;
     const st = Number(r.status||0);
     const transient =
       r.reason==="proxy_network_or_blocked" ||
-      r.reason==="proxy_bad_json" ||
-      (String(r.reason).indexOf("proxy_http_") === 0 && [408,425,429,500,502,503,504].includes(st));
+      (String(r.reason).startsWith("proxy_http_") && [429,500,502,503,504].includes(st));
 
-    if(transient && attempt<retries){
-      setHumanScanStatus("Origin scan service is waking up. This can take a moment…");
-      await sleep(baseDelay * attempt);
+    if(transient && attempt<2){
+      await sleep(450*attempt);
       continue;
     }
-
-    setHumanScanStatus("Origin scan unavailable. Badge can still be created with local fallback.");
     return r;
   }
 
-  setHumanScanStatus("Origin scan unavailable. Badge can still be created with local fallback.");
   return last || { ...fallback, reason:"proxy_failed_or_blocked" };
 }
 
@@ -3836,16 +3365,14 @@ function makeBadgeHtml(proof){
   const ai = !!proof.origin.ai_flag;
   const scoreTxt = (proof.origin.score_0_1*100).toFixed(1)+"%";
   const windowS = proof.window_s;
-  const artworkThumbUrl = (proof.wm_data_url || proof.thumb_data_url || proof.img_data_url) || null;
-  const escapedImgKey = escapeHtml(proof.badge_key || "");
 
   const helix = makeHelixSvg(proof.glyph_seed, ai, (proof?.origin?.score_0_1 ?? NaN), (proof.thumb_data_url || proof.img_data_url)||null, {mode:"badge", style: (window.__traceGlyphStyleOverride || proof.glyph_style || (typeof window.__traceGetGlyphStyle==="function"?window.__traceGetGlyphStyle():"orbit_ring")), meta:{payloadLen:(proof.payload_text||"").length, hasImg:!!proof.img_hash}});
 
   return `
-    <div class="badge ${ai?"bad":"good"}${artworkThumbUrl?" withArtworkThumb":""}" id="badge_click">
+    <div class="badge ${ai?"bad":"good"}" id="badge_click">
       <div class="cornerDot"></div>
       <div class="badgeInner">
-        <div class="glyphBox" data-imgkey="${escapedImgKey}" title="View image">${helix}${artworkThumbUrl?`<div class="thumbWatermark clickable" data-imgkey="${escapedImgKey}" title="View image" style="background-image:url(${artworkThumbUrl})"></div>`:""}</div>
+        <div class="glyphBox" data-imgkey="${escapeHtml(proof.badge_key||"")}" title="View image">${helix}${(proof.wm_data_url || proof.thumb_data_url || proof.img_data_url)?`<div class="thumbWatermark clickable" data-imgkey="${escapeHtml(proof.badge_key||"")}" title="View image" style="background-image:url(${(proof.wm_data_url || proof.thumb_data_url || proof.img_data_url)})"></div>`:""}</div>
         <div class="badgeRight">
           <div class="badgeTop">
             <div>
@@ -3860,7 +3387,6 @@ function makeBadgeHtml(proof){
           </div>
         </div>
       </div>
-      ${artworkThumbUrl?`<div class="badgeArtworkThumb clickable" data-imgkey="${escapedImgKey}" title="Artwork preview" style="background-image:url(${artworkThumbUrl})"><span class="badgeArtworkThumbLabel">Artwork</span></div>`:""}
     </div>
   `;
 }
@@ -4885,25 +4411,25 @@ document.addEventListener("DOMContentLoaded",()=>{
         <button class="btn" id="img_modal_close" type="button">Close</button>
       </div>
       <div class="imgModalBody">
-        <img class="imgModalImg" id="img_modal_img" alt="Uploaded image preview">
+        <img class="imgModalImg" id="img_modal_img" alt="Uploaded image preview"/>
       </div>
     </div>
   </div>
 
 
   <!-- Share badge preview modal -->
-  <div class="imgModal hide" id="share_modal" role="dialog" aria-modal="true" aria-label="Share badge preview" style="--share-stage-size: 220px;">
+  <div class="imgModal hide" id="share_modal" role="dialog" aria-modal="true" aria-label="Share badge preview">
     <div class="imgModalCard">
       <div class="imgModalTop">
         <div>
           <div class="title">Share badge artifact</div>
-          <div class="meta" id="share_modal_meta">Page 1 of 2 · Artwork + glyph · 1080 × 1080 PNG</div>
+          <div class="meta" id="share_modal_meta">Page 1 of 2 · Artwork focus · 1080 × 1080 PNG</div>
         </div>
         <div class="spacer"></div>
         <div class="shareModalNav">
-          <button class="btn" id="btn_share_prev" type="button" disabled="disabled">← Prev</button>
+          <button class="btn" id="btn_share_prev" type="button" disabled>← Prev</button>
           <div class="shareModalPageCount" id="share_modal_pagecount">1 / 2</div>
-          <button class="btn" id="btn_share_next" type="button" disabled="disabled">Next →</button>
+          <button class="btn" id="btn_share_next" type="button">Next →</button>
         </div>
         <button class="btn good" id="btn_share_download" type="button">Download PNG</button>
         <button class="btn" id="btn_share_close" type="button">Close</button>
@@ -4911,7 +4437,7 @@ document.addEventListener("DOMContentLoaded",()=>{
       <div class="imgModalBody">
         <div class="shareModalStage" id="share_modal_stage">
           <div class="shareModalLivePage" id="share_modal_live" aria-label="Animated share artifact preview"></div>
-          <img class="shareModalImg hide" id="share_modal_img" alt="Share badge artifact preview" src="">
+          <img class="shareModalImg hide" id="share_modal_img" alt="Share badge artifact preview"/>
         </div>
       </div>
     </div>
@@ -6759,13 +6285,11 @@ document.addEventListener("DOMContentLoaded",()=>{
         click("btn_unlock");
       }
       window.__traceConsumerBadgeCreating = true;
-      window.__traceConsumerBadgeCreated = false;
-      try{ const bw=document.getElementById("badge_wrap"); if(bw) bw.innerHTML=""; }catch(e){}
-      try{ window.__traceCurrentCreateStartedAt = Date.now(); }catch(e){}
+      window.__traceConsumerBadgeCreated = true;
       setStatus("Creating badge… running Trace engine.");
       setTimeout(()=>setStatus("Running origin scan and generating glyph…"),350);
       setTimeout(()=>click("btn_analyze"),650);
-      setTimeout(()=>{ syncEngineToApp(); setStatus("Still working…"); },1800);
+      setTimeout(()=>{ syncEngineToApp(); setStatus("Badge ready."); },1800);
       setTimeout(syncEngineToApp,3200);
     });
     $("app_share_badge")?.addEventListener("click",()=>click("btn_share_badge"));
@@ -7206,6 +6730,149 @@ body:not(.trace-engine-visible) #trace_app_shell{display:block!important}
   }
 </style>
 
+<script id="trace-app-glyph-visible-fix">
+/* Fix: consumer app result must render the same real glyph/badge as the engine,
+   while the engine stays hidden unless Advanced is opened. */
+(function(){
+  const $ = (id)=>document.getElementById(id);
+
+  function hasRealBadgeHtml(html){
+    return !!(html && html.trim() && /class=["'][^"']*badge/.test(html));
+  }
+
+  function buildBadgeHtmlFromEngine(){
+    if(!window.__traceConsumerBadgeCreated) return "";
+    try{
+      if(typeof lastProof !== "undefined" && lastProof && typeof makeBadgeHtml === "function"){
+        return makeBadgeHtml(lastProof);
+      }
+    }catch(e){}
+    const old = $("badge_wrap");
+    return old && hasRealBadgeHtml(old.innerHTML) ? old.innerHTML : "";
+  }
+
+  function ensureGlyphInsideBadge(appBadge){
+    if(!appBadge) return;
+    let svg = appBadge.querySelector("svg.glyph3d");
+    if(svg) return svg;
+
+    try{
+      if(typeof lastProof !== "undefined" && lastProof && typeof makeHelixSvg === "function"){
+        const ai = !!(lastProof.origin && lastProof.origin.ai_flag);
+        const score = lastProof.origin ? lastProof.origin.score_0_1 : NaN;
+        const img = (lastProof.thumb_data_url || lastProof.img_data_url) || null;
+        const glyphHtml = makeHelixSvg(
+          lastProof.glyph_seed,
+          ai,
+          score,
+          img,
+          {
+            mode:"badge",
+            style:(window.__traceGlyphStyleOverride || lastProof.glyph_style || (typeof window.__traceGetGlyphStyle==="function" ? window.__traceGetGlyphStyle() : "orbit_ring")),
+            meta:{payloadLen:(lastProof.payload_text||"").length, hasImg:!!lastProof.img_hash}
+          }
+        );
+        const box = appBadge.querySelector(".glyphBox");
+        if(box){
+          box.insertAdjacentHTML("afterbegin", glyphHtml);
+          svg = box.querySelector("svg.glyph3d");
+        }
+      }
+    }catch(e){}
+    return svg;
+  }
+
+  function renderConsumerBadge(){
+    const appBadge = $("app_badge_result");
+    if(!appBadge) return;
+
+    if(!window.__traceConsumerBadgeCreated){
+      if(!appBadge.querySelector(".empty-glyph")){
+        appBadge.innerHTML = '<div class="empty-glyph">TRACE</div>';
+      }
+      appBadge.removeAttribute("data-rendered-badge-key");
+      if($("app_result_pill")){
+        $("app_result_pill").textContent = "Waiting";
+        $("app_result_pill").className = "status-pill idle";
+      }
+      if($("app_result_title")) $("app_result_title").textContent = "Your badge will appear here";
+      if($("app_result_sub")) $("app_result_sub").textContent = "Upload artwork, then create a badge.";
+      if($("app_badge_state")) $("app_badge_state").textContent = "Not created";
+      if($("app_share_badge")) $("app_share_badge").disabled = true;
+      if($("app_download_png")) $("app_download_png").disabled = true;
+      return;
+    }
+
+    const html = buildBadgeHtmlFromEngine();
+    if(!html) return;
+
+    const currentKey = appBadge.getAttribute("data-rendered-badge-key") || "";
+    let nextKey = "";
+    try{
+      if(typeof lastProof !== "undefined" && lastProof && lastProof.badge_key) nextKey = String(lastProof.badge_key);
+    }catch(e){}
+    if(!nextKey){
+      const m = html.match(/data-imgkey=["']([^"']+)/);
+      nextKey = m ? m[1] : String(html.length);
+    }
+
+    const hasSvgAlready = !!appBadge.querySelector("svg.glyph3d");
+    if(currentKey !== nextKey || !hasSvgAlready || !hasRealBadgeHtml(appBadge.innerHTML)){
+      appBadge.innerHTML = html;
+      appBadge.querySelectorAll("[id]").forEach(n=>{ if(!n.closest("svg")) n.removeAttribute("id"); });
+      appBadge.setAttribute("data-rendered-badge-key", nextKey);
+    }
+
+    const svg = ensureGlyphInsideBadge(appBadge);
+    try{
+      if(svg && typeof startGlyphMotion === "function") startGlyphMotion(svg);
+    }catch(e){}
+
+    const hasBadge = !!appBadge.querySelector(".badge");
+    if($("app_result_pill")){
+      $("app_result_pill").textContent = hasBadge ? "Ready" : "Waiting";
+      $("app_result_pill").className = "status-pill " + (hasBadge ? "ready" : "idle");
+    }
+    if($("app_result_title")) $("app_result_title").textContent = hasBadge ? "Badge ready" : "Your badge will appear here";
+    if($("app_result_sub")) $("app_result_sub").textContent = hasBadge ? "Trace glyph and verification proof are ready to share." : "Upload artwork, then create a badge.";
+    if($("app_badge_state")) $("app_badge_state").textContent = hasBadge ? "Created" : "Not created";
+
+    const oldShare = $("btn_share_badge");
+    const canShare = hasBadge && oldShare && !oldShare.disabled;
+    if($("app_share_badge")) $("app_share_badge").disabled = !canShare;
+    if($("app_download_png")) $("app_download_png").disabled = !canShare;
+  }
+
+  function wire(){
+    const old = $("badge_wrap");
+    if(old){
+      new MutationObserver(renderConsumerBadge).observe(old,{childList:true,subtree:true,attributes:true,characterData:true});
+    }
+    const btn = $("app_create_badge");
+    if(btn){
+      btn.addEventListener("click",()=>{
+        setTimeout(renderConsumerBadge,900);
+        setTimeout(renderConsumerBadge,1800);
+        setTimeout(renderConsumerBadge,3400);
+      },true);
+    }
+    document.addEventListener("click",(e)=>{
+      if(e.target && e.target.closest && e.target.closest("[data-trace-tab]")){
+        setTimeout(renderConsumerBadge,80);
+      }
+    },true);
+    setInterval(renderConsumerBadge,900);
+    setTimeout(renderConsumerBadge,600);
+  }
+
+  if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", wire);
+  else wire();
+
+  window.__traceRenderConsumerBadge = renderConsumerBadge;
+})();
+</script>
+
+
 <style id="trace-consumer-idle-result-stability">
   #app_badge_result .empty-glyph{
     animation:none!important;
@@ -7215,6 +6882,26 @@ body:not(.trace-engine-visible) #trace_app_shell{display:block!important}
     animation:none!important;
   }
 </style>
+<script id="trace-consumer-idle-result-stability">
+(function(){
+  const $ = (id)=>document.getElementById(id);
+  function idleGuard(){
+    const box=$("app_badge_result");
+    if(!box) return;
+    if(!window.__traceConsumerBadgeCreated){
+      box.setAttribute("data-idle","true");
+      if(!box.querySelector(".empty-glyph")) box.innerHTML='<div class="empty-glyph">TRACE</div>';
+    }else{
+      box.removeAttribute("data-idle");
+    }
+  }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded", idleGuard);
+  else idleGuard();
+  setInterval(idleGuard,700);
+})();
+</script>
+
+
 <style id="trace-mindprint-meter-and-glyph-id-fix">
   .trace-mp-meter{
     display:flex;align-items:center;justify-content:space-between;gap:10px;
@@ -7827,246 +7514,201 @@ body:not(.trace-engine-visible) #trace_app_shell{display:block!important}
     animation:none!important;
   }
 </style>
+<script id="trace-idle-copy-single-lock">
+(function(){
+  const $ = (id)=>document.getElementById(id);
+  const IDLE_TITLE = "Your badge will appear here";
+  const IDLE_SUB = "Upload artwork, then create a badge.";
+  let locking = false;
 
-<style id="trace-stable-consumer-result-v2-css">
-  #app_badge_result{
-    contain:layout paint;
+  function isIdle(){
+    const pill = $("app_result_pill");
+    const box = $("app_badge_result");
+    const badgeState = $("app_badge_state");
+    return !!(
+      pill && /waiting/i.test(pill.textContent || "") &&
+      box && !box.querySelector(".badge") &&
+      !(window.__traceConsumerBadgeCreated || window.__traceConsumerBadgeCreating) &&
+      (!badgeState || /not created/i.test(badgeState.textContent || ""))
+    );
   }
-  #app_badge_result.trace-result-idle,
-  #app_badge_result.trace-result-creating{
-    min-height:320px;
-    display:grid;
-    place-items:center;
+
+  function lockIdleCopy(){
+    if(locking || !isIdle()) return;
+    locking = true;
+    const title = $("app_result_title");
+    const sub = $("app_result_sub");
+    if(title && title.textContent !== IDLE_TITLE) title.textContent = IDLE_TITLE;
+    if(sub){
+      sub.classList.add("trace-copy-locked");
+      if(sub.textContent !== IDLE_SUB) sub.textContent = IDLE_SUB;
+    }
+    locking = false;
   }
+
+  function wire(){
+    lockIdleCopy();
+    ["app_result_title","app_result_sub","app_result_pill","app_badge_state","app_badge_result"].forEach(id=>{
+      const el=$(id);
+      if(el) new MutationObserver(()=>requestAnimationFrame(lockIdleCopy))
+        .observe(el,{childList:true,subtree:true,characterData:true,attributes:true});
+    });
+    setInterval(lockIdleCopy, 300);
+  }
+
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded", wire);
+  else wire();
+})();
+</script>
+
+
+<script id="trace-final-result-ready-safety">
+(function(){
+  const $ = (id)=>document.getElementById(id);
+  function hasProof(){
+    try{ return !!(typeof lastProof !== "undefined" && lastProof); }catch(e){ return false; }
+  }
+  function hasBadgeHtml(){
+    const wrap=$("badge_wrap");
+    return !!(wrap && /class=["'][^"']*badge/.test(wrap.innerHTML||""));
+  }
+  function nudgeReady(){
+    if(!(window.__traceConsumerBadgeCreating || window.__traceConsumerBadgeCreated)) return;
+    if(!(hasProof() || hasBadgeHtml())) return;
+    window.__traceConsumerBadgeCreated = true;
+    window.__traceConsumerBadgeCreating = false;
+    try{ if(typeof window.__traceStableResultStabilize === "function") window.__traceStableResultStabilize(); }catch(e){}
+  }
+  const wrap=$("badge_wrap");
+  if(wrap) new MutationObserver(()=>setTimeout(nudgeReady,60)).observe(wrap,{childList:true,subtree:true,characterData:true});
+  setInterval(nudgeReady, 900);
+})();
+</script>
+
+<style id="trace-app-badge-final-render-css">
   #app_badge_result.trace-result-ready{
     min-height:320px;
     display:grid;
     place-items:center;
     overflow:visible;
-    animation:none!important;
-    transition:box-shadow .18s ease, border-color .18s ease!important;
   }
   #app_badge_result.trace-result-ready .badge{
     width:100%;
     max-width:520px;
     margin:0 auto;
   }
-  #app_badge_result .empty-glyph{
-    width:132px;height:132px;border-radius:34px;
-    display:grid;place-items:center;
-    letter-spacing:.38em;font-weight:900;
-    color:rgba(255,255,255,.78);
-    border:1px solid rgba(255,255,255,.13);
-    background:radial-gradient(circle at 50% 40%, rgba(255,255,255,.08), rgba(255,255,255,.025));
-  }
-  .trace-app-polish #trace_app_shell .app-card,
-  .trace-app-polish #trace_app_shell .result-card{
-    backdrop-filter: blur(18px);
-    border-color:rgba(255,255,255,.12);
-  }
-  .trace-app-polish #app_create_badge:not(:disabled){
-    box-shadow:0 14px 38px rgba(73, 222, 128, .18);
-  }
 </style>
-<script id="trace-stable-consumer-result-v2">
-/* Stable consumer result manager.
-   Only renders a badge after the current app session has actually clicked Create Badge
-   and the engine writes a fresh badge to #badge_wrap. It ignores stale lastProof/badge
-   data left from older profiles or Advanced mode. */
+<script id="trace-app-badge-final-render-fix">
 (function(){
   const $ = (id)=>document.getElementById(id);
-  const IDLE_TITLE = "Your badge will appear here";
-  const IDLE_SUB = "Upload artwork, then create a badge.";
-  let createToken = 0;
-  let lockedKey = "";
-  let lastStatus = "";
+  let lastRenderedKey = "";
+  let watchUntil = 0;
 
   function validBadgeHtml(html){
     html = String(html || "");
-    if(html.length < 100) return false;
-    if(/Your badge will appear here|empty-glyph|WAITING|Not created/i.test(html)) return false;
-    return (
+    return html.length > 80 && (
       /class=["'][^"']*\bbadge\b/.test(html) ||
       /class=["'][^"']*glyphBox/.test(html)
-    ) && /(glyph3d|<svg|glyphBox|badge)/i.test(html);
+    ) && /(glyph3d|<svg|glyphBox)/i.test(html);
   }
 
-  function badgeHtmlFromEngine(){
+  function getBadgeHtml(){
+    try{
+      if(typeof lastProof !== "undefined" && lastProof && typeof makeBadgeHtml === "function"){
+        const html = makeBadgeHtml(lastProof);
+        if(validBadgeHtml(html)) return html;
+      }
+    }catch(e){}
     const wrap = $("badge_wrap");
-    const html = wrap ? wrap.innerHTML : "";
-    return validBadgeHtml(html) ? html : "";
+    const wh = wrap ? wrap.innerHTML : "";
+    if(validBadgeHtml(wh)) return wh;
+    return "";
   }
 
   function keyFor(html){
-    return String(html.length) + ":" + html.slice(0,260).replace(/\s+/g," ");
+    return String(html.length) + ":" + html.slice(0,220).replace(/\s+/g," ");
   }
 
-  function setText(id, text){
-    const el=$(id);
-    if(el && el.textContent !== text) el.textContent = text;
+  function setResultCopyReady(){
+    const title=$("app_result_title"), sub=$("app_result_sub"), pill=$("app_result_pill");
+    if(title) title.textContent = "Badge ready";
+    if(sub) sub.textContent = "Trace glyph and verification proof are ready to share.";
+    if(pill){ pill.textContent = "Ready"; pill.className = "status-pill ready"; }
+    if($("app_badge_state")) $("app_badge_state").textContent = "Created";
   }
 
-  function setPill(text, cls){
-    const pill=$("app_result_pill");
-    if(!pill) return;
-    if(pill.textContent !== text) pill.textContent = text;
-    pill.className = "status-pill " + cls;
-  }
+  function renderBadgeToApp(force){
+    const html = getBadgeHtml();
+    if(!validBadgeHtml(html)) return false;
 
-  function setShare(enabled){
-    const share=$("app_share_badge");
-    const dl=$("app_download_png");
-    if(share) share.disabled = !enabled;
-    if(dl) dl.disabled = !enabled;
-  }
+    window.__traceConsumerBadgeCreated = true;
+    window.__traceConsumerBadgeCreating = false;
 
-  function setIdle(){
-    if(window.__traceConsumerBadgeCreating) return;
-    window.__traceConsumerBadgeCreated = false;
-    lockedKey = "";
-    const box=$("app_badge_result");
-    if(box){
-      box.classList.remove("trace-result-ready","trace-result-creating","trace-no-blink-locked");
-      box.classList.add("trace-result-idle");
-      box.removeAttribute("data-badge-key");
-      if(!box.querySelector(".empty-glyph") || box.children.length !== 1){
-        box.innerHTML = '<div class="empty-glyph">TRACE</div>';
-      }
-    }
-    setText("app_result_title", IDLE_TITLE);
-    setText("app_result_sub", IDLE_SUB);
-    setPill("Waiting","idle");
-    setText("app_badge_state","Not created");
-    setShare(false);
-  }
-
-  function setCreating(){
-    const box=$("app_badge_result");
-    if(box && !box.classList.contains("trace-result-ready")){
-      box.classList.remove("trace-result-idle");
-      box.classList.add("trace-result-creating");
-      if(!box.querySelector(".empty-glyph") || box.children.length !== 1){
-        box.innerHTML = '<div class="empty-glyph">TRACE</div>';
-      }
-    }
-    setText("app_result_title","Creating badge");
-    setText("app_result_sub","Running Trace engine and origin scan.");
-    setPill("Creating","warn");
-    setText("app_badge_state","Creating");
-    setShare(false);
-  }
-
-  function renderReady(force){
-    if(!window.__traceConsumerBadgeCreated) return false;
-    const html = badgeHtmlFromEngine();
-    if(!html) return false;
-    const box=$("app_badge_result");
+    const box = $("app_badge_result");
     if(!box) return false;
 
-    const key = keyFor(html);
-    if(force || key !== lockedKey || box.getAttribute("data-badge-key") !== key || !box.querySelector(".badge,.glyphBox,svg.glyph3d")){
+    const k = keyFor(html);
+    if(force || lastRenderedKey !== k || !box.querySelector(".badge, .glyphBox, svg.glyph3d")){
       box.classList.remove("trace-result-idle","trace-result-creating");
-      box.classList.add("trace-result-ready","trace-no-blink-locked");
-      box.setAttribute("data-badge-key", key);
+      box.classList.add("trace-result-ready");
       box.innerHTML = html;
-      box.querySelectorAll("[id]").forEach(n=>{ if(!n.closest("svg")) n.removeAttribute("id"); });
+      box.querySelectorAll("[id]").forEach(n=>{
+        if(!n.closest("svg")) n.removeAttribute("id");
+      });
       try{
         const svg = box.querySelector("svg.glyph3d");
         if(svg && typeof startGlyphMotion === "function") startGlyphMotion(svg);
       }catch(e){}
-      lockedKey = key;
+      lastRenderedKey = k;
     }
-    setText("app_result_title","Badge ready");
-    setText("app_result_sub","Trace glyph and verification proof are ready to share.");
-    setPill("Ready","ready");
-    setText("app_badge_state","Created");
-    const oldShare=$("btn_share_badge");
-    setShare(!!(oldShare && !oldShare.disabled));
+
+    setResultCopyReady();
+    const oldShare = $("btn_share_badge");
+    const canShare = !!(oldShare && !oldShare.disabled);
+    if($("app_share_badge")) $("app_share_badge").disabled = !canShare;
+    if($("app_download_png")) $("app_download_png").disabled = !canShare;
     return true;
   }
 
-  function startCreate(){
-    createToken++;
-    lockedKey = "";
-    window.__traceConsumerBadgeCreated = false;
-    window.__traceConsumerBadgeCreating = true;
-    window.__traceCurrentCreateStartedAt = Date.now();
-    try{ const wrap=$("badge_wrap"); if(wrap) wrap.innerHTML = ""; }catch(e){}
-    setCreating();
-    const token = createToken;
-    [400,900,1500,2400,3800,6000,9000,14000,22000,34000,46000].forEach(ms=>{
-      setTimeout(()=>{
-        if(token !== createToken) return;
-        if(window.__traceConsumerBadgeCreated) renderReady(false);
-        else setCreating();
-      }, ms);
-    });
-  }
-
-  function acceptFreshEngineBadge(){
-    if(!window.__traceConsumerBadgeCreating) return;
-    const html = badgeHtmlFromEngine();
-    if(!html) return;
-    window.__traceConsumerBadgeCreating = false;
-    window.__traceConsumerBadgeCreated = true;
-    renderReady(true);
-  }
-
-  function resetConsumerOnly(){
-    createToken++;
-    window.__traceConsumerBadgeCreating = false;
-    window.__traceConsumerBadgeCreated = false;
-    try{ const wrap=$("badge_wrap"); if(wrap) wrap.innerHTML = ""; }catch(e){}
-    setIdle();
-  }
-
   function tick(){
-    if(window.__traceConsumerBadgeCreated){
-      renderReady(false);
-    }else if(window.__traceConsumerBadgeCreating){
-      acceptFreshEngineBadge();
-      if(!window.__traceConsumerBadgeCreated) setCreating();
-    }else{
-      setIdle();
+    const now = Date.now();
+    const hasEngineBadge = validBadgeHtml(getBadgeHtml());
+    if(hasEngineBadge){
+      renderBadgeToApp(false);
+      return;
     }
-    const status = (($("app_result_title")?.textContent||"") + "|" + ($("app_result_sub")?.textContent||""));
-    if(status !== lastStatus) lastStatus = status;
+    if(now < watchUntil){
+      // Keep creating state stable while the engine is still working.
+      const title=$("app_result_title"), sub=$("app_result_sub"), pill=$("app_result_pill");
+      if(title) title.textContent = "Creating badge";
+      if(sub) sub.textContent = "Running Trace engine and origin scan.";
+      if(pill){ pill.textContent = "Creating"; pill.className = "status-pill warn"; }
+      if($("app_badge_state")) $("app_badge_state").textContent = "Creating";
+    }
   }
 
   function wire(){
-    document.body.classList.add("trace-app-polish");
-    // Always start a fresh consumer session on load/login; never show stale badges.
-    resetConsumerOnly();
+    const create = $("app_create_badge");
+    if(create){
+      create.addEventListener("click", ()=>{
+        watchUntil = Date.now() + 45000;
+        lastRenderedKey = "";
+        [500,1000,1800,3000,5000,8000,12000,18000,26000,36000,44000].forEach(ms=>{
+          setTimeout(()=>renderBadgeToApp(false) || tick(), ms);
+        });
+      }, true);
+    }
 
-    const create=$("app_create_badge");
-    if(create) create.addEventListener("click", startCreate, true);
-
-    ["app_new_badge","btn_reset"].forEach(id=>{
-      const el=$(id);
-      if(el) el.addEventListener("click",()=>setTimeout(resetConsumerOnly,80), true);
-    });
-
-    const wrap=$("badge_wrap");
+    const wrap = $("badge_wrap");
     if(wrap){
-      new MutationObserver(()=>setTimeout(acceptFreshEngineBadge,30))
+      new MutationObserver(()=>setTimeout(()=>renderBadgeToApp(true),40))
         .observe(wrap,{childList:true,subtree:true,characterData:true,attributes:true});
     }
 
-    // If login/register buttons exist, reset the consumer card for the new profile.
-    ["auth_btn","trace_admin_1996","trace_hero_login","trace_hero_signup","trace_nav_login","trace_nav_signup"].forEach(id=>{
-      const el=$(id);
-      if(el) el.addEventListener("click",()=>setTimeout(resetConsumerOnly,120), true);
-    });
+    // Public rescue hook for other scripts.
+    window.__traceRenderRealBadgeToApp = function(){ return renderBadgeToApp(true); };
 
-    window.__traceRenderRealBadgeToApp = function(){
-      if(window.__traceConsumerBadgeCreated) return renderReady(true);
-      return false;
-    };
-    window.__traceConsumerResetResultCard = resetConsumerOnly;
-    window.__traceConsumerStartCreateState = startCreate;
-
-    setInterval(tick, 700);
-    setTimeout(setIdle, 200);
+    setInterval(tick, 350);
   }
 
   if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", wire);
@@ -8075,322 +7717,175 @@ body:not(.trace-engine-visible) #trace_app_shell{display:block!important}
 </script>
 
 
-<script id="trace_stability_runtime_patch">
+<style id="trace-no-blink-result-lock-css">
+  #app_badge_result.trace-result-ready{
+    animation:none!important;
+    transition:none!important;
+  }
+  #app_badge_result.trace-result-ready .empty-glyph{
+    display:none!important;
+  }
+</style>
+<script id="trace-no-blink-result-lock">
+/* Final anti-blink patch:
+   The old stable-result manager could reset the app card to idle while the engine badge
+   already existed. This patch makes engine badge presence the single source of truth
+   after Create Badge, and never swaps back to idle unless New/Reset is clicked. */
 (function(){
-  let traceBadgeReady = false;
-  let lastStableHTML = "";
+  const $ = (id)=>document.getElementById(id);
+  let lockedReadyKey = "";
 
-  function qs(id){ return document.getElementById(id); }
-
-  function stabilizeResult(){
-    const result = qs("app_badge_result");
-    const pill = qs("app_result_pill");
-    const title = qs("app_result_title");
-    const sub = qs("app_result_sub");
-
-    if(!result || !pill || !title || !sub) return;
-
-    const hasBadge = !!result.querySelector(".badge");
-
-    if(hasBadge){
-      traceBadgeReady = true;
-      lastStableHTML = result.innerHTML;
-
-      pill.textContent = "Badge Ready";
-      pill.className = "status-pill ready";
-
-      title.textContent = "Trace badge created";
-      sub.textContent = "Human-made digital artwork verified in TRACE.";
-    }else if(!traceBadgeReady){
-      pill.textContent = "Waiting";
-      pill.className = "status-pill idle";
-
-      title.textContent = "Your badge will appear here";
-      sub.textContent = "Upload artwork, then create a badge.";
-    }else if(lastStableHTML){
-      result.innerHTML = lastStableHTML;
-    }
+  function validBadgeHtml(html){
+    html = String(html || "");
+    return html.length > 80 && (
+      /class=["'][^"']*\bbadge\b/.test(html) ||
+      /class=["'][^"']*glyphBox/.test(html)
+    ) && /(glyph3d|<svg|glyphBox)/i.test(html);
   }
 
-  function hardResetUI(){
-    traceBadgeReady = false;
-    lastStableHTML = "";
-
-    const result = qs("app_badge_result");
-    if(result){
-      result.innerHTML = '<div class="empty-glyph">TRACE</div>';
-    }
-
-    const pill = qs("app_result_pill");
-    if(pill){
-      pill.textContent = "Waiting";
-      pill.className = "status-pill idle";
-    }
-
-    const title = qs("app_result_title");
-    if(title){
-      title.textContent = "Your badge will appear here";
-    }
-
-    const sub = qs("app_result_sub");
-    if(sub){
-      sub.textContent = "Upload artwork, then create a badge.";
-    }
-  }
-
-  window.__traceHardResetUI = hardResetUI;
-
-  document.addEventListener("DOMContentLoaded", function(){
-    hardResetUI();
-
-    const observer = new MutationObserver(function(){
-      stabilizeResult();
-    });
-
-    const result = qs("app_badge_result");
-    if(result){
-      observer.observe(result, {
-        childList:true,
-        subtree:true
-      });
-    }
-
-    const resetBtn = qs("app_new_badge");
-    if(resetBtn){
-      resetBtn.addEventListener("click", function(){
-        setTimeout(hardResetUI, 40);
-      });
-    }
-
-    const tabs = document.querySelectorAll("[data-trace-tab]");
-    tabs.forEach(btn=>{
-      btn.addEventListener("click", function(){
-        setTimeout(stabilizeResult, 60);
-      });
-    });
-
-    setTimeout(stabilizeResult, 300);
-  });
-})();
-</script>
-
-
-<script id="trace_app_store_phase1_js">
-(function(){
-  const PROFILE_MIN = 20;
-  const BADGE_MIN = 10;
-
-  function $(id){ return document.getElementById(id); }
-  function safeText(el, text){ if(el) el.textContent = text; }
-  function isAdmin(){
+  function getEngineBadgeHtml(){
     try{
-      return localStorage.getItem("trace_admin")==="true" ||
-             localStorage.getItem("trace_active_user")==="1996" ||
-             localStorage.getItem("trace_active_user")==="admin";
-    }catch(e){ return false; }
-  }
-
-  function applyRole(){
-    document.body.classList.toggle("trace-admin", isAdmin());
-    if(!isAdmin()){
-      document.body.classList.remove("trace-engine-visible");
-      const adv = $("app_advanced");
-      if(adv) adv.open = false;
-    }
-  }
-
-  function addMeter(textarea, min, label){
-    if(!textarea || textarea.dataset.traceMeterReady) return;
-    textarea.dataset.traceMeterReady = "1";
-
-    const meter = document.createElement("div");
-    meter.className = "trace-mp-meter";
-    meter.innerHTML = "<i></i>";
-
-    const note = document.createElement("div");
-    note.className = "trace-mp-note";
-    note.textContent = "0/" + min + " characters";
-
-    textarea.insertAdjacentElement("afterend", note);
-    textarea.insertAdjacentElement("afterend", meter);
-
-    const fill = meter.querySelector("i");
-
-    function update(){
-      const len = (textarea.value || "").trim().length;
-      const pct = Math.max(0, Math.min(100, Math.round((len / min) * 100)));
-      fill.style.width = pct + "%";
-      if(len >= min){
-        note.textContent = label + " ready";
-        note.classList.add("ready");
-      }else{
-        note.textContent = len + "/" + min + " characters";
-        note.classList.remove("ready");
-      }
-    }
-    textarea.addEventListener("input", update, {passive:true});
-    update();
-  }
-
-  function humanizeStatus(){
-    const raw = $("app_origin_raw");
-    const status = $("app_origin_status");
-    if(!status) return;
-    const txt = (raw && raw.textContent || "").toLowerCase();
-    if(txt.includes("proxy") || txt.includes("400") || txt.includes("failed")){
-      status.textContent = "Local fallback";
-    }
-  }
-
-  function lockConsumerResultOnFreshSession(){
-    try{
-      const createdThisSession = sessionStorage.getItem("trace_badge_created_this_session")==="true";
-      if(!createdThisSession && typeof window.__traceHardResetUI === "function"){
-        window.__traceHardResetUI();
+      if(typeof lastProof !== "undefined" && lastProof && typeof makeBadgeHtml === "function"){
+        const html = makeBadgeHtml(lastProof);
+        if(validBadgeHtml(html)) return html;
       }
     }catch(e){}
+    const wrap = $("badge_wrap");
+    const wh = wrap ? wrap.innerHTML : "";
+    return validBadgeHtml(wh) ? wh : "";
   }
 
-  function markCreateSession(){
-    try{ sessionStorage.setItem("trace_badge_created_this_session","true"); }catch(e){}
+  function keyFor(html){
+    return String(html.length) + ":" + html.slice(0,220).replace(/\s+/g," ");
   }
 
-  function addRCPanel(){
-    const adv = $("app_advanced");
-    if(!adv || $("trace_rc_panel")) return;
-    const div = document.createElement("div");
-    div.id = "trace_rc_panel";
-    div.className = "trace-rc-panel";
-    div.innerHTML = "<b>Release candidate checks</b><br>Upload → Create Badge → Share/Download → New Badge. Technical engine stays available only in admin mode.";
-    adv.appendChild(div);
+  function setReadyCopy(){
+    const title=$("app_result_title");
+    const sub=$("app_result_sub");
+    const pill=$("app_result_pill");
+    if(title) title.textContent = "Badge ready";
+    if(sub) sub.textContent = "Trace glyph and verification proof are ready to share.";
+    if(pill){ pill.textContent = "Ready"; pill.className = "status-pill ready"; }
+    if($("app_badge_state")) $("app_badge_state").textContent = "Created";
+    const oldShare = $("btn_share_badge");
+    const canShare = !!(oldShare && !oldShare.disabled);
+    if($("app_share_badge")) $("app_share_badge").disabled = !canShare;
+    if($("app_download_png")) $("app_download_png").disabled = !canShare;
+  }
+
+  function renderLockedReady(force){
+    const html = getEngineBadgeHtml();
+    if(!validBadgeHtml(html)) return false;
+
+    window.__traceConsumerBadgeCreated = true;
+    window.__traceConsumerBadgeCreating = false;
+
+    const box = $("app_badge_result");
+    if(!box) return false;
+
+    const key = keyFor(html);
+    const alreadyReady = box.classList.contains("trace-result-ready") &&
+      box.getAttribute("data-no-blink-key") === key &&
+      box.querySelector(".badge, .glyphBox, svg.glyph3d");
+
+    if(force || !alreadyReady || lockedReadyKey !== key){
+      box.classList.remove("trace-result-idle","trace-result-creating");
+      box.classList.add("trace-result-ready","trace-no-blink-locked");
+      box.setAttribute("data-no-blink-key", key);
+      box.setAttribute("data-idle","false");
+      box.innerHTML = html;
+      box.querySelectorAll("[id]").forEach(n=>{
+        if(!n.closest("svg")) n.removeAttribute("id");
+      });
+      try{
+        const svg = box.querySelector("svg.glyph3d");
+        if(svg && typeof startGlyphMotion === "function") startGlyphMotion(svg);
+      }catch(e){}
+      lockedReadyKey = key;
+    }else{
+      box.classList.remove("trace-result-idle","trace-result-creating");
+      box.classList.add("trace-result-ready","trace-no-blink-locked");
+      box.setAttribute("data-idle","false");
+    }
+
+    setReadyCopy();
+    return true;
+  }
+
+  function enforceReady(){
+    const html = getEngineBadgeHtml();
+    if(!validBadgeHtml(html)) return;
+
+    const box = $("app_badge_result");
+    const key = keyFor(html);
+    const needsRepair = !box ||
+      !box.classList.contains("trace-result-ready") ||
+      box.getAttribute("data-no-blink-key") !== key ||
+      !box.querySelector(".badge, .glyphBox, svg.glyph3d") ||
+      /Your badge will appear here|Waiting|Not created/i.test(
+        (($("app_result_title")?.textContent||"") + " " +
+         ($("app_result_pill")?.textContent||"") + " " +
+         ($("app_badge_state")?.textContent||""))
+      );
+
+    if(needsRepair) renderLockedReady(true);
+    else setReadyCopy();
+  }
+
+  function setIdleOnlyWhenUserResets(){
+    lockedReadyKey = "";
+    window.__traceConsumerBadgeCreated = false;
+    window.__traceConsumerBadgeCreating = false;
+    const box = $("app_badge_result");
+    if(box){
+      box.classList.remove("trace-result-ready","trace-result-creating","trace-no-blink-locked");
+      box.classList.add("trace-result-idle");
+      box.removeAttribute("data-no-blink-key");
+      box.setAttribute("data-idle","true");
+      box.innerHTML = '<div class="empty-glyph">TRACE</div>';
+    }
+    const title=$("app_result_title");
+    const sub=$("app_result_sub");
+    const pill=$("app_result_pill");
+    if(title) title.textContent = "Your badge will appear here";
+    if(sub) sub.textContent = "Upload artwork, then create a badge.";
+    if(pill){ pill.textContent = "Waiting"; pill.className = "status-pill idle"; }
+    if($("app_badge_state")) $("app_badge_state").textContent = "Not created";
+    if($("app_share_badge")) $("app_share_badge").disabled = true;
+    if($("app_download_png")) $("app_download_png").disabled = true;
   }
 
   function wire(){
-    applyRole();
-    addRCPanel();
-
-    addMeter($("app_profile_mp"), PROFILE_MIN, "Profile mindprint");
-    addMeter($("app_badge_mp"), BADGE_MIN, "Badge mindprint");
+    const wrap = $("badge_wrap");
+    if(wrap){
+      new MutationObserver(()=>setTimeout(()=>renderLockedReady(true),30))
+        .observe(wrap,{childList:true,subtree:true,characterData:true,attributes:true});
+    }
 
     const create = $("app_create_badge");
-    if(create && !create.dataset.tracePhase1Ready){
-      create.dataset.tracePhase1Ready = "1";
-      create.addEventListener("click", function(){
-        markCreateSession();
-        const s = $("app_status");
-        safeText(s, "Creating badge…");
-      }, true);
-    }
-
-    const reset = $("app_new_badge");
-    if(reset && !reset.dataset.tracePhase1Ready){
-      reset.dataset.tracePhase1Ready = "1";
-      reset.addEventListener("click", function(){
-        try{ sessionStorage.removeItem("trace_badge_created_this_session"); }catch(e){}
-        setTimeout(function(){
-          if(typeof window.__traceHardResetUI === "function") window.__traceHardResetUI();
-          safeText($("app_status"), "Ready for a new artwork.");
-          safeText($("app_origin_status"), "Not run");
-          safeText($("app_badge_state"), "Not created");
-        }, 80);
-      }, true);
-    }
-
-    const admin = $("trace_admin_1996");
-    if(admin && !admin.dataset.tracePhase1Ready){
-      admin.dataset.tracePhase1Ready = "1";
-      admin.addEventListener("click", function(){
-        try{ localStorage.setItem("trace_admin","true"); }catch(e){}
-        setTimeout(applyRole, 50);
-      }, true);
-    }
-
-    const dev = $("trace_show_dev");
-    if(dev && !dev.dataset.tracePhase1Ready){
-      dev.dataset.tracePhase1Ready = "1";
-      dev.addEventListener("click", function(e){
-        if(!isAdmin()){
-          e.preventDefault();
-          e.stopImmediatePropagation();
-          safeText($("app_status"), "Developer tools are hidden in the public app.");
-          return false;
-        }
-      }, true);
-    }
-
-    lockConsumerResultOnFreshSession();
-    humanizeStatus();
-  }
-
-  document.addEventListener("DOMContentLoaded", wire);
-  window.addEventListener("storage", applyRole);
-  setTimeout(wire, 250);
-  setTimeout(wire, 900);
-})();
-</script>
-
-
-<script id="trace_public_beta_warmup">
-(function(){
-  function cfg(){ return window.TRACE_CONFIG || {}; }
-  function setStatus(msg){
-    try{
-      var a=document.getElementById("app_status"); if(a) a.textContent=msg;
-      var b=document.getElementById("app_origin_status"); if(b) b.textContent=msg;
-      var c=document.getElementById("winston_state"); if(c) c.textContent=msg;
-    }catch(e){}
-  }
-  function baseUrl(){
-    var c = cfg();
-    var u = String(c.PROXY_BASE_URL || "").trim().replace(/\/+$/,"");
-    return u;
-  }
-  function healthUrl(){
-    var c = cfg();
-    var b = baseUrl();
-    if(!b) return "";
-    return b + String(c.HEALTH_PATH || "/health");
-  }
-  async function traceProxyWarmup(){
-    var c = cfg();
-    if(c.ENABLE_PROXY_WARMUP === false || c.ENABLE_ORIGIN_SCAN === false) return;
-    var url = healthUrl();
-    if(!url) return;
-    setStatus("Preparing origin scan service…");
-    var timeoutMs = Math.max(8000, Number(c.PROXY_TIMEOUT_MS || 30000));
-    for(var i=1;i<=3;i++){
-      var ctrl = new AbortController();
-      var t = setTimeout(function(){ try{ctrl.abort();}catch(e){} }, timeoutMs);
-      try{
-        var res = await fetch(url + (url.indexOf("?")>=0 ? "&" : "?") + "t=" + Date.now(), {
-          method:"GET",
-          cache:"no-store",
-          credentials:"omit",
-          signal:ctrl.signal
+    if(create){
+      create.addEventListener("click",()=>{
+        lockedReadyKey = "";
+        [600,1200,2200,3600,5600,9000,14000,22000,34000,46000].forEach(ms=>{
+          setTimeout(()=>renderLockedReady(false), ms);
         });
-        clearTimeout(t);
-        if(res.ok){
-          setStatus("Origin scan service ready.");
-          window.__TRACE_PROXY_READY = true;
-          return true;
-        }
-      }catch(e){
-        clearTimeout(t);
-      }
-      setStatus("Origin scan service is starting. This can take a moment…");
-      await new Promise(function(r){ setTimeout(r, 900*i); });
+      }, true);
     }
-    window.__TRACE_PROXY_READY = false;
-    setStatus("Origin scan may use local fallback if the service is unavailable.");
-    return false;
+
+    ["app_new_badge","btn_reset"].forEach(id=>{
+      const el=$(id);
+      if(el) el.addEventListener("click",()=>setTimeout(setIdleOnlyWhenUserResets,80), true);
+    });
+
+    window.__traceRenderRealBadgeToApp = function(){ return renderLockedReady(true); };
+    setInterval(enforceReady, 250);
+    setTimeout(enforceReady, 300);
   }
-  window.traceProxyWarmup = traceProxyWarmup;
-  document.addEventListener("DOMContentLoaded", function(){
-    setTimeout(traceProxyWarmup, 600);
-  });
+
+  if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", wire);
+  else wire();
 })();
 </script>
 
-
-
-</body></html>
+</body>
+</html>
