@@ -3394,8 +3394,16 @@ async function attemptWinstonAI(file){
   }catch(e){ urlProxy = ""; }
 
   const savedProxy = (store.get("winston_proxy_url") || "").trim();
+  const sameOriginProxy =
+    (location.protocol === "http:" || location.protocol === "https:")
+      ? `${location.origin}/detect-image`
+      : "";
+
   const defaultProxy = "https://signai-tamy.onrender.com/detect-image";
-  const endpointBase = urlProxy || savedProxy || defaultProxy;
+
+  // Online: use the same Render service as the app.
+  // Local file: use a saved proxy first, otherwise the known backend.
+  const endpointBase = urlProxy || sameOriginProxy || savedProxy || defaultProxy;
 
   if(location.protocol === "file:" && !endpointBase){
     return { ...fallback, reason:"proxy_not_configured_file_protocol" };
