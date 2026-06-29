@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="trace-webcrypto-build" content="encrypted-vault-backup-v8-stable-signature-payload"/>
 <title>TRACE — Version 2 FINAL STABLE</title>
 <style>
   :root{
@@ -2038,9 +2039,12 @@ svg.glyph3d.trace-motion-smooth.trace-motion-lite g.motion{
 
         <div class="row">
           <button class="btn" id="btn_download_pub">Download public key</button>
-          <button class="btn" id="btn_export_priv">Export private key</button>
+          <button class="btn good" id="btn_export_priv">Export encrypted backup</button>
+          <button class="btn" id="btn_import_backup">Import encrypted backup</button>
+          <input id="vault_import_file" type="file" accept=".json,application/json" class="hide"/>
         </div>
-        <div class="hint" style="margin-top:8px">Keys are generated locally using WebCrypto (Ed25519). Your private key is protected by your local vault password and never leaves this device.</div>
+        <div class="hint" id="vault_backup_status" style="margin-top:8px">The encrypted backup can restore this creator identity in another browser or device. The vault password is required.</div>
+        <div class="hint" style="margin-top:6px">Keys are generated locally using WebCrypto. Your private key is encrypted with PBKDF2 + AES-GCM before local storage and is only decrypted in memory while the vault is unlocked.</div>
 
         <div style="height:10px"></div>
         <div class="cardTitle" style="font-size:13px">Profile mindprint (one-time) — <span id="vault_mp_status" class="warn">required</span></div>
@@ -2057,7 +2061,7 @@ svg.glyph3d.trace-motion-smooth.trace-motion-lite g.motion{
           </div>
           <div class="stat">Ready: <b id="ready_flag" class="warn">No</b></div>
         </div>
-        <div class="banner warn hide" id="compat_banner"><b>Work-computer mode</b> — din webbläsare blockerar signering/lagring. Du kan fortfarande rendera badges, men de blir <b>UNSIGNED</b> i Verify.</div>
+        <div class="banner warn hide" id="compat_banner"><b>Secure signing unavailable</b> — open TRACE through the HTTPS Render link. Badge creation is blocked until signing works.</div>
 
 
         <div style="height:10px"></div>
@@ -2373,7 +2377,8 @@ const LS = (()=>{
 // Expose a small banner for blocked-storage environments
 window.__TRACE_STORAGE_OK__ = LS.available();
 const USER_SCOPED_KEYS = new Set([
-  "signai_priv_jwk","signai_pub_jwk","signai_creator_id","signai_vault_hash",
+  "signai_priv_jwk","signai_priv_jwk_enc","signai_pub_jwk","signai_creator_id","signai_vault_hash",
+  "signai_vault_kdf_salt","signai_vault_crypto_version",
   "signai_profile_epoch","signai_last_proof","signai_last_badge_svg","signai_vault_root","signai_vault_root_hash",
   "signai_badge_history","signai_profile_mp"
 ]);
@@ -2501,6 +2506,33 @@ async function hashCred(u,p){
   return await sha256Hex(textToU8("trace-auth::"+(u||"")+"::"+(p||"")));
 }
 
+async function ensureProfileCreatorIdentity(password){
+  const hasIdentity =
+    !!store.get("signai_pub_jwk") &&
+    !!store.get("signai_priv_jwk_enc") &&
+    !!store.get("signai_creator_id");
+
+  if(hasIdentity) return true;
+
+  const vaultPass = $("#vault_pass");
+  if(!vaultPass) throw new Error("Vault password field is unavailable");
+
+  vaultPass.value = String(password || "");
+  await tryUnlockVault();
+
+  const ready =
+    vaultUnlocked &&
+    !!store.get("signai_pub_jwk") &&
+    !!store.get("signai_priv_jwk_enc") &&
+    !!store.get("signai_creator_id");
+
+  if(!ready){
+    throw new Error("Creator identity could not be initialized");
+  }
+
+  return true;
+}
+
 async function initAuth(){
   const modal = $("#auth_modal");
   const wrap = document.querySelector(".wrap");
@@ -2583,9 +2615,17 @@ async function initAuth(){
           window.__traceSwitchProfileSession(u, mode === "signup");
         }
       }catch(e){}
-      try{ await ensureVaultRoot(); }catch(e){}
+      try{
+        await ensureVaultRoot();
+        hint.textContent = "Creating creator identity…";
+        await ensureProfileCreatorIdentity(p);
+      }catch(e){
+        console.error("Creator identity initialization failed", e);
+        hint.textContent = "Profile created, but creator identity could not be initialized.";
+        return;
+      }
       try{ if(typeof __adminNotesLoad==="function" && adminUnlocked){ __adminNotesLoad(); } }catch(e){}
-      hint.textContent = "Profile created ✓";
+      hint.textContent = "Profile and creator identity created ✓";
       setTimeout(()=>{
         modal.classList.add("hide");
         if(wrap) wrap.classList.remove("hide");
@@ -2612,7 +2652,17 @@ async function initAuth(){
           window.__traceSwitchProfileSession(u, mode === "signup");
         }
       }catch(e){}
-    try{ await ensureVaultRoot(); }catch(e){}
+    try{
+      await ensureVaultRoot();
+      if(!store.get("signai_pub_jwk")){
+        hint.textContent = "Initializing creator identity…";
+        await ensureProfileCreatorIdentity(p);
+      }
+    }catch(e){
+      console.error("Creator identity initialization failed", e);
+      hint.textContent = "Signed in, but creator identity could not be initialized.";
+      return;
+    }
     try{ if(typeof __adminNotesLoad==="function" && adminUnlocked){ __adminNotesLoad(); } }catch(e){}
     hint.textContent = "Welcome back ✓";
     setTimeout(()=>{
@@ -2902,6 +2952,7 @@ function startWindowCountdown(ts, windowS, el, kind){
 
 /* ========= app state ========= */
 let vaultUnlocked = false;
+let vaultCryptoKey = null; // AES-GCM key derived from the vault password; memory only.
   try{ refreshVaultKeyUI(); }catch(e){}
 let creator = { pubKey:null, privKey:null, creatorId:null };
 let profileMindprint = { textHash:null, rhythmHash:null, score_0_1:0 };
@@ -2934,13 +2985,233 @@ async function hashPass(pass){
   const u8 = textToU8("signai-vault::"+pass);
   return await sha256Hex(u8);
 }
+
+/*
+ * TRACE encrypted creator-key vault.
+ * The private JWK is encrypted with AES-GCM before it is stored.
+ * The AES key is derived from the user's vault password with PBKDF2 and is
+ * never written to localStorage.
+ */
+const TRACE_VAULT_ITERATIONS = 210000;
+const TRACE_VAULT_AAD = textToU8("TRACE_PRIVATE_KEY_V1");
+
+function traceVaultBytesToB64(bytes){
+  let bin = "";
+  const u8 = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
+  for(let i=0;i<u8.length;i++) bin += String.fromCharCode(u8[i]);
+  return btoa(bin);
+}
+function traceVaultB64ToBytes(value){
+  const bin = atob(String(value || ""));
+  const out = new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) out[i] = bin.charCodeAt(i);
+  return out;
+}
+function traceVaultRandomB64(length){
+  const bytes = new Uint8Array(length);
+  crypto.getRandomValues(bytes);
+  return traceVaultBytesToB64(bytes);
+}
+function traceVaultGetOrCreateSalt(){
+  let salt = store.get("signai_vault_kdf_salt");
+  if(!salt){
+    salt = traceVaultRandomB64(16);
+    store.set("signai_vault_kdf_salt", salt);
+  }
+  return salt;
+}
+async function traceVaultDeriveKey(pass, saltB64, iterations=TRACE_VAULT_ITERATIONS){
+  const material = await crypto.subtle.importKey(
+    "raw",
+    textToU8(String(pass || "")),
+    "PBKDF2",
+    false,
+    ["deriveKey"]
+  );
+  return await crypto.subtle.deriveKey(
+    {
+      name:"PBKDF2",
+      salt:traceVaultB64ToBytes(saltB64),
+      iterations:Number(iterations) || TRACE_VAULT_ITERATIONS,
+      hash:"SHA-256"
+    },
+    material,
+    {name:"AES-GCM", length:256},
+    false,
+    ["encrypt","decrypt"]
+  );
+}
+async function traceVaultEncryptPrivateJwk(privateJwk, key, saltB64){
+  const iv = new Uint8Array(12);
+  crypto.getRandomValues(iv);
+  const plaintext = textToU8(JSON.stringify(privateJwk));
+  const ciphertext = await crypto.subtle.encrypt(
+    {name:"AES-GCM", iv, additionalData:TRACE_VAULT_AAD, tagLength:128},
+    key,
+    plaintext
+  );
+  return {
+    v:1,
+    cipher:"AES-GCM",
+    kdf:"PBKDF2",
+    hash:"SHA-256",
+    iterations:TRACE_VAULT_ITERATIONS,
+    salt_b64:saltB64,
+    iv_b64:traceVaultBytesToB64(iv),
+    ciphertext_b64:traceVaultBytesToB64(ciphertext)
+  };
+}
+async function traceVaultDecryptPrivateJwk(envelope, pass){
+  if(!envelope || Number(envelope.v)!==1) throw new Error("Unsupported encrypted key format");
+  const key = await traceVaultDeriveKey(pass, envelope.salt_b64, envelope.iterations);
+  const plaintext = await crypto.subtle.decrypt(
+    {
+      name:"AES-GCM",
+      iv:traceVaultB64ToBytes(envelope.iv_b64),
+      additionalData:TRACE_VAULT_AAD,
+      tagLength:128
+    },
+    key,
+    traceVaultB64ToBytes(envelope.ciphertext_b64)
+  );
+  const jwk = JSON.parse(new TextDecoder().decode(plaintext));
+  return {key, jwk};
+}
+async function traceVaultStoreEncryptedPrivateJwk(privateJwk, key, saltB64){
+  const envelope = await traceVaultEncryptPrivateJwk(privateJwk, key, saltB64);
+  const serialized = JSON.stringify(envelope);
+  store.set("signai_priv_jwk_enc", serialized);
+  store.set("signai_vault_crypto_version", "1");
+  if(store.get("signai_priv_jwk_enc") !== serialized){
+    throw new Error("Encrypted private key could not be stored");
+  }
+  store.del("signai_priv_jwk");
+  return envelope;
+}
+
+/* ========= encrypted vault backup / restore ========= */
+const TRACE_VAULT_BACKUP_AAD = textToU8("TRACE_VAULT_BACKUP_STATE_V1");
+
+function traceVaultValidateEncryptedEnvelope(envelope){
+  if(!envelope || typeof envelope !== "object") throw new Error("Missing encrypted private key");
+  if(Number(envelope.v)!==1) throw new Error("Unsupported encrypted key version");
+  if(envelope.cipher!=="AES-GCM" || envelope.kdf!=="PBKDF2") throw new Error("Unsupported encryption format");
+  if(!envelope.salt_b64 || !envelope.iv_b64 || !envelope.ciphertext_b64) throw new Error("Encrypted key is incomplete");
+  return envelope;
+}
+
+async function traceVaultEncryptBackupState(state, key, saltB64){
+  const iv = new Uint8Array(12);
+  crypto.getRandomValues(iv);
+  const ciphertext = await crypto.subtle.encrypt(
+    {name:"AES-GCM", iv, additionalData:TRACE_VAULT_BACKUP_AAD, tagLength:128},
+    key,
+    textToU8(JSON.stringify(state || {}))
+  );
+  return {
+    v:1,
+    cipher:"AES-GCM",
+    salt_b64:saltB64,
+    iv_b64:traceVaultBytesToB64(iv),
+    ciphertext_b64:traceVaultBytesToB64(ciphertext)
+  };
+}
+
+async function traceVaultDecryptBackupState(envelope, key){
+  if(!envelope) return null;
+  if(Number(envelope.v)!==1 || envelope.cipher!=="AES-GCM") throw new Error("Unsupported encrypted backup state");
+  const plaintext = await crypto.subtle.decrypt(
+    {
+      name:"AES-GCM",
+      iv:traceVaultB64ToBytes(envelope.iv_b64),
+      additionalData:TRACE_VAULT_BACKUP_AAD,
+      tagLength:128
+    },
+    key,
+    traceVaultB64ToBytes(envelope.ciphertext_b64)
+  );
+  return JSON.parse(new TextDecoder().decode(plaintext));
+}
+
+function traceVaultBackupStatus(message, ok=false){
+  const el = $("#vault_backup_status");
+  if(!el) return;
+  el.textContent = message;
+  el.style.color = ok ? "var(--green)" : "var(--muted2)";
+}
+
+function traceVaultInferAlgorithm(publicJwk, requested){
+  if(requested === "ECDSA_P256_SHA256" || requested === "Ed25519") return requested;
+  if(publicJwk && publicJwk.kty === "EC") return "ECDSA_P256_SHA256";
+  return "Ed25519";
+}
+
+async function traceVaultImportAndVerifyKeypair(privateJwk, publicJwk, algorithm){
+  let privateKey;
+  let publicKey;
+  let signingAlgorithm;
+
+  if(algorithm === "ECDSA_P256_SHA256"){
+    privateKey = await crypto.subtle.importKey(
+      "jwk", privateJwk, {name:"ECDSA", namedCurve:"P-256"}, false, ["sign"]
+    );
+    publicKey = await crypto.subtle.importKey(
+      "jwk", publicJwk, {name:"ECDSA", namedCurve:"P-256"}, true, ["verify"]
+    );
+    signingAlgorithm = {name:"ECDSA", hash:"SHA-256"};
+  }else{
+    privateKey = await crypto.subtle.importKey(
+      "jwk", privateJwk, {name:"Ed25519"}, false, ["sign"]
+    );
+    publicKey = await crypto.subtle.importKey(
+      "jwk", publicJwk, {name:"Ed25519"}, true, ["verify"]
+    );
+    signingAlgorithm = {name:"Ed25519"};
+  }
+
+  const challenge = new Uint8Array(32);
+  crypto.getRandomValues(challenge);
+  const signature = await crypto.subtle.sign(signingAlgorithm, privateKey, challenge);
+  const verified = await crypto.subtle.verify(signingAlgorithm, publicKey, signature, challenge);
+  if(!verified) throw new Error("Private and public keys do not match");
+
+  return {privateKey, publicKey};
+}
+
+function traceVaultReadProfileMindprintForBackup(){
+  try{
+    const user = getActiveUser() || currentUser();
+    const raw = LS.getItem("signai_profile_mp_" + user);
+    return raw ? JSON.parse(raw) : (profileMindprint || null);
+  }catch(e){
+    return profileMindprint || null;
+  }
+}
+
+function traceVaultRestoreProfileMindprint(value){
+  if(!value || typeof value !== "object") return;
+  const user = getActiveUser() || currentUser();
+  LS.setItem("signai_profile_mp_" + user, JSON.stringify(value));
+  profileMindprint = value;
+}
 function setVaultUI(){
   const st = $("#vault_state");
   st.innerHTML = "Status: <b class='"+(vaultUnlocked?"ok":"warn")+"'>"+(vaultUnlocked?"Unlocked":"Locked")+"</b>";
   $("#creator_id").textContent = creator.creatorId ? creator.creatorId : "—";
 }
 function setReadyUI(){
-  const ready = vaultUnlocked && !!creator.creatorId && !!profileMindprint?.textHash && Number(profileMindprint.score_0_1||0)>=1 && !!badgeMindprint?.ready && !!badgeMindprint?.textHash && Number(badgeMindprint.score_0_1||0)>=1;
+  const sigAlg = store.get("signai_sig_alg") || "";
+  const signingReady =
+    window.isSecureContext &&
+    !!window.crypto &&
+    !!crypto.subtle &&
+    vaultUnlocked &&
+    !!creator.creatorId &&
+    !!creator.privKey &&
+    !!creator.pubKey &&
+    (sigAlg === "Ed25519" || sigAlg === "ECDSA_P256_SHA256");
+
+  const ready = signingReady && !!profileMindprint?.textHash && Number(profileMindprint.score_0_1||0)>=1 && !!badgeMindprint?.ready && !!badgeMindprint?.textHash && Number(badgeMindprint.score_0_1||0)>=1;
   $("#ready_flag").textContent = ready ? "Yes" : "No";
   $("#ready_flag").className = ready ? "ok" : "warn";
   $("#btn_analyze").disabled = !ready;
@@ -3052,44 +3323,105 @@ setTimeout(()=>{
 async function tryUnlockVault(){
   const pass = $("#vault_pass").value || "";
   if(pass.length < 4) return warn("Välj ett vault-lösenord (minst 4 tecken).");
+
   const hp = await hashPass(pass);
-  const stored = store.get("signai_vault_hash");
-  if(stored && stored !== hp) return warn("Fel vault-lösenord.");
-  if(!stored) store.set("signai_vault_hash", hp);
+  const storedHash = store.get("signai_vault_hash");
+  if(storedHash && storedHash !== hp) return warn("Fel vault-lösenord.");
+  const shouldStoreVaultHash = !storedHash;
 
   vaultUnlocked = true;
+  vaultCryptoKey = null;
 
   try{ await ensureVaultRoot(); }catch(e){}
   try{ refreshVaultKeyUI(); }catch(e){}
 
-  // auto-create creator signing keys on first unlock
-  try{
-    if(!store.get("signai_pub_jwk")){
-      await createKeypair();
-    }
-  }catch(e){}
+  if(window.isSecureContext && crypto && crypto.subtle){
+    try{
+      const encryptedRaw = store.get("signai_priv_jwk_enc");
+      const legacyRaw = store.get("signai_priv_jwk");
 
-  // load keys if exist (Ed25519 or ECDSA fallback)
-  try{
-    const privJ = store.get("signai_priv_jwk");
-    const pubJ  = store.get("signai_pub_jwk");
-    const alg = store.get("signai_sig_alg") || "Ed25519";
-    if(privJ && pubJ && window.isSecureContext && crypto && crypto.subtle && alg !== "none"){
-      if(alg === "ECDSA_P256_SHA256"){
-        creator.privKey = await crypto.subtle.importKey("jwk", JSON.parse(privJ), {name:"ECDSA", namedCurve:"P-256"}, true, ["sign"]);
-        creator.pubKey  = await crypto.subtle.importKey("jwk", JSON.parse(pubJ),  {name:"ECDSA", namedCurve:"P-256"}, true, ["verify"]);
+      if(encryptedRaw){
+        const unlocked = await traceVaultDecryptPrivateJwk(JSON.parse(encryptedRaw), pass);
+        vaultCryptoKey = unlocked.key;
+
+        const pubJ = store.get("signai_pub_jwk");
+        const alg = store.get("signai_sig_alg") || "Ed25519";
+        if(pubJ && alg !== "none"){
+          if(alg === "ECDSA_P256_SHA256"){
+            creator.privKey = await crypto.subtle.importKey("jwk", unlocked.jwk, {name:"ECDSA", namedCurve:"P-256"}, false, ["sign"]);
+            creator.pubKey  = await crypto.subtle.importKey("jwk", JSON.parse(pubJ), {name:"ECDSA", namedCurve:"P-256"}, true, ["verify"]);
+          }else{
+            creator.privKey = await crypto.subtle.importKey("jwk", unlocked.jwk, {name:"Ed25519"}, false, ["sign"]);
+            creator.pubKey  = await crypto.subtle.importKey("jwk", JSON.parse(pubJ), {name:"Ed25519"}, true, ["verify"]);
+          }
+          creator.creatorId = store.get("signai_creator_id") || (await sha256Hex(textToU8(alg+"|"+pubJ)));
+        }
+
+        const pendingStateRaw = store.get("signai_pending_backup_state_enc");
+        if(pendingStateRaw){
+          const protectedState = await traceVaultDecryptBackupState(
+            JSON.parse(pendingStateRaw),
+            unlocked.key
+          );
+
+          if(protectedState && typeof protectedState === "object"){
+            if(protectedState.vault_root) store.set("signai_vault_root", protectedState.vault_root);
+            if(protectedState.vault_root_hash) store.set("signai_vault_root_hash", protectedState.vault_root_hash);
+            if(protectedState.profile_epoch != null) store.set("signai_profile_epoch", String(protectedState.profile_epoch));
+            traceVaultRestoreProfileMindprint(protectedState.profile_mindprint);
+          }
+
+          store.del("signai_pending_backup_state_enc");
+          store.del("signai_pending_backup_import");
+        }
       }else{
-        creator.privKey = await crypto.subtle.importKey("jwk", JSON.parse(privJ), {name:"Ed25519"}, true, ["sign"]);
-        creator.pubKey  = await crypto.subtle.importKey("jwk", JSON.parse(pubJ),  {name:"Ed25519"}, true, ["verify"]);
+        const salt = traceVaultGetOrCreateSalt();
+        vaultCryptoKey = await traceVaultDeriveKey(pass, salt);
+
+        // One-time migration from the old plaintext localStorage format.
+        if(legacyRaw){
+          const legacyJwk = JSON.parse(legacyRaw);
+          await traceVaultStoreEncryptedPrivateJwk(legacyJwk, vaultCryptoKey, salt);
+
+          const pubJ = store.get("signai_pub_jwk");
+          const alg = store.get("signai_sig_alg") || "Ed25519";
+          if(pubJ && alg !== "none"){
+            if(alg === "ECDSA_P256_SHA256"){
+              creator.privKey = await crypto.subtle.importKey("jwk", legacyJwk, {name:"ECDSA", namedCurve:"P-256"}, false, ["sign"]);
+              creator.pubKey  = await crypto.subtle.importKey("jwk", JSON.parse(pubJ), {name:"ECDSA", namedCurve:"P-256"}, true, ["verify"]);
+            }else{
+              creator.privKey = await crypto.subtle.importKey("jwk", legacyJwk, {name:"Ed25519"}, false, ["sign"]);
+              creator.pubKey  = await crypto.subtle.importKey("jwk", JSON.parse(pubJ), {name:"Ed25519"}, true, ["verify"]);
+            }
+            creator.creatorId = store.get("signai_creator_id") || (await sha256Hex(textToU8(alg+"|"+pubJ)));
+          }
+        }
       }
-      creator.creatorId = store.get("signai_creator_id") || (await sha256Hex(textToU8(alg+"|"+pubJ)));
-    }else{
-      // compat
-      const root = store.get("signai_vault_root") || "";
-      creator.creatorId = store.get("signai_creator_id") || (await sha256Hex(textToU8("compat|"+getActiveUser()+"|"+root)));
+
+      // First unlock for a new profile: generate and encrypt a creator keypair.
+      if(!store.get("signai_pub_jwk")){
+        await createKeypair();
+      }
+    }catch(e){
+      vaultUnlocked = false;
+      vaultCryptoKey = null;
+      creator.privKey = null;
+      creator.pubKey = null;
+      creator.creatorId = null;
+      setVaultUI();
+      setReadyUI();
+      return warn("Vaulten kunde inte låsas upp. Kontrollera lösenordet eller återställ från din krypterade nyckelbackup.");
     }
-  }catch(e){ /* ignore */ }
-  // load profile mindprint
+  }else{
+    // Secure WebCrypto is unavailable. Keep the vault locked; badge creation remains blocked.
+    const root = store.get("signai_vault_root") || "";
+    creator.creatorId = store.get("signai_creator_id") || (await sha256Hex(textToU8("compat|"+getActiveUser()+"|"+root)));
+  }
+
+  if(shouldStoreVaultHash){
+    store.set("signai_vault_hash", hp);
+  }
+
   try{
     const mp = store.get("signai_profile_mp_"+getActiveUser());
     if(mp) profileMindprint = JSON.parse(mp);
@@ -3103,6 +3435,7 @@ async function tryUnlockVault(){
 
 function lockVault(){
   vaultUnlocked = false;
+  vaultCryptoKey = null;
   creator.privKey = null; // keep pub? but hide
   // do not show profile as registered while locked
   refreshMindprintUI();
@@ -3143,18 +3476,16 @@ async function ensureVaultUnlocked(){
 async function createKeypair(){
   if(!(await ensureVaultUnlocked())) return;
 
-  // Work-computer / file:// safe: don't hard-fail if WebCrypto is blocked.
-  if(!window.isSecureContext || !crypto || !crypto.subtle){
+  // TRACE creator identities must be cryptographic. No unsigned fallback.
+  if(!window.isSecureContext || !window.crypto || !crypto.subtle){
     store.set("signai_sig_alg", "none");
     creator.pubKey = null;
     creator.privKey = null;
-    // still give a stable creator_id for UI/history (NOT a cryptographic identity)
-    const root = store.get("signai_vault_root") || "";
-    creator.creatorId = await sha256Hex(textToU8("compat|"+getActiveUser()+"|"+root));
-    store.set("signai_creator_id", creator.creatorId);
-    warn("WebCrypto är blockat här (kräver https/localhost). Du kan fortfarande rendera badges i compat-läge (UNSIGNED).");
-    setVaultUI(); setReadyUI();
-    return;
+    creator.creatorId = null;
+    store.del("signai_creator_id");
+    setVaultUI();
+    setReadyUI();
+    throw new Error("Secure signing requires the HTTPS Render link.");
   }
 
   let kp=null;
@@ -3168,20 +3499,22 @@ async function createKeypair(){
       kp = await crypto.subtle.generateKey({name:"ECDSA", namedCurve:"P-256"}, true, ["sign","verify"]);
     }catch(e2){
       store.set("signai_sig_alg", "none");
-      creator.pubKey = null; creator.privKey = null;
-      const root = store.get("signai_vault_root") || "";
-      creator.creatorId = await sha256Hex(textToU8("compat|"+getActiveUser()+"|"+root));
-      store.set("signai_creator_id", creator.creatorId);
-      warn("Kan inte skapa signeringsnycklar i denna miljö. Compat-läge (UNSIGNED) används.");
-      setVaultUI(); setReadyUI();
-      return;
+      creator.pubKey = null;
+      creator.privKey = null;
+      creator.creatorId = null;
+      store.del("signai_creator_id");
+      setVaultUI();
+      setReadyUI();
+      throw new Error("This browser could not create a supported TRACE signing key.");
     }
   }
 
   const pubJwk  = await crypto.subtle.exportKey("jwk", kp.publicKey);
   const privJwk = await crypto.subtle.exportKey("jwk", kp.privateKey);
+  if(!vaultCryptoKey) throw new Error("Vault encryption key is not available");
+  const salt = traceVaultGetOrCreateSalt();
+  await traceVaultStoreEncryptedPrivateJwk(privJwk, vaultCryptoKey, salt);
   store.set("signai_pub_jwk", JSON.stringify(pubJwk));
-  store.set("signai_priv_jwk", JSON.stringify(privJwk));
   store.set("signai_sig_alg", alg);
 
   creator.pubKey = kp.publicKey;
@@ -3198,11 +3531,162 @@ $("#btn_download_pub").addEventListener("click", ()=>{
   if(!pub) return warn("Ingen pubkey än. Create nycklar först.");
   downloadText(pub, "signai_pubkey.json", "application/json");
 });
-$("#btn_export_priv").addEventListener("click", ()=>{
-  if(!vaultUnlocked) return warn("Unlock vaulta Vault först.");
-  const priv = store.get("signai_priv_jwk");
-  if(!priv) return warn("Ingen private key än. Create nycklar först.");
-  downloadText(priv, "signai_privatekey.json", "application/json");
+$("#btn_export_priv").addEventListener("click", async ()=>{
+  try{
+    if(!vaultUnlocked) return warn("Lås upp vaulten först.");
+    if(!vaultCryptoKey) return warn("Vaultens krypteringsnyckel saknas. Lås och lås upp vaulten igen.");
+
+    const encryptedRaw = store.get("signai_priv_jwk_enc");
+    const publicRaw = store.get("signai_pub_jwk");
+    if(!encryptedRaw || !publicRaw) return warn("Ingen krypterad creator key finns ännu.");
+
+    const encryptedPrivate = traceVaultValidateEncryptedEnvelope(JSON.parse(encryptedRaw));
+
+    const protectedState = {
+      vault_root:store.get("signai_vault_root") || null,
+      vault_root_hash:store.get("signai_vault_root_hash") || null,
+      profile_mindprint:traceVaultReadProfileMindprintForBackup(),
+      profile_epoch:store.get("signai_profile_epoch") || null
+    };
+    const encryptedState = await traceVaultEncryptBackupState(
+      protectedState,
+      vaultCryptoKey,
+      encryptedPrivate.salt_b64
+    );
+
+    const creatorId = store.get("signai_creator_id") || null;
+    const backup = {
+      format:"TRACE_ENCRYPTED_VAULT_BACKUP_V2",
+      app:"TRACE",
+      backup_version:2,
+      exported_at:new Date().toISOString(),
+      creator_id:creatorId,
+      sig_alg:store.get("signai_sig_alg") || null,
+      public_jwk:JSON.parse(publicRaw),
+      encrypted_private_jwk:encryptedPrivate,
+      encrypted_vault_state:encryptedState
+    };
+
+    const date = new Date().toISOString().slice(0,10);
+    const idPart = String(creatorId || "creator").replace(/[^a-zA-Z0-9]/g, "").slice(0,12) || "creator";
+    downloadText(
+      JSON.stringify(backup, null, 2),
+      `trace_vault_backup_${idPart}_${date}.json`,
+      "application/json"
+    );
+    traceVaultBackupStatus("Encrypted vault backup exported ✓", true);
+  }catch(e){
+    console.error("Vault backup export failed", e);
+    warn("Backupen kunde inte exporteras: " + String(e?.message || e));
+  }
+});
+
+$("#btn_import_backup").addEventListener("click", ()=>{
+  $("#vault_import_file")?.click();
+});
+
+$("#vault_import_file").addEventListener("change", async (event)=>{
+  const input = event.currentTarget;
+  const file = input?.files?.[0];
+  if(!file) return;
+
+  try{
+    if(!window.isSecureContext || !crypto || !crypto.subtle){
+      throw new Error("WebCrypto requires the HTTPS Render link");
+    }
+    const activeUser = getActiveUser();
+    if(!activeUser) throw new Error("Log in to a creator profile first");
+
+    const backup = JSON.parse(await file.text());
+    const accepted = new Set([
+      "TRACE_ENCRYPTED_VAULT_BACKUP_V2",
+      "TRACE_ENCRYPTED_CREATOR_KEY_V1"
+    ]);
+    if(!backup || !accepted.has(backup.format)) throw new Error("This is not a supported TRACE encrypted backup");
+    if(!backup.public_jwk || typeof backup.public_jwk !== "object") throw new Error("Public key is missing");
+
+    const encryptedPrivate = traceVaultValidateEncryptedEnvelope(backup.encrypted_private_jwk);
+    const algorithm = traceVaultInferAlgorithm(backup.public_jwk, backup.sig_alg);
+
+    if(backup.encrypted_vault_state){
+      const stateEnvelope = backup.encrypted_vault_state;
+      if(
+        Number(stateEnvelope.v) !== 1 ||
+        stateEnvelope.cipher !== "AES-GCM" ||
+        !stateEnvelope.iv_b64 ||
+        !stateEnvelope.ciphertext_b64
+      ){
+        throw new Error("Encrypted vault state is invalid");
+      }
+    }
+
+    const publicRaw = JSON.stringify(backup.public_jwk);
+    const computedCreatorId = await sha256Hex(textToU8(algorithm + "|" + publicRaw));
+    if(backup.creator_id && backup.creator_id !== computedCreatorId){
+      throw new Error("Creator identity does not match the public key");
+    }
+    const creatorId = backup.creator_id || computedCreatorId;
+    const existingCreatorId = store.get("signai_creator_id");
+    if(existingCreatorId && existingCreatorId !== creatorId){
+      const replace = window.confirm(
+        "This profile already has a different creator identity. Replace it with the imported backup?"
+      );
+      if(!replace){
+        traceVaultBackupStatus("Import cancelled. Existing creator identity was kept.");
+        return;
+      }
+    }
+
+    store.set("signai_priv_jwk_enc", JSON.stringify(encryptedPrivate));
+    store.set("signai_pub_jwk", publicRaw);
+    store.set("signai_creator_id", creatorId);
+    store.set("signai_sig_alg", algorithm);
+    store.set("signai_vault_kdf_salt", encryptedPrivate.salt_b64);
+    store.set("signai_vault_crypto_version", "1");
+    store.del("signai_priv_jwk");
+    store.del("signai_vault_hash");
+
+    if(backup.format === "TRACE_ENCRYPTED_VAULT_BACKUP_V2" && backup.encrypted_vault_state){
+      store.set("signai_pending_backup_state_enc", JSON.stringify(backup.encrypted_vault_state));
+    }else{
+      store.del("signai_pending_backup_state_enc");
+    }
+    store.set("signai_pending_backup_import", "1");
+
+    vaultUnlocked = false;
+    vaultCryptoKey = null;
+    creator.privKey = null;
+    creator.pubKey = null;
+    creator.creatorId = null;
+
+    const vaultPassField = document.getElementById("vault_pass");
+    if(vaultPassField) vaultPassField.value = "";
+
+    setVaultUI();
+    refreshVaultKeyUI();
+    refreshMindprintUI();
+    setReadyUI();
+    try{ setCompatUI(); }catch(e){}
+    traceVaultBackupStatus(
+      "Encrypted backup imported ✓ Unlock the vault with the backup's original password to activate it.",
+      true
+    );
+  }catch(e){
+    console.error("Vault backup import failed", e);
+
+    const isCryptoFailure =
+      e?.name === "OperationError" ||
+      /decrypt|authentication|cipher|password/i.test(String(e?.message || ""));
+
+    const message = isCryptoFailure
+      ? "Wrong vault password or damaged backup. Nothing was imported."
+      : "Import failed. Existing creator identity was not changed.";
+
+    traceVaultBackupStatus(message);
+    warn(message);
+  }finally{
+    if(input) input.value = "";
+  }
 });
 function downloadText(text, filename, mime){
   const blob = new Blob([text], {type:mime||"text/plain"});
@@ -4475,19 +4959,44 @@ function canonicalize(v){
   return v;
 }
 
+/*
+ * The signature covers the durable TRACE proof core.
+ * Large preview/artwork data URLs are presentation data and may be compacted
+ * in localStorage. The signed img_hash still binds the proof to the artwork.
+ */
+function traceSignaturePayload(proof){
+  const p = JSON.parse(JSON.stringify(proof || {}));
+
+  delete p.sig_b64;
+  delete p.pub_jwk;
+
+  if(p.sig_scope === "TRACE_CORE_V1"){
+    delete p.img_data_url;
+    delete p.wm_data_url;
+    delete p.img_preview_url;
+    delete p.thumb_data_url;
+  }
+
+  return p;
+}
+
 $("#btn_analyze").addEventListener("click", async ()=>{
   try{
   document.dispatchEvent(new CustomEvent("trace:badge-stage", {detail:{stage:"preparing-artwork"}}));
-  if(!vaultUnlocked) return warn("Unlock vaulta Vault först.");
-  let __compatUnsigned = false;
-  if(!creator.privKey || !creator.pubKey || !creator.creatorId){
-    __compatUnsigned = true;
-    // stable-ish ID for UI/history in compat mode
-    if(!creator.creatorId){
-      const root = store.get("signai_vault_root") || "";
-      creator.creatorId = await sha256Hex(textToU8("compat|"+getActiveUser()+"|"+root));
-      store.set("signai_creator_id", creator.creatorId);
-    }
+
+  const activeSigAlg = store.get("signai_sig_alg") || "";
+  const signingReady =
+    window.isSecureContext &&
+    !!window.crypto &&
+    !!crypto.subtle &&
+    vaultUnlocked &&
+    !!creator.privKey &&
+    !!creator.pubKey &&
+    !!creator.creatorId &&
+    (activeSigAlg === "Ed25519" || activeSigAlg === "ECDSA_P256_SHA256");
+
+  if(!signingReady){
+    return warn("Signing key unavailable. Unlock the vault with the original password before creating a badge.");
   }
   if(!(profileMindprint && profileMindprint.textHash && Number(profileMindprint.score_0_1||0)>=1)) return warn("Profile Mindprint requires at least 40 characters.");
   if(!(badgeMindprint && badgeMindprint.ready && badgeMindprint.textHash && Number(badgeMindprint.score_0_1||0)>=1)) return warn("Badge Mindprint requires at least 20 characters.");
@@ -4570,7 +5079,8 @@ $("#btn_analyze").addEventListener("click", async ()=>{
   const base = {
     v: "1.0",
     hop: "8.0",
-    sig_alg: ((store.get("signai_sig_alg")||"Ed25519") && (!__compatUnsigned) && window.isSecureContext && crypto && crypto.subtle) ? (store.get("signai_sig_alg")||"Ed25519") : "none",
+    sig_alg: activeSigAlg,
+    sig_scope: "TRACE_CORE_V1",
     ts,
     window_s: windowS,
     creator_id: creator.creatorId,
@@ -4615,27 +5125,34 @@ $("#btn_analyze").addEventListener("click", async ()=>{
 if(baseImgDataUrl) base.img_data_url = baseImgDataUrl;
 
 
-  const canon = JSON.stringify(canonicalize(base));
+  const signingPayload = traceSignaturePayload(base);
+  const canon = JSON.stringify(canonicalize(signingPayload));
   const bytes = textToU8(canon);
 
-  let sigU8 = null;
-  let pubJwk = {};
-  let sigB64 = "";
-  const alg = base.sig_alg || "none";
+  const alg = base.sig_alg;
+  let sigU8;
+  let sigB64;
+  let pubJwk;
 
-  if(alg !== "none" && creator.privKey && window.isSecureContext && crypto && crypto.subtle){
-    try{
-      sigU8 = await signBytes(creator.privKey, bytes, alg);
-      sigB64 = btoa(String.fromCharCode(...sigU8));
-      pubJwk = JSON.parse(store.get("signai_pub_jwk")||"{}");
-    }catch(e){
-      // fall back to compat unsigned instead of failing on locked-down work devices
-      base.sig_alg = "none";
-      sigU8 = null;
-      sigB64 = "";
-      pubJwk = {};
-      __compatUnsigned = true;
+  try{
+    pubJwk = JSON.parse(store.get("signai_pub_jwk") || "null");
+    if(!pubJwk || typeof pubJwk !== "object"){
+      throw new Error("Stored public key is missing");
     }
+
+    sigU8 = await signBytes(creator.privKey, bytes, alg);
+    if(!sigU8 || !sigU8.length){
+      throw new Error("The signing operation returned an empty signature");
+    }
+
+    const signatureValid = await verifySig(creator.pubKey, sigU8, bytes, alg);
+    if(!signatureValid){
+      throw new Error("Signature self-check failed");
+    }
+
+    sigB64 = btoa(String.fromCharCode(...sigU8));
+  }catch(e){
+    throw new Error("Badge signing failed. Nothing was saved. Unlock the vault and try again.");
   }
 
   document.dispatchEvent(new CustomEvent("trace:badge-stage", {detail:{stage:"creating-badge"}}));
@@ -4693,8 +5210,9 @@ $("#btn_save_json").addEventListener("click", ()=>{
 
 /* ========= verify ========= */
 async function verifyProof(proof){
-  // Reconstruct base (without signature/public key container)
-  const {sig_b64, pub_jwk, ...base} = proof;
+  const sig_b64 = proof?.sig_b64 || "";
+  const pub_jwk = proof?.pub_jwk || null;
+  const base = traceSignaturePayload(proof);
   const alg = base.sig_alg || "Ed25519";
 
   const canon = JSON.stringify(canonicalize(base));
@@ -5032,7 +5550,8 @@ $("#admin_btn_purge_user")?.addEventListener("click", ()=>{
     const keep = getHistory().filter(it => (it.creator_id||it?.proof?.creator_id) !== (creator?.creatorId));
     LS.setItem("signai_badge_history", JSON.stringify(keep));
     const prefixes = [
-      "signai_priv_jwk_","signai_pub_jwk_","signai_creator_id_","signai_vault_hash_",
+      "signai_priv_jwk_","signai_priv_jwk_enc_","signai_pub_jwk_","signai_creator_id_","signai_vault_hash_",
+      "signai_vault_kdf_salt_","signai_vault_crypto_version_",
       "signai_profile_epoch_","signai_last_proof_","signai_last_badge_svg_",
       "signai_badge_history_","signai_profile_mp_"
     ];
@@ -7667,12 +8186,63 @@ svg.glyph3d.trace-v2-motion>g.motion{transform-box:fill-box;transform-origin:cen
   }
 
   async function ensureVault(){
-    if(vaultUnlocked&&creator?.creatorId)return true;
-    const candidates=[]; const authPass=byId("auth_pass")?.value||""; if(authPass)candidates.push(authPass); const legacy=LS.getItem("trace_consumer_vault_pass")||""; if(legacy&&!candidates.includes(legacy))candidates.push(legacy);
-    const stored=store.get("signai_vault_hash"); let chosen=candidates[0]||("trace-v2-"+requireUser());
-    if(stored){ for(const candidate of candidates){ if(await hashPass(candidate)===stored){chosen=candidate;break;} } }
-    byId("vault_pass").value=chosen; await tryUnlockVault();
-    if(!vaultUnlocked)throw new Error("The local vault could not be unlocked. Open Advanced and use the original vault password.");
+    const hasActiveSigningKey = () => {
+      const alg = store.get("signai_sig_alg") || "";
+      return (
+        window.isSecureContext &&
+        !!window.crypto &&
+        !!crypto.subtle &&
+        vaultUnlocked &&
+        !!creator?.creatorId &&
+        !!creator?.privKey &&
+        !!creator?.pubKey &&
+        (alg === "Ed25519" || alg === "ECDSA_P256_SHA256")
+      );
+    };
+
+    if(hasActiveSigningKey()) return true;
+
+    const importedBackupPending = store.get("signai_pending_backup_import") === "1";
+
+    if(!importedBackupPending){
+      const candidates=[];
+      const authPass=byId("auth_pass")?.value||"";
+      if(authPass)candidates.push(authPass);
+      const legacy=LS.getItem("trace_consumer_vault_pass")||"";
+      if(legacy&&!candidates.includes(legacy))candidates.push(legacy);
+
+      const stored=store.get("signai_vault_hash");
+      let chosen=candidates[0]||("trace-v2-"+requireUser());
+      if(stored){
+        for(const candidate of candidates){
+          if(await hashPass(candidate)===stored){
+            chosen=candidate;
+            break;
+          }
+        }
+      }
+
+      byId("vault_pass").value=chosen;
+      await tryUnlockVault();
+    }
+
+    if(!hasActiveSigningKey()){
+      const prompted = String(
+        window.prompt("Enter the original vault password to activate the signing key") || ""
+      );
+
+      if(prompted.length < 4){
+        throw new Error("Signing key remains locked. No badge was created.");
+      }
+
+      byId("vault_pass").value=prompted;
+      await tryUnlockVault();
+    }
+
+    if(!hasActiveSigningKey()){
+      throw new Error("Wrong vault password. Signing key remains locked and no badge was created.");
+    }
+
     return true;
   }
   function mirrorFile(file){
@@ -7791,10 +8361,20 @@ svg.glyph3d.trace-v2-motion>g.motion{transform-box:fill-box;transform-origin:cen
       const active=!!checks.windowOk;
       const signed=!!checks.sigOk;
       const good=active&&signed;
+      const unsigned=checks.reason==="unsigned";
       const originText=proof.origin?.ai_flag?"AI flagged":proof.origin?.local_fallback?"Local fallback":"Human signal";
-      const title=good?"Verified Trace proof":(active?"Proof needs review":"Proof expired or invalid");
-      const subtitle=good?"Signature and active time window are valid.":"See the checks below.";
-      result.innerHTML=`<div class="trace-verify-seal ${good?"":"bad"}">${good?"✓":"!"}</div><h2 style="text-align:center">${title}</h2><p style="text-align:center">${subtitle}</p><div class="trace-verify-grid"><div><span>Signature</span><b>${signed?"Valid":"Invalid / unsigned"}</b></div><div><span>Window</span><b>${active?"Active":"Expired"}</b></div><div><span>Badge ID</span><b>${esc(proofId(proof).replace(/^sha256:/,"").slice(0,24).toUpperCase())}</b></div><div><span>Origin</span><b>${originText}</b></div></div>`;
+      const title=good
+        ?"Verified Trace proof"
+        :(unsigned
+          ?"Unsigned proof"
+          :(active?"Invalid signature":"Proof expired or invalid"));
+      const subtitle=good
+        ?"Signature and active time window are valid."
+        :(unsigned
+          ?"This proof contains no cryptographic signature."
+          :"The cryptographic signature did not validate.");
+      const signatureText=signed?"Valid":(unsigned?"Unsigned":"Invalid");
+      result.innerHTML=`<div class="trace-verify-seal ${good?"":"bad"}">${good?"✓":"!"}</div><h2 style="text-align:center">${title}</h2><p style="text-align:center">${subtitle}</p><div class="trace-verify-grid"><div><span>Signature</span><b>${signatureText}</b></div><div><span>Window</span><b>${active?"Active":"Expired"}</b></div><div><span>Badge ID</span><b>${esc(proofId(proof).replace(/^sha256:/,"").slice(0,24).toUpperCase())}</b></div><div><span>Origin</span><b>${originText}</b></div></div>`;
     }catch(e){
       result.innerHTML='<div class="trace-verify-seal bad">!</div><h2 style="text-align:center">Could not verify proof</h2><p>'+esc(e.message||e)+'</p>';
     }
@@ -7926,6 +8506,251 @@ svg.glyph3d.trace-v2-motion>g.motion{transform-box:fill-box;transform-origin:cen
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",wire,{once:true});else wire();
 })();
 </script>
+
+<style id="trace-backup-visible-ui-fix">
+.trace-backup-card{display:grid;gap:14px}
+.trace-backup-card h2{margin:0 0 4px}
+.trace-backup-card p{margin:0;color:var(--muted);line-height:1.45}
+.trace-backup-password{display:grid;gap:7px}
+.trace-backup-password span{font-size:12px;font-weight:900;color:var(--muted);letter-spacing:.04em}
+.trace-backup-password input{width:100%;padding:13px 14px;border-radius:16px;border:1px solid rgba(255,255,255,.11);background:rgba(0,0,0,.24);color:var(--text);font:inherit;outline:none}
+.trace-backup-status{min-height:20px;color:var(--muted2);font-size:12px;line-height:1.45}
+.trace-backup-status.ok{color:var(--green)}
+.trace-backup-status.err{color:var(--red)}
+.trace-backup-status a{color:var(--blue);font-weight:900}
+</style>
+<script id="trace-backup-visible-ui-fix-script">
+(function(){
+  let backupObjectUrl = "";
+
+  function el(id){ return document.getElementById(id); }
+
+  function setBackupStatus(message, kind, link){
+    const targets = [el("trace_profile_backup_status"), el("vault_backup_status")].filter(Boolean);
+    targets.forEach(node => {
+      node.classList?.remove("ok", "err");
+      if(kind) node.classList?.add(kind);
+      node.textContent = message || "";
+      if(link){
+        node.appendChild(document.createTextNode(" "));
+        node.appendChild(link.cloneNode(true));
+      }
+    });
+  }
+
+  function readBackupPassword(allowPrompt){
+    /*
+     * Backup actions use only the password explicitly entered for that action.
+     * Login fields, hidden vault fields and browser autofill are ignored.
+     */
+    let pass = (el("trace_profile_backup_pass")?.value || "").trim();
+
+    if(!pass && allowPrompt){
+      pass = String(window.prompt("Enter your TRACE vault password") || "").trim();
+    }
+
+    return pass;
+  }
+
+  async function ensureBackupVaultUnlocked(){
+    if(!window.isSecureContext || !window.crypto || !crypto.subtle){
+      throw new Error("Open the HTTPS Render link to use encrypted backup");
+    }
+    if(!vaultUnlocked || !vaultCryptoKey){
+      throw new Error("Unlock the vault first");
+    }
+    if(!store.get("signai_priv_jwk_enc")){
+      throw new Error("No encrypted creator key exists yet");
+    }
+  }
+
+  function downloadBackupText(text, filename){
+    if(backupObjectUrl){
+      try{ URL.revokeObjectURL(backupObjectUrl); }catch(e){}
+      backupObjectUrl = "";
+    }
+    const blob = new Blob([text], {type:"application/json;charset=utf-8"});
+    const url = URL.createObjectURL(blob);
+    backupObjectUrl = url;
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.rel = "noopener";
+    a.style.display = "none";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    const fallback = document.createElement("a");
+    fallback.href = url;
+    fallback.download = filename;
+    fallback.textContent = "Tap here if the download did not start";
+    fallback.rel = "noopener";
+    setBackupStatus("Encrypted backup is ready.", "ok", fallback);
+
+    setTimeout(() => {
+      if(backupObjectUrl === url){
+        try{ URL.revokeObjectURL(url); }catch(e){}
+        backupObjectUrl = "";
+      }
+    }, 5 * 60 * 1000);
+  }
+
+  async function exportEncryptedBackup(){
+    await ensureBackupVaultUnlocked();
+
+    const encryptedRaw = store.get("signai_priv_jwk_enc");
+    const publicRaw = store.get("signai_pub_jwk");
+    if(!encryptedRaw || !publicRaw){
+      throw new Error("Creator identity is not initialized yet. Sign out and sign in again.");
+    }
+
+    const encryptedPrivate = traceVaultValidateEncryptedEnvelope(JSON.parse(encryptedRaw));
+
+    const protectedState = {
+      vault_root: store.get("signai_vault_root") || null,
+      vault_root_hash: store.get("signai_vault_root_hash") || null,
+      profile_mindprint: traceVaultReadProfileMindprintForBackup(),
+      profile_epoch: store.get("signai_profile_epoch") || null
+    };
+    const encryptedState = await traceVaultEncryptBackupState(
+      protectedState,
+      vaultCryptoKey,
+      encryptedPrivate.salt_b64
+    );
+
+    const creatorId = store.get("signai_creator_id") || null;
+    const backup = {
+      format: "TRACE_ENCRYPTED_VAULT_BACKUP_V2",
+      app: "TRACE",
+      backup_version: 2,
+      exported_at: new Date().toISOString(),
+      creator_id: creatorId,
+      sig_alg: store.get("signai_sig_alg") || null,
+      public_jwk: JSON.parse(publicRaw),
+      encrypted_private_jwk: encryptedPrivate,
+      encrypted_vault_state: encryptedState
+    };
+
+    const date = new Date().toISOString().slice(0,10);
+    const idPart = String(creatorId || "creator").replace(/[^a-zA-Z0-9]/g, "").slice(0,12) || "creator";
+    downloadBackupText(JSON.stringify(backup, null, 2), `trace_vault_backup_${idPart}_${date}.json`);
+  }
+
+  function mountProfileBackupCard(){
+    const view = el("app_profile_view");
+    const flow = view?.querySelector("section.app-flow");
+    if(!flow || el("trace_profile_backup_card")) return;
+
+    const card = document.createElement("div");
+    card.className = "trace-profile-card trace-backup-card";
+    card.id = "trace_profile_backup_card";
+    card.innerHTML = `
+      <div>
+        <div class="eyebrow">Key vault</div>
+        <h2>Encrypted key backup</h2>
+        <p>Export or import the encrypted creator identity without entering a password on this page.</p>
+      </div>
+      <div class="trace-verify-actions">
+        <button id="trace_profile_export_backup" class="primary" type="button">Export encrypted backup</button>
+        <button id="trace_profile_import_backup" type="button">Import encrypted backup</button>
+      </div>
+      <div id="trace_profile_backup_status" class="trace-backup-status">Export requires an unlocked vault. After import, unlock normally with the backup's original vault password.</div>
+    `;
+
+    const gallery = flow.querySelector("#trace_profile_gallery")?.closest(".trace-profile-card");
+    if(gallery) flow.insertBefore(card, gallery);
+    else flow.appendChild(card);
+  }
+
+  function replaceLegacyBackupButtons(){
+    const exportOld = el("btn_export_priv");
+    if(exportOld && exportOld.dataset.traceFixed !== "1"){
+      const clean = exportOld.cloneNode(true);
+      clean.dataset.traceFixed = "1";
+      clean.textContent = "Export encrypted backup";
+      exportOld.replaceWith(clean);
+      clean.addEventListener("click", async () => {
+        try{
+          setBackupStatus("Preparing encrypted backup…");
+          await exportEncryptedBackup();
+        }catch(error){
+          console.error("TRACE backup export failed", error);
+          setBackupStatus(error?.message || String(error), "err");
+          alert("Backup could not be exported: " + (error?.message || String(error)));
+        }
+      });
+    }
+
+    const importOld = el("btn_import_backup");
+    if(importOld && importOld.dataset.traceFixed !== "1"){
+      const clean = importOld.cloneNode(true);
+      clean.dataset.traceFixed = "1";
+      importOld.replaceWith(clean);
+      clean.addEventListener("click", () => {
+        const picker = el("vault_import_file");
+        if(picker){
+          picker.value = "";
+          picker.click();
+        }
+      });
+    }
+  }
+
+  async function handleProfileExport(){
+    try{
+      setBackupStatus("Preparing encrypted backup…");
+      await exportEncryptedBackup();
+    }catch(error){
+      console.error("TRACE backup export failed", error);
+      setBackupStatus(error?.message || String(error), "err");
+    }
+  }
+
+  function handleProfileImport(){
+    const picker = el("vault_import_file");
+    if(picker){
+      picker.value = "";
+      picker.click();
+    }
+  }
+
+  function wire(){
+    mountProfileBackupCard();
+    replaceLegacyBackupButtons();
+
+    document.addEventListener("click", event => {
+      const target = event.target?.closest?.("button");
+      if(!target) return;
+      if(target.id === "trace_profile_export_backup"){
+        event.preventDefault();
+        handleProfileExport();
+      }else if(target.id === "trace_profile_import_backup"){
+        event.preventDefault();
+        handleProfileImport();
+      }else if(target.dataset?.traceTab === "profile"){
+        setTimeout(mountProfileBackupCard, 0);
+      }
+    });
+
+    const oldStatus = el("vault_backup_status");
+    if(oldStatus){
+      new MutationObserver(() => {
+        const profileStatus = el("trace_profile_backup_status");
+        if(profileStatus && oldStatus.textContent){
+          profileStatus.textContent = oldStatus.textContent;
+          profileStatus.className = "trace-backup-status" + (oldStatus.style.color?.includes("green") ? " ok" : "");
+        }
+      }).observe(oldStatus, {childList:true, characterData:true, subtree:true});
+    }
+  }
+
+  if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", wire, {once:true});
+  else wire();
+})();
+</script>
+
 
 </body>
 </html>
