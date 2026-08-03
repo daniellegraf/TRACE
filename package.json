@@ -1,0 +1,25 @@
+{
+  "name": "trace-creator-proof",
+  "version": "2.51.0",
+  "private": true,
+  "type": "module",
+  "description": "TRACE creator proof, cinematic reveal, creator archive, verification activity, origin analysis and public verification service",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "test": "node tests/trace-v51-static-tests.mjs && node server.js --test-origin",
+    "test:static": "node tests/trace-v51-static-tests.mjs",
+    "test:origin": "node server.js --test-origin",
+    "test:glyph": "node server.js --test-glyph",
+    "test:browser": "python tests/trace-v51-browser-tests.py",
+    "test:all": "npm test && npm run test:browser"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.8",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "multer": "^1.4.5-lts.1"
+  }
+}
