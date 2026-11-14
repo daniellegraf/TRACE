@@ -5,7 +5,7 @@
   "type": "module",
   "description": "TRACE creator proof, cinematic reveal, creator archive, verification activity, origin analysis and public verification service",
   "engines": {
-    "node": ">=20"
+    "node": "26.x"
   },
   "scripts": {
     "start": "node server.js",
