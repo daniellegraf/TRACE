@@ -1,0 +1,29 @@
+# TRACE: never commit local credentials or identity material
+node_modules/
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.jwk
+*.jwk.json
+*.vault
+*.backup.json
+trace_vault_backup_*.json
+
+# Local caches, editor data and generated files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+__pycache__/
+.pytest_cache/
+*.pyc
+.coverage
+coverage/
+.nyc_output/
+playwright-report/
+test-results/
+trace-lock-artifact.zip
