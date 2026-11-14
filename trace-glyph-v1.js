@@ -1181,11 +1181,20 @@ function buildSpatialV7Scene(spec,width,height,t,context,colors){
 const TraceGlyphScheduler=(()=>{
   const items=new Map(); let raf=0,last=0,avgFrame=16.7,interactionUntil=0;
   const reduced=()=>!!(root.matchMedia&&root.matchMedia("(prefers-reduced-motion: reduce)").matches);
-  const isVisible=(svg)=>{if(!svg?.isConnected)return false;const r=svg.getBoundingClientRect?.();return !r||(r.bottom>=-80&&r.top<=(root.innerHeight||1000)+80&&r.right>=-80&&r.left<=(root.innerWidth||1000)+80);};
+  // Visibility is observed, not synchronously measured during every animation frame.
+  const visibilityObserver=typeof root.IntersectionObserver==="function"
+    ? new root.IntersectionObserver(entries=>{for(const entry of entries){const item=items.get(entry.target);if(item)item.intersecting=entry.isIntersecting;}},{rootMargin:"80px"})
+    : null;
+  const isVisible=(svg,item)=>{
+    if(!svg?.isConnected||root.document?.visibilityState==="hidden")return false;
+    if(visibilityObserver)return item.intersecting!==false;
+    const r=svg.getBoundingClientRect?.();
+    return !r||(r.bottom>=-80&&r.top<=(root.innerHeight||1000)+80&&r.right>=-80&&r.left<=(root.innerWidth||1000)+80);
+  };
   const qualityFor=(item)=>{if(reduced())return"static";if(root.__TRACE_TEXT_INPUT_ACTIVE||performance.now()<interactionUntil)return"static";if(avgFrame>28)return"low";if(avgFrame>21)return"medium";return item.mode==="badge"||item.mode==="public"?"high":"medium";};
   function touchInteraction(ms=180){interactionUntil=Math.max(interactionUntil,performance.now()+ms);}
   function update(item,now){
-    const {svg,spec,width,height,mode,primary,halos}=item;if(!isVisible(svg)){item.visible=false;return;}item.visible=true;
+    const {svg,spec,width,height,mode,primary,halos}=item;if(!isVisible(svg,item)){item.visible=false;return;}item.visible=true;
     const q=qualityFor(item); if(q==="static")return;
     const target=q==="high"?33:q==="medium"?50:83;if(now-item.last<target)return;item.last=now;const t=now/1000;
     if(spec.renderer_version===RENDERER_V7)return;
@@ -1200,9 +1209,9 @@ const TraceGlyphScheduler=(()=>{
     }
     for(let i=0;i<primary.length;i++){const d=structuralPath(spec,i,width,height,t+i*.14,{mode});primary[i].setAttribute("d",d);if(halos[i])halos[i].setAttribute("d",d);}
   }
-  function tick(now){const delta=last?Math.min(80,now-last):16.7;last=now;avgFrame=avgFrame*.92+delta*.08;for(const [svg,item] of items){if(!svg.isConnected){items.delete(svg);continue;}update(item,now);}raf=items.size?root.requestAnimationFrame(tick):0;}
-  function register(svg,spec,width,height,mode,primary,halos){items.set(svg,{svg,spec,width,height,mode,primary,halos,last:0,lastSurface:"",lastDetail:"",lastNodes:""});if(!raf)raf=root.requestAnimationFrame(tick);}
-  function unregister(svg){items.delete(svg);if(!items.size&&raf){root.cancelAnimationFrame?.(raf);raf=0;}}
+  function tick(now){const delta=last?Math.min(80,now-last):16.7;last=now;avgFrame=avgFrame*.92+delta*.08;for(const [svg,item] of items){if(!svg.isConnected){visibilityObserver?.unobserve(svg);items.delete(svg);continue;}update(item,now);}raf=items.size?root.requestAnimationFrame(tick):0;}
+  function register(svg,spec,width,height,mode,primary,halos){items.set(svg,{svg,spec,width,height,mode,primary,halos,last:0,lastSurface:"",lastDetail:"",lastNodes:"",intersecting:true});visibilityObserver?.observe(svg);if(!raf)raf=root.requestAnimationFrame(tick);}
+  function unregister(svg){visibilityObserver?.unobserve(svg);items.delete(svg);if(!items.size&&raf){root.cancelAnimationFrame?.(raf);raf=0;}}
   function stats(){return{active:items.size,avgFrameMs:round(avgFrame,2),interactionPaused:performance.now()<interactionUntil||!!root.__TRACE_TEXT_INPUT_ACTIVE};}
   try{root.addEventListener?.("pointerdown",()=>touchInteraction(140),{passive:true});root.addEventListener?.("keydown",()=>touchInteraction(180),{passive:true});root.document?.addEventListener?.("visibilitychange",()=>{if(root.document.visibilityState!=="visible")interactionUntil=performance.now()+250;});}catch{}
   return Object.freeze({register,unregister,touchInteraction,stats});
