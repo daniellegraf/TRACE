@@ -10306,7 +10306,12 @@ svg.glyph3d.trace-v2-motion>g.motion{transform-box:fill-box;transform-origin:cen
     $$(".trace-history-card",gallery).forEach(card=>{const proof=map.get(String(card.dataset.proofId||"").replace(/^sha256:/i,""))||map.get(String(card.dataset.proofId||""));if(!proof)return;const meta=$(".trace-history-meta",card);if(meta&&!$(".trace-formation-line",meta)){const f=deriveGlyphFormationMetadata(proof);const line=document.createElement("span");line.className="trace-formation-line";line.textContent=f.legacy?(f.formation+" · "+f.structure):(f.formation+" · "+f.structure+" · "+f.motion+" · "+f.complexity);meta.appendChild(line);}});
     observeGlyphs(gallery,"gallery");updateMaturityUI();
     const profileSvg=$("#trace_creator_glyph svg.glyph3d");if(profileSvg)observeGlyph(profileSvg,"profile");
-    const sel=$("#trace_profile_glyph_style");if(sel)renderStylePreview($("#trace_style_preview_profile"),sel.value,"profile");
+    const sel=$("#trace_profile_glyph_style"), preview=$("#trace_style_preview_profile");
+    // Avoid regenerating an expensive glyph preview on every profile mutation.
+    if(sel&&preview&&preview.dataset.traceDecoratedStyle!==sel.value){
+      renderStylePreview(preview,sel.value,"profile");
+      preview.dataset.traceDecoratedStyle=sel.value;
+    }
   }
 
   function wireSettings(){
@@ -10339,8 +10344,27 @@ svg.glyph3d.trace-v2-motion>g.motion{transform-box:fill-box;transform-origin:cen
   function init(){
     progressMount();wireSettings();wireStylePreviews();
     const resultActions=$(".trace-reward-actions");if(resultActions)resultActions.setAttribute("aria-label","Proof actions");
-    const profileObserver=new MutationObserver(()=>{if($("#app_profile_view.active"))requestAnimationFrame(decorateGallery);});
-    const shell=$("#trace_app_shell");if(shell)profileObserver.observe(shell,{subtree:true,childList:true,attributes:true,attributeFilter:["class"]});
+    // The former shell-wide observer repeatedly decorated the profile in response
+    // to DOM mutations caused by decorateGallery itself. Only relevant changes
+    // schedule one refresh, and disconnect while mutating the gallery.
+    const shell=$("#trace_app_shell");
+    let galleryDecorateFrame=0;
+    const profileObserver=new MutationObserver(records=>{
+      if(!$("#app_profile_view.active")||galleryDecorateFrame)return;
+      const relevant=records.some(record=>
+        record.type==="attributes"
+          ? record.target?.id==="app_profile_view"
+          : (record.target===shell||!!record.target?.closest?.("#app_profile_view"))
+      );
+      if(!relevant)return;
+      galleryDecorateFrame=requestAnimationFrame(()=>{
+        galleryDecorateFrame=0;
+        profileObserver.disconnect();
+        try{if($("#app_profile_view.active"))decorateGallery();}
+        finally{if(shell)profileObserver.observe(shell,{subtree:true,childList:true,attributes:true,attributeFilter:["class"]});}
+      });
+    });
+    if(shell)profileObserver.observe(shell,{subtree:true,childList:true,attributes:true,attributeFilter:["class"]});
     const badgeObserver=new MutationObserver(()=>{if(currentProof)decorateReadyBadge(currentProof);});const badge=$("#app_badge_result");if(badge)badgeObserver.observe(badge,{childList:true,subtree:true});
     setTimeout(()=>{decorateGallery();if(currentProof)decorateReadyBadge(currentProof);},80);
   }
