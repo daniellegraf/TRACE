@@ -119,7 +119,7 @@ async function resilientSupabaseFetch(input, init = {}) {
 
 const app = express();
 app.use((req, res, next) => {
-  res.setHeader("X-TRACE-Build", "trace-v51-creator-ritual-archive-activity");
+  res.setHeader("X-TRACE-Build", "trace-v51.25-audit-hardening");
   next();
 });
 app.disable("x-powered-by");
@@ -4359,7 +4359,7 @@ app.get("/health", (req, res) => {
 
   return res.json({
     ok: true,
-    build: "trace-v51-creator-ritual-archive-activity",
+    build: "trace-v51.25-audit-hardening",
     ts: Date.now(),
     frontend_found: fs.existsSync(indexPath),
     glyph_engine_found: fs.existsSync(glyphEnginePath),
@@ -4971,7 +4971,7 @@ if (ORIGIN_TEST_MODE || GLYPH_TEST_MODE) {
     const glyph = runGlyphSpecificationTests();
     const report = {
       ok: true,
-      build: "trace-v51-creator-ritual-archive-activity",
+      build: "trace-v51.25-audit-hardening",
       tests_passed: Number(origin?.tests_passed || 0) + Number(glyph.tests_passed || 0),
       origin,
       glyph,
@@ -4981,7 +4981,7 @@ if (ORIGIN_TEST_MODE || GLYPH_TEST_MODE) {
   } catch (error) {
     console.error(JSON.stringify({
       ok: false,
-      build: "trace-v51-creator-ritual-archive-activity",
+      build: "trace-v51.25-audit-hardening",
       error: error?.stack || String(error),
     }, null, 2));
     process.exitCode = 1;
