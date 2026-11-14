@@ -20,8 +20,8 @@ with sync_playwright() as p:
         errors = []
         page.on('pageerror', lambda err: errors.append(str(err)))
         markup = (ROOT / 'tests' / 'glyph-harness.html').read_text()
-        scripts = re.findall(r'<script\\b[^>]*>([\\s\\S]*?)</script>', markup)
-        html_only = re.sub(r'<script\\b[^>]*>.*?</script>', '', markup, flags=re.DOTALL)
+        scripts = re.findall(r'<script\b[^>]*>([\s\S]*?)</script>', markup)
+        html_only = re.sub(r'<script\b[^>]*>.*?</script>', '', markup, flags=re.DOTALL)
         page.set_content(html_only, wait_until='load')
         page.add_script_tag(content=(ROOT / 'trace-glyph-v1.js').read_text())
         for script in scripts:
