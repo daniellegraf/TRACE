@@ -1264,6 +1264,7 @@ function getActiveUser(){
 }
 </script>
 <script src="/trace-glyph-v1.js?v=51.23"></script>
+<script src="/trace-mindprint-v2.js?v=2"></script>
 
 <style>
 .hide{display:none!important}
@@ -4406,6 +4407,22 @@ function rhythmTracker(el, onDone, opts={}){
       if(cfg.minIntervals > 0 && intervals.length < cfg.minIntervals) return;
     }
 
+    if(window.TraceMindprintV2?.build){
+      const minChars=(cfg.autoAfterChars!==null)?cfg.autoAfterChars:cfg.minChars;
+      const kind=/badge/i.test(el.id||"")?"badge":"profile";
+      const mp=await window.TraceMindprintV2.build({
+        text:txt,
+        intervals,
+        minChars,
+        kind,
+        creatorId:creator?.creatorId||""
+      });
+      onDone(mp);
+      markDone();
+      return;
+    }
+
+    // Legacy fallback if the V2 engine failed to load.
     const mean = intervals.length ? (intervals.reduce((a,b)=>a+b,0)/intervals.length) : 0;
     const vari = intervals.length ? (intervals.reduce((a,b)=>a+(b-mean)*(b-mean),0)/intervals.length) : 0;
     const rhythmStr = intervals.length
@@ -4413,11 +4430,8 @@ function rhythmTracker(el, onDone, opts={}){
       : "no_rhythm";
     const rhythmHash = await sha256Hex(textToU8(rhythmStr));
     const textHash = await sha256Hex(textToU8(txt));
-
-    // score: based on length + interval count + variance (variance optional)
     const norm = Math.max(1, Number(cfg.normChars) || 80);
     const score = clamp01((txt.length/norm)*0.65 + (Math.min(intervals.length,40)/40)*0.30 + (intervals.length? (Math.min(vari,60000)/60000)*0.05 : 0));
-
     onDone({textHash, rhythmHash, score_0_1:score});
     markDone();
   }
@@ -5697,8 +5711,8 @@ $("#btn_analyze").addEventListener("click", async ()=>{
     "style="+glyphStyle,
     creator.creatorId,
     badge_key,
-    profileMindprint.textHash, profileMindprint.rhythmHash,
-    badgeMindprint.textHash, badgeMindprint.rhythmHash,
+    profileMindprint.textHash, profileMindprint.rhythmHash, profileMindprint.behaviorCommitment||"legacy-profile-mindprint",
+    badgeMindprint.textHash, badgeMindprint.rhythmHash, badgeMindprint.behaviorCommitment||"legacy-badge-mindprint",
     imgHash || "noimg",
     "origin="+origin.score_0_1.toFixed(4),
     "visual_class="+traceOriginClass(origin)
@@ -5759,7 +5773,8 @@ $("#btn_analyze").addEventListener("click", async ()=>{
       provider_result:origin.provider_result,
       diagnostics:origin.diagnostics
     },
-    mindprint_profile: {
+    mindprint_contract: (profileMindprint?.version==="trace-mindprint-v2"&&badgeMindprint?.version==="trace-mindprint-v2") ? "trace-mindprint-v2" : undefined,
+    mindprint_profile: window.TraceMindprintV2?.publicRecord ? window.TraceMindprintV2.publicRecord(profileMindprint) : {
       textHash: profileMindprint.textHash,
       rhythmHash: profileMindprint.rhythmHash,
       score_0_1: profileMindprint.score_0_1
@@ -5767,7 +5782,7 @@ $("#btn_analyze").addEventListener("click", async ()=>{
     glyph_style: glyphStyle,
     glyph_renderer_version: "trace-glyph-renderer-v2",
     glyph_spec: glyphSpec,
-    mindprint_badge: {
+    mindprint_badge: window.TraceMindprintV2?.publicRecord ? window.TraceMindprintV2.publicRecord(badgeMindprint) : {
       textHash: badgeMindprint.textHash,
       rhythmHash: badgeMindprint.rhythmHash,
       score_0_1: badgeMindprint.score_0_1
@@ -9361,12 +9376,24 @@ svg.glyph3d.trace-v2-motion>g.motion{transform-box:fill-box;transform-origin:cen
     if(mindprintMeterTimers[kind])clearTimeout(mindprintMeterTimers[kind]);
     mindprintMeterTimers[kind]=setTimeout(()=>paintMindprintMeter(kind),140);
   }
-  function noteKey(kind){
+  function noteKey(kind,event){
+    if(event?.repeat||event?.isComposing||event?.ctrlKey||event?.metaKey||event?.altKey)return;
+    const key=String(event?.key||"");
+    if(key&&key.length!==1&&!["Backspace","Delete","Enter"].includes(key))return;
     const now=performance.now(); const last=kind==="profile"?state.profileLastKey:state.badgeLastKey; const list=kind==="profile"?state.profileIntervals:state.badgeIntervals;
     if(last&&now-last>10&&now-last<3000){list.push(now-last);if(list.length>96)list.splice(0,list.length-96);}
     if(kind==="profile")state.profileLastKey=now;else state.badgeLastKey=now;
   }
-  async function buildMindprint(text,intervals,min){
+  async function buildMindprint(text,intervals,min,kind){
+    if(window.TraceMindprintV2?.build){
+      return await window.TraceMindprintV2.build({
+        text,
+        intervals,
+        minChars:min,
+        kind:kind||"badge",
+        creatorId:creator?.creatorId||""
+      });
+    }
     const mean=intervals.length?intervals.reduce((a,b)=>a+b,0)/intervals.length:0; const vari=intervals.length?intervals.reduce((a,b)=>a+(b-mean)*(b-mean),0)/intervals.length:0;
     const rhythm=intervals.length?intervals.slice(-64).map(x=>Math.round(x)).join(",")+"|m="+mean.toFixed(1)+"|v="+vari.toFixed(1):"no_rhythm";
     return {textHash:await sha256Hex(textToU8(text)),rhythmHash:await sha256Hex(textToU8(rhythm)),score_0_1:text.length>=min?1:Math.min(1,text.length/min),ready:text.length>=min};
@@ -9382,7 +9409,7 @@ svg.glyph3d.trace-v2-motion>g.motion{transform-box:fill-box;transform-origin:cen
     const token=++profileCommitToken;
     if(!user||text.length<40){profileMindprint={textHash:null,rhythmHash:null,score_0_1:Math.min(1,text.length/40),ready:false};refreshMindprintUI();return false;}
     if(text===lastCommittedProfileText&&profileMindprint?.textHash){refreshMindprintUI();return true;}
-    const mp=await buildMindprint(text,state.profileIntervals,40); if(token!==profileCommitToken)return false;
+    const mp=await buildMindprint(text,state.profileIntervals,40,"profile"); if(token!==profileCommitToken)return false;
     profileMindprint=mp; lastCommittedProfileText=text; ProfileStore.setMindprint(user,text,mp); refreshMindprintUI(); return true;
   }
   async function commitBadgeMindprint(text){
@@ -9391,7 +9418,7 @@ svg.glyph3d.trace-v2-motion>g.motion{transform-box:fill-box;transform-origin:cen
     const token=++badgeCommitToken;
     if(text.length<20){badgeMindprint={textHash:null,rhythmHash:null,score_0_1:Math.min(1,text.length/20),ready:false};refreshMindprintUI();return false;}
     if(text===lastCommittedBadgeText&&badgeMindprint?.textHash){refreshMindprintUI();return true;}
-    const mp=await buildMindprint(text,state.badgeIntervals,20); if(token!==badgeCommitToken)return false;
+    const mp=await buildMindprint(text,state.badgeIntervals,20,"badge"); if(token!==badgeCommitToken)return false;
     badgeMindprint=mp; lastCommittedBadgeText=text; refreshMindprintUI(); return true;
   }
 
@@ -9668,8 +9695,8 @@ svg.glyph3d.trace-v2-motion>g.motion{transform-box:fill-box;transform-origin:cen
     recoverStorageQuota();
     document.body.classList.add("trace-v2-ready");ensureViews();ensurePhotoInput();showView("create");
     const p=byId("app_profile_mp"),b=byId("app_badge_mp");ensureMeter("profile",p,40);ensureMeter("badge",b,20);updateMindprintMeter("profile",p.value||"");updateMindprintMeter("badge",b.value||"");
-    p.addEventListener("keydown",()=>noteKey("profile"));
-    b.addEventListener("keydown",()=>noteKey("badge"));
+    p.addEventListener("keydown",e=>noteKey("profile",e));
+    b.addEventListener("keydown",e=>noteKey("badge",e));
     // Zero heavy work on keystrokes. Typing only updates a coalesced visual meter.
     // SHA-256 + localStorage happen on blur or synchronously in the Create Proof flow.
     p.addEventListener("input",()=>{mindprintMeterText.profile=p.value;if(mindprintMeterTimers.profile)clearTimeout(mindprintMeterTimers.profile);mindprintMeterTimers.profile=setTimeout(()=>paintMindprintMeter("profile"),180);},{passive:true});
