@@ -119,7 +119,7 @@ async function resilientSupabaseFetch(input, init = {}) {
 
 const app = express();
 app.use((req, res, next) => {
-  res.setHeader("X-TRACE-Build", "trace-v51.25-audit-hardening");
+  res.setHeader("X-TRACE-Build", "trace-v51.26-mindprint-v2");
   next();
 });
 app.disable("x-powered-by");
@@ -130,6 +130,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const indexPath = path.join(__dirname, "index.html");
 const glyphEnginePath = path.join(__dirname, "trace-glyph-v1.js");
+const mindprintEnginePath = path.join(__dirname, "trace-mindprint-v2.js");
 const ritualEnginePath = path.join(__dirname, "trace-creator-ritual-v1.js");
 const ritualStylesPath = path.join(__dirname, "trace-creator-ritual-v1.css");
 const uploadDir = "/tmp/trace-uploads";
@@ -567,6 +568,15 @@ app.get("/trace-glyph-v1.js", (req, res) => {
   res.setHeader("Cache-Control", "public, max-age=3600, stale-while-revalidate=86400");
   res.setHeader("Content-Type", "application/javascript; charset=utf-8");
   return res.sendFile(glyphEnginePath);
+});
+
+app.get("/trace-mindprint-v2.js", (req, res) => {
+  if (!fs.existsSync(mindprintEnginePath)) {
+    return res.status(500).type("text/plain").send("TRACE Mindprint V2 engine not found");
+  }
+  res.setHeader("Cache-Control", "public, max-age=3600, stale-while-revalidate=86400");
+  res.setHeader("Content-Type", "application/javascript; charset=utf-8");
+  return res.sendFile(mindprintEnginePath);
 });
 
 app.get("/trace-creator-ritual-v1.js", (req, res) => {
@@ -1409,6 +1419,35 @@ function validateTraceGlyphSpecification(candidate, origin = null) {
   return { ok: true, version: TRACE_GLYPH_SPEC_VERSION };
 }
 
+const TRACE_MINDPRINT_CONTRACT_V2 = "trace-mindprint-v2";
+const TRACE_MINDPRINT_FEATURE_SCHEMA_V2 = "trace-mindprint-features-v2";
+
+function validateMindprintV2Block(candidate, label) {
+  const fail = (reason) => ({ ok: false, reason: `mindprint_${label}_${reason}` });
+  if (!candidate || typeof candidate !== "object" || Array.isArray(candidate)) return fail("missing");
+  if (candidate.version !== TRACE_MINDPRINT_CONTRACT_V2) return fail("version_invalid");
+  if (candidate.feature_schema !== TRACE_MINDPRINT_FEATURE_SCHEMA_V2) return fail("feature_schema_invalid");
+  if (!/^[a-f0-9]{64}$/.test(String(candidate.textHash || ""))) return fail("text_hash_invalid");
+  if (!/^[a-f0-9]{64}$/.test(String(candidate.rhythmHash || ""))) return fail("rhythm_hash_invalid");
+  if (!/^[a-f0-9]{64}$/.test(String(candidate.behaviorCommitment || ""))) return fail("behavior_commitment_invalid");
+  if (!Number.isFinite(candidate.score_0_1) || candidate.score_0_1 < 0 || candidate.score_0_1 > 1) return fail("score_invalid");
+  if (!Number.isFinite(candidate.quality_0_1) || candidate.quality_0_1 < 0 || candidate.quality_0_1 > 1) return fail("quality_invalid");
+  if (!Number.isInteger(candidate.sample_count) || candidate.sample_count < 0 || candidate.sample_count > 96) return fail("sample_count_invalid");
+  if (typeof candidate.behavioral_available !== "boolean") return fail("behavioral_available_invalid");
+  return { ok: true };
+}
+
+function validateMindprintContract(proof) {
+  const contract = proof?.mindprint_contract;
+  if (contract === undefined || contract === null || contract === "") return { ok: true, legacy: true };
+  if (contract !== TRACE_MINDPRINT_CONTRACT_V2) return { ok: false, reason: "mindprint_contract_unsupported" };
+  const profile = validateMindprintV2Block(proof.mindprint_profile, "profile");
+  if (!profile.ok) return profile;
+  const badge = validateMindprintV2Block(proof.mindprint_badge, "badge");
+  if (!badge.ok) return badge;
+  return { ok: true, version: TRACE_MINDPRINT_CONTRACT_V2 };
+}
+
 function compactPublicProof(proof) {
   const compact = JSON.parse(JSON.stringify(proof || {}));
 
@@ -1713,6 +1752,15 @@ app.post("/proofs", proofPublishLimit, async (req, res) => {
           request_id: requestId,
         });
       }
+    }
+    const mindprintValidation = validateMindprintContract(proof);
+    if (!mindprintValidation.ok) {
+      return res.status(422).json({
+        ok: false,
+        error: "The signed TRACE Mindprint contract is invalid",
+        reason: mindprintValidation.reason,
+        request_id: requestId,
+      });
     }
     const aiProbability = typeof origin?.ai_probability === "number"
       ? origin.ai_probability
@@ -4359,10 +4407,11 @@ app.get("/health", (req, res) => {
 
   return res.json({
     ok: true,
-    build: "trace-v51.25-audit-hardening",
+    build: "trace-v51.26-mindprint-v2",
     ts: Date.now(),
     frontend_found: fs.existsSync(indexPath),
     glyph_engine_found: fs.existsSync(glyphEnginePath),
+    mindprint_engine_found: fs.existsSync(mindprintEnginePath),
     ritual_engine_found: fs.existsSync(ritualEnginePath),
     ritual_styles_found: fs.existsSync(ritualStylesPath),
     verification_event_hash_secret_source: TRACE_EVENT_HASH_SECRET_SOURCE,
@@ -4971,7 +5020,7 @@ if (ORIGIN_TEST_MODE || GLYPH_TEST_MODE) {
     const glyph = runGlyphSpecificationTests();
     const report = {
       ok: true,
-      build: "trace-v51.25-audit-hardening",
+      build: "trace-v51.26-mindprint-v2",
       tests_passed: Number(origin?.tests_passed || 0) + Number(glyph.tests_passed || 0),
       origin,
       glyph,
@@ -4981,7 +5030,7 @@ if (ORIGIN_TEST_MODE || GLYPH_TEST_MODE) {
   } catch (error) {
     console.error(JSON.stringify({
       ok: false,
-      build: "trace-v51.25-audit-hardening",
+      build: "trace-v51.26-mindprint-v2",
       error: error?.stack || String(error),
     }, null, 2));
     process.exitCode = 1;
