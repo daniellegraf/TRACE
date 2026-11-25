@@ -143,7 +143,14 @@ function neuralResponse(a,front,left,right,here,food){
  return Math.tanh(out/Math.sqrt(a.brain.length));
 }
 function archiveChild(child){
- const c=colonies[patchFor(child.x,child.y)]; c.count++;c.highGen=Math.max(c.highGen,child.gen);c.brain=Math.max(c.brain,child.brain.length);c.signal+=child.g[7]*.01;archivedCount++;
+ const c=colonies[patchFor(child.x,child.y)];
+ c.count++;c.highGen=Math.max(c.highGen,child.gen);c.brain=Math.max(c.brain,child.brain.length);
+ c.signal+=child.g[7]*.01;archivedCount++;
+ if(!c.template||child.brain.length>c.template.brain.length||
+    (child.gen>c.template.gen&&rand()<.6)||rand()<.008){
+   c.template={x:child.x,y:child.y,gen:child.gen,g:child.g.slice(),
+    brain:child.brain.map(n=>({w:n.w.slice(),b:n.b}))};
+ }
 }
 function registerChild(parent,batch=null,forced=false){
  const child=organism((parent.x+between(-3,3)+GW)%GW,(parent.y+between(-3,3)+GH)%GH,
@@ -160,7 +167,7 @@ function reset(){
  resource=new Float32Array(N);signalA=new Float32Array(N);signalB=new Float32Array(N);nsA=new Float32Array(N);nsB=new Float32Array(N);
  for(let y=0;y<GH;y++)for(let x=0;x<GW;x++){const i=y*GW+x;u[i]=1;resource[i]=between(.18,.55);}
  for(let j=0;j<22;j++){const x=between(5,GW-5),y=between(5,GH-5);bump(v,x,y,between(.5,.95),between(2,7)|0);bump(resource,x,y,.4,8);}
- colonies=Array.from({length:PATCH_COLS*PATCH_ROWS},()=>({count:0,highGen:0,brain:0,signal:0}));
+ colonies=Array.from({length:PATCH_COLS*PATCH_ROWS},()=>({count:0,highGen:0,brain:0,signal:0,template:null}));
  agents=Array.from({length:INITIAL_POP},()=>organism(between(1,GW-1),between(1,GH-1),newGenome(),0,between(.8,1.1)));
  by('evo-seed').textContent='FRÖ: '+seed.toString(16).toUpperCase().padStart(8,'0');
  by('evo-start').textContent='↻ NYTT UNIVERSUM';by('evo-pause').disabled=false;by('evo-pause').textContent='⏸ PAUSA';
@@ -235,7 +242,17 @@ function evolution(){
  if(newborn.length)agents.push(...newborn);
  // Renewable incubation guarantees population growth despite local resource scarcity.
  // A birth above ACTIVE_CAP becomes an undying colony member, not a deleted agent.
- if(clock%24===0&&agents.length)registerChild(agents[(rand()*agents.length)|0],null,true);
+ if(clock%24===0&&agents.length){
+  let parent=agents[(rand()*agents.length)|0];
+  if(archivedCount>0&&rand()<.62){
+   const first=(rand()*colonies.length)|0;
+   for(let i=0;i<colonies.length;i++){
+    const c=colonies[(first+i)%colonies.length];
+    if(c.count&&c.template){parent={...c.template,energy:1.2};break;}
+   }
+  }
+  registerChild(parent,null,true);
+ }
  // Nonstationary resource patches generate new situations for inherited controllers.
  if(clock%500===0){
   const x=between(10,GW-10),y=between(10,GH-10);bump(resource,x,y,.8,12);bump(v,x,y,.2,5);
