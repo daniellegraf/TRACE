@@ -37,7 +37,7 @@
   </div>
   <div class="evo-bottom"><p class="evo-summary" id="evo-summary"><strong>Vad kan hända?</strong> Kemiska mönster kan bilda öar, ringar eller trådar. Ingen organism dör. Nya individer föds ständigt och alla behåller sin egen arvsmassa och sitt eget nervnät. Utfallet räknas fram i realtid.</p>
     <div class="evo-events" id="evo-events" role="log" aria-label="Verkliga händelser i simuleringen"><div>Laboratoriet väntar på start.</div></div></div>
-  <div class="evo-disclaimer"><b>DETTA ÄR ETT DIGITALT EXPERIMENT.</b> Organismerna är kod, inte upptäckt liv. Efter 1 100 aktiva individer lagras nya som aggregerade koloni-medlemmar, inte individuellt simulerade agenter. Fler neuroner eller synapsuppdateringar betyder inte automatiskt verklig intelligens. Mönster och beteenden växer fram ur programmets regler och slumpfrö — inte ur verkliga teleskopobservationer. Tryck på själva bilden för att tillsätta näring och påverka experimentet.</div>
+  <div class="evo-disclaimer"><b>DETTA ÄR ETT DIGITALT EXPERIMENT.</b> Alla individer har egna tillstånd och uppdateras i varje fullständig simuleringscykel; ingen arkiveras eller raderas. Vid många individer tar en cykel längre tid, och bildens punkter förenklas till en densitetskarta eftersom skärmen har begränsat antal pixlar. Inget garanterar framväxande intelligens. Begränsningen på sikt är telefonens minne och processor. Existerande organismer eller framsteg sparas inte automatiskt om sidan stängs.</div>
 </section>
 <footer class="foot"><b>ÄRLIG VETENSKAPLIG BEGRÄNSNING</b> · Ingen webbsida kan skanna hela universum direkt. Detta är en automatiserad sökning genom ett litet, observerat urval av universum: kända exoplaneter. Grafiken är dekorativ och representerar inte stjärnornas verkliga positioner. Resultatet visar inga oupptäckta radiosignaler.<div class="barlink"><a href="https://exoplanetarchive.ipac.caltech.edu/docs/TAP/usingTAP.html" target="_blank" rel="noopener">NASA Exoplanet Archive / API ↗</a><a href="https://github.com/Paosososo/beyond-earth" target="_blank" rel="noopener">Katalogspegel (3 nov 2026) ↗</a><a href="https://seti.berkeley.edu/opendata" target="_blank" rel="noopener">SETI rådata ↗</a></div></footer></div>
 <script>
@@ -268,14 +268,18 @@ function stats(){
  if(clock>0&&clock%600===0)by('evo-summary').innerHTML='<strong>Observation:</strong> '+total.toLocaleString('sv-SE')+' egna nervnät i samma simulation. Ingen individ försvinner. Vid högre antal blir en hel beräkningscykel långsammare. Största nervnätet: '+maxNodes+' neuroner, inte ett bevis på intelligens.';
 }
 function paint(){
+ // All organisms contribute to the pixel-density map, even if there are more
+ // individuals than screen pixels. Rendering density is NOT population aggregation.
+ const heat=new Uint32Array(N);
+ for(const a of agents)heat[cell(a.x,a.y)]++;
  const cc=rgba;
  for(let i=0;i<N;i++){
- const B=Math.min(1,v[i]*4.1),A=Math.min(1,signalA[i]*1.55),C=Math.min(1,signalB[i]*1.55),R=resource[i];
- const q=i<<2;
- cc[q]=Math.min(255,4+R*10+B*34+A*24+C*185);
- cc[q+1]=Math.min(255,11+R*24+B*217+A*190+C*55);
- cc[q+2]=Math.min(255,27+R*44+B*155+A*140+C*155);
- cc[q+3]=255;
+  const B=Math.min(1,v[i]*4.1),A=Math.min(1,signalA[i]*1.55),C=Math.min(1,signalB[i]*1.55),R=resource[i],crowd=Math.min(1,Math.log1p(heat[i])*.15);
+  const q=i<<2;
+  cc[q]=Math.min(255,4+R*10+B*34+A*24+C*185+crowd*75);
+  cc[q+1]=Math.min(255,11+R*24+B*217+A*190+C*55+crowd*95);
+  cc[q+2]=Math.min(255,27+R*44+B*155+A*140+C*155+crowd*150);
+  cc[q+3]=255;
  }
  oc.putImageData(frame,0,0);
  display.setTransform(pixel,0,0,pixel,0,0);
@@ -283,21 +287,17 @@ function paint(){
  display.drawImage(off,0,0,cssW,cssH);
  display.save();display.globalCompositeOperation='lighter';
  const sx=cssW/GW,sy=cssH/GH;
- // Aggregate colony lights: representatives of immortal population beyond the CPU cap.
- for(let k=0;k<colonies.length;k++){
-  const c=colonies[k];if(!c.count)continue;
-  const x=((k%PATCH_COLS)+.5)*PATCH_SIZE*sx,y=(((k/PATCH_COLS)|0)+.5)*PATCH_SIZE*sy;
-  display.beginPath();display.arc(x,y,Math.min(17,1.8+Math.log1p(c.count)*2.8),0,TAU);
-  display.fillStyle='rgba(105,173,255,'+Math.min(.28,.05+Math.log1p(c.count)*.018)+')';display.fill();
- }
- for(const a of agents){
- const x=a.x*sx,y=a.y*sy,rr=Math.max(1.1,Math.min(2.6,1.3+Math.max(.1,a.energy)*.4))*Math.min(1.3,cssW/400);
- display.beginPath();display.arc(x,y,rr*2.35,0,TAU);
- display.fillStyle=a.g[7]>0?'rgba(50,247,207,.08)':'rgba(244,95,251,.08)';display.fill();
- display.beginPath();display.arc(x,y,rr,0,TAU);
- const alpha=bound(.4+a.energy*.25,.4,.95);
- display.fillStyle=a.g[7]>0?'rgba(148,255,219,'+alpha+')':'rgba(255,155,230,'+alpha+')';
- display.fill();
+ // Visual point sampling is permitted; every agent is still uniquely simulated.
+ const every=Math.max(1,Math.ceil(agents.length/2300));
+ for(let k=0;k<agents.length;k+=every){
+  const a=agents[k],x=a.x*sx,y=a.y*sy;
+  const rr=Math.max(1.1,Math.min(2.6,1.3+Math.max(.1,a.energy)*.4))*Math.min(1.3,cssW/400);
+  display.beginPath();display.arc(x,y,rr*2.35,0,TAU);
+  display.fillStyle=a.g[7]>0?'rgba(50,247,207,.08)':'rgba(244,95,251,.08)';display.fill();
+  display.beginPath();display.arc(x,y,rr,0,TAU);
+  const alpha=bound(.4+a.energy*.25,.4,.95);
+  display.fillStyle=a.g[7]>0?'rgba(148,255,219,'+alpha+')':'rgba(255,155,230,'+alpha+')';
+  display.fill();
  }
  display.restore();
 }
