@@ -27,15 +27,15 @@
   </div>
   <div class="evo-actions"><button type="button" class="evo-primary" id="evo-start">✦ STARTA DET OKÄNDA</button><button type="button" class="evo-secondary" id="evo-pause" disabled>⏸ PAUSA</button><span class="evo-what">Inga inställningar · nya resultat varje gång</span></div>
   <div class="evo-metrics" aria-live="off">
-    <div class="evo-metric"><b id="evo-pop">0</b><span>Totalt skapade · inga dödsfall</span></div>
+    <div class="evo-metric"><b id="evo-pop">0</b><span>Unika levande individer</span></div>
     <div class="evo-metric"><b id="evo-gen">0</b><span>Högsta generation</span></div>
     <div class="evo-metric"><b id="evo-births">0</b><span>Födslar / mutationer</span></div>
     <div class="evo-metric"><b id="evo-structures">0</b><span>Max neuroner / nya noder</span></div>
-    <div class="evo-metric"><b id="evo-active">0</b><span>Individer simuleras aktivt</span></div>
-    <div class="evo-metric"><b id="evo-vault">0</b><span>Odödliga i koloniarkivet</span></div>
+    <div class="evo-metric"><b id="evo-active">0</b><span>Egna individuella nervnät</span></div>
+    <div class="evo-metric"><b id="evo-progress">0 / 0</b><span>Behandlade denna cykel</span></div>
     <div class="evo-metric"><b id="evo-learning">0</b><span>Synapsjusteringar (försök)</span></div>
   </div>
-  <div class="evo-bottom"><p class="evo-summary" id="evo-summary"><strong>Vad kan hända?</strong> Kemiska mönster kan bilda öar, ringar eller trådar. Ingen organism dör. Nya individer föds ständigt, deras nervnät kan växa och förändras av erfarenhet och mutationer. De bildar permanenta kolonier. Utfallet räknas fram i realtid.</p>
+  <div class="evo-bottom"><p class="evo-summary" id="evo-summary"><strong>Vad kan hända?</strong> Kemiska mönster kan bilda öar, ringar eller trådar. Ingen organism dör. Nya individer föds ständigt och alla behåller sin egen arvsmassa och sitt eget nervnät. Utfallet räknas fram i realtid.</p>
     <div class="evo-events" id="evo-events" role="log" aria-label="Verkliga händelser i simuleringen"><div>Laboratoriet väntar på start.</div></div></div>
   <div class="evo-disclaimer"><b>DETTA ÄR ETT DIGITALT EXPERIMENT.</b> Organismerna är kod, inte upptäckt liv. Efter 1 100 aktiva individer lagras nya som aggregerade koloni-medlemmar, inte individuellt simulerade agenter. Fler neuroner eller synapsuppdateringar betyder inte automatiskt verklig intelligens. Mönster och beteenden växer fram ur programmets regler och slumpfrö — inte ur verkliga teleskopobservationer. Tryck på själva bilden för att tillsätta näring och påverka experimentet.</div>
 </section>
@@ -91,12 +91,12 @@ const display=canvas.getContext('2d',{alpha:false});
 if(!display){by('evo-state').textContent='KAN INTE VISA CANVAS';return;}
 const GW=162,GH=94,N=GW*GH,PI=Math.PI,TAU=PI*2;
 const PATCH_SIZE=9,PATCH_COLS=Math.ceil(GW/PATCH_SIZE),PATCH_ROWS=Math.ceil(GH/PATCH_SIZE);
-const ACTIVE_CAP=1100, INITIAL_POP=125, MAX_BRAIN=40; // Virtualized immortal population with active CPU budget.
+const INITIAL_POP=125, MAX_BRAIN=40; // No individual cap or archive; full population participates in each logical step.
 const patchFor=(x,y)=>Math.floor(y/PATCH_SIZE)*PATCH_COLS+Math.floor(x/PATCH_SIZE);
 const off=document.createElement('canvas');off.width=GW;off.height=GH;
 const oc=off.getContext('2d');const frame=oc.createImageData(GW,GH),rgba=frame.data;
 let u,v,nu,nv,resource,signalA,signalB,nsA,nsB,agents=[],rng,seed=0,clock=0,drawFrames=0,mutations=0,births=0,hiGen=0;
-let colonies=[], archivedCount=0, maxNodes=0, innovations=0, learningUpdates=0, environmentShifts=0;
+let maxNodes=0, innovations=0, learningUpdates=0, environmentShifts=0, cycle=null, lastProcessed=0;
 let active=false,paused=false,last=0,raf=0,cssW=1,cssH=1,pixel=1,lastStats=0,lastEvent=0;
 const now=()=>typeof performance!=='undefined'?performance.now():Date.now();
 function rand(){let x=rng|0;x^=x<<13;x^=x>>>17;x^=x<<5;rng=x|0;return (x>>>0)/4294967296;}
@@ -142,39 +142,27 @@ function neuralResponse(a,front,left,right,here,food){
  }
  return Math.tanh(out/Math.sqrt(a.brain.length));
 }
-function archiveChild(child){
- const c=colonies[patchFor(child.x,child.y)];
- c.count++;c.highGen=Math.max(c.highGen,child.gen);c.brain=Math.max(c.brain,child.brain.length);
- c.signal+=child.g[7]*.01;archivedCount++;
- if(!c.template||child.brain.length>c.template.brain.length||
-    (child.gen>c.template.gen&&rand()<.6)||rand()<.008){
-   c.template={x:child.x,y:child.y,gen:child.gen,g:child.g.slice(),
-    brain:child.brain.map(n=>({w:n.w.slice(),b:n.b}))};
- }
-}
 function registerChild(parent,batch=null,forced=false){
  const child=organism((parent.x+between(-3,3)+GW)%GW,(parent.y+between(-3,3)+GH)%GH,
-  newGenome(parent.g),parent.gen+1,forced?.75:parent.energy*.35,brainCopy(parent.brain));
- if(agents.length+(batch?batch.length:0)<ACTIVE_CAP){
-  if(batch)batch.push(child); else agents.push(child);
- }else archiveChild(child);
- births++;if(child.gen>hiGen){hiGen=child.gen;if(hiGen<=5||hiGen%5===0)addEvent('Ny generation '+hiGen+' har uppstått');}
+ newGenome(parent.g),parent.gen+1,forced?.75:parent.energy*.35,brainCopy(parent.brain));
+ if(batch)batch.push(child);else agents.push(child);
+ births++;
+ if(child.gen>hiGen){hiGen=child.gen;if(hiGen<=5||hiGen%5===0)addEvent('Ny generation '+hiGen+' har uppstått');}
 }
 function reset(){
  seed=((typeof crypto!=='undefined'&&crypto.getRandomValues)?crypto.getRandomValues(new Uint32Array(1))[0]:(Date.now()^(Math.random()*4294967296)))>>>0;
- rng=seed||0x9E3779B9;clock=0;drawFrames=0;mutations=0;births=0;hiGen=0;lastEvent=0;lastStats=0;archivedCount=0;maxNodes=0;innovations=0;learningUpdates=0;environmentShifts=0;
+ rng=seed||0x9E3779B9;clock=0;drawFrames=0;mutations=0;births=0;hiGen=0;lastEvent=0;lastStats=0;maxNodes=0;innovations=0;learningUpdates=0;environmentShifts=0;cycle=null;lastProcessed=0;
  u=new Float32Array(N);v=new Float32Array(N);nu=new Float32Array(N);nv=new Float32Array(N);
  resource=new Float32Array(N);signalA=new Float32Array(N);signalB=new Float32Array(N);nsA=new Float32Array(N);nsB=new Float32Array(N);
  for(let y=0;y<GH;y++)for(let x=0;x<GW;x++){const i=y*GW+x;u[i]=1;resource[i]=between(.18,.55);}
  for(let j=0;j<22;j++){const x=between(5,GW-5),y=between(5,GH-5);bump(v,x,y,between(.5,.95),between(2,7)|0);bump(resource,x,y,.4,8);}
- colonies=Array.from({length:PATCH_COLS*PATCH_ROWS},()=>({count:0,highGen:0,brain:0,signal:0,template:null}));
  agents=Array.from({length:INITIAL_POP},()=>organism(between(1,GW-1),between(1,GH-1),newGenome(),0,between(.8,1.1)));
  by('evo-seed').textContent='FRÖ: '+seed.toString(16).toUpperCase().padStart(8,'0');
  by('evo-start').textContent='↻ NYTT UNIVERSUM';by('evo-pause').disabled=false;by('evo-pause').textContent='⏸ PAUSA';
  by('evo-state').textContent='UTVECKLING PÅGÅR';by('evo-state').classList.add('live');
  by('evo-tip').textContent='Färger = kemiska fält · prickar = organismer';
  by('evo-events').innerHTML='';addEvent('125 organismer skapade · inga dödsregler');
- by('evo-summary').innerHTML='<strong>Evig tillväxt startad.</strong> Inga dödsregler. Individernas små nervnät kan växa, mutera och anpassa kopplingar. Världen sparar växande kolonier utan att beräkna varje individ separat.';
+ by('evo-summary').innerHTML='<strong>Alla simuleras individuellt.</strong> Varje organism behåller sitt eget nervnät, minne, energi och position. Ingen arkiveras. Vid stort antal tar en gemensam beräkningscykel längre tid, men omfattar alla.';
  active=true;paused=false;last=0;paint();stats();
 }
 function chemistry(){
@@ -211,10 +199,15 @@ function sense(a,angle){
  return resource[i]*a.g[0]+v[i]*.4+(signalA[i]-signalB[i])*a.g[1]+.08*Math.sin(.09*x+.05*y+clock*.012);
 }
 function evolution(){
- const density=new Uint16Array(PATCH_COLS*PATCH_ROWS);
- for(const a of agents)density[patchFor(a.x,a.y)]++;
- const newborn=[];
- for(const a of agents){
+ if(!cycle){
+  const density=new Uint32Array(PATCH_COLS*PATCH_ROWS);
+  for(const a of agents)density[patchFor(a.x,a.y)]++;
+  cycle={density,cursor:0,total:agents.length,newborn:[]};
+ }
+ const density=cycle.density,newborn=cycle.newborn;
+ let processed=0,deadline=now()+8;
+ while(cycle.cursor<cycle.total){
+  const a=agents[cycle.cursor++];
   const g=a.g;
   const front=sense(a,0),left=sense(a,-.64),right=sense(a,.64);
   const bias=(right-left)*g[3]+(right+left-2*front)*.11;
@@ -238,35 +231,22 @@ function evolution(){
   if(a.energy>g[5]&&a.age>60&&rand()<.042*Math.exp(-.025*near)){
    a.energy*=.69;registerChild(a,newborn);
   }
+  // A cycle is not complete until each real organism has received one update.
+  if(((++processed)&127)===0&&now()>=deadline)break;
  }
- if(newborn.length)agents.push(...newborn);
- // Renewable incubation guarantees population growth despite local resource scarcity.
- // A birth above ACTIVE_CAP becomes an undying colony member, not a deleted agent.
- if(clock%24===0&&agents.length){
-  let parent=agents[(rand()*agents.length)|0];
-  if(archivedCount>0&&rand()<.62){
-   const first=(rand()*colonies.length)|0;
-   for(let i=0;i<colonies.length;i++){
-    const c=colonies[(first+i)%colonies.length];
-    if(c.count&&c.template){parent={...c.template,energy:1.2};break;}
-   }
-  }
-  registerChild(parent,null,true);
- }
+ by('evo-progress').textContent=cycle.cursor.toLocaleString('sv-SE')+' / '+cycle.total.toLocaleString('sv-SE');
+ if(cycle.cursor<cycle.total)return false;
+ lastProcessed=cycle.total;
+ for(const child of newborn)agents.push(child);
+ // Guaranteed birth; no limit on total population.
+ if(clock%24===0&&agents.length)registerChild(agents[(rand()*agents.length)|0],null,true);
  // Nonstationary resource patches generate new situations for inherited controllers.
  if(clock%500===0){
   const x=between(10,GW-10),y=between(10,GH-10);bump(resource,x,y,.8,12);bump(v,x,y,.2,5);
   environmentShifts++;addEvent('Miljön förändrades: nya näringsområden ('+environmentShifts+')');
  }
- if((clock&3)===0&&archivedCount){
-  for(let k=0;k<colonies.length;k++){
-   const col=colonies[k];if(!col.count)continue;
-   const x=(k%PATCH_COLS)*PATCH_SIZE+(PATCH_SIZE>>1),y=((k/PATCH_COLS)|0)*PATCH_SIZE+(PATCH_SIZE>>1);
-   const z=cell(x,y),s=Math.log1p(col.count)*.00045;
-   if(col.signal>=0)signalA[z]=bound(signalA[z]+s,0,1);
-   else signalB[z]=bound(signalB[z]+s,0,1);
-  }
- }
+ cycle=null;
+ return true;
 }
 function structuralIndex(){
  // Spatial chemical gradients, deliberately not a proxy for intelligence.
@@ -275,17 +255,17 @@ function structuralIndex(){
  return Math.min(100,gradients/(Math.ceil(GW/3)*Math.ceil(GH/3))*590);
 }
 function stats(){
- const total=INITIAL_POP+births;
+ const total=agents.length;
  by('evo-pop').textContent=total.toLocaleString('sv-SE');
  by('evo-gen').textContent=String(hiGen);
  by('evo-births').textContent=births.toLocaleString('sv-SE')+' / '+mutations.toLocaleString('sv-SE');
  by('evo-structures').textContent=maxNodes+' / '+innovations.toLocaleString('sv-SE');
  by('evo-learning').textContent=learningUpdates.toLocaleString('sv-SE');
- by('evo-active').textContent=agents.length.toLocaleString('sv-SE');
- by('evo-vault').textContent=archivedCount.toLocaleString('sv-SE');
+ by('evo-active').textContent=total.toLocaleString('sv-SE');
+ by('evo-progress').textContent=(cycle?cycle.cursor:lastProcessed).toLocaleString('sv-SE')+' / '+(cycle?cycle.total:lastProcessed).toLocaleString('sv-SE');
  by('evo-clock').textContent='TICK '+String(clock).padStart(6,'0');
- if(clock>0&&clock%450===0)addEvent(total.toLocaleString('sv-SE')+' odödliga, '+archivedCount.toLocaleString('sv-SE')+' i kolonier');
- if(clock>0&&clock%600===0)by('evo-summary').innerHTML='<strong>Observation:</strong> '+total.toLocaleString('sv-SE')+' individer skapade, 0 dödsfall. '+agents.length+' simuleras individuellt och '+archivedCount.toLocaleString('sv-SE')+' i permanenta kolonier. Största aktiva eller arkiverade nervnätet: '+maxNodes+' noder. Synapsjusteringar: '+learningUpdates.toLocaleString('sv-SE')+'. Inget av detta är ett bevis på verklig intelligens.';
+ if(clock>0&&clock%450===0)addEvent(total.toLocaleString('sv-SE')+' individuellt simulerade · inga dödsfall');
+ if(clock>0&&clock%600===0)by('evo-summary').innerHTML='<strong>Observation:</strong> '+total.toLocaleString('sv-SE')+' egna nervnät i samma simulation. Ingen individ försvinner. Vid högre antal blir en hel beräkningscykel långsammare. Största nervnätet: '+maxNodes+' neuroner, inte ett bevis på intelligens.';
 }
 function paint(){
  const cc=rgba;
@@ -339,9 +319,16 @@ function paintBlank(){
 function loop(ts){
  raf=requestAnimationFrame(loop);
  if(!active||paused||document.hidden)return;
- if(last&&ts-last<32)return;last=ts;
- try{clock++;chemistry();evolution();paint();if(clock-lastStats>=16){stats();lastStats=clock;}}
- catch(err){paused=true;by('evo-state').textContent='BERÄKNINGSFEL';by('evo-state').classList.remove('live');addEvent('Fel: '+(err.message||'okänt'));by('evo-pause').textContent='▶ ÅTERUPPTA';}
+ if(last&&ts-last<28)return;last=ts;
+ try{
+  if(!cycle){clock++;chemistry();}
+  const done=evolution();drawFrames++;
+  if(done&&clock-lastStats>=16){stats();lastStats=clock;}
+  if(done||drawFrames%9===0)paint();
+ }catch(err){
+  paused=true;by('evo-state').textContent='BERÄKNINGSFEL';by('evo-state').classList.remove('live');
+  addEvent('Fel: '+(err.message||'okänt'));by('evo-pause').textContent='▶ ÅTERUPPTA';
+ }
 }
 by('evo-start').addEventListener('click',()=>{
  try{reset();}catch(err){by('evo-state').textContent='FEL VID START';addEvent('Fel: '+err.message);}
