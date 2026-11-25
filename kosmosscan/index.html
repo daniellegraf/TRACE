@@ -32,7 +32,7 @@
     <div class="evo-metric"><b id="evo-births">0</b><span>Födslar / mutationer</span></div>
     <div class="evo-metric"><b id="evo-structures">0,0</b><span>Kemisk struktur (index)</span></div>
   </div>
-  <div class="evo-bottom"><p class="evo-summary" id="evo-summary"><strong>Vad kan hända?</strong> Kemiska mönster kan bilda öar, ringar eller trådar. Organismer kan dö ut, bilda kolonier eller förändra sina beteenden genom selektion. Utfallet räknas fram i realtid.</p>
+  <div class="evo-bottom"><p class="evo-summary" id="evo-summary"><strong>Vad kan hända?</strong> Kemiska mönster kan bilda öar, ringar eller trådar. Organismer kan dö ut, bilda kolonier eller förändra sina beteenden genom selektion. Deras antal styrs av tillgången på energi och konkurrens i närområdet. Utfallet räknas fram i realtid.</p>
     <div class="evo-events" id="evo-events" role="log" aria-label="Verkliga händelser i simuleringen"><div>Laboratoriet väntar på start.</div></div></div>
   <div class="evo-disclaimer"><b>DETTA ÄR ETT DIGITALT EXPERIMENT.</b> Organismerna är kod, inte upptäckt liv. Mönster och beteenden växer fram ur programmets regler och slumpfrö — inte ur verkliga teleskopobservationer. Tryck på själva bilden för att tillsätta näring och påverka experimentet.</div>
 </section>
@@ -87,6 +87,9 @@ const canvas=by('evo-canvas');if(!canvas)return;
 const display=canvas.getContext('2d',{alpha:false});
 if(!display){by('evo-state').textContent='KAN INTE VISA CANVAS';return;}
 const GW=162,GH=94,N=GW*GH,PI=Math.PI,TAU=PI*2;
+const PATCH_SIZE=9,PATCH_COLS=Math.ceil(GW/PATCH_SIZE),PATCH_ROWS=Math.ceil(GH/PATCH_SIZE);
+const SAFETY_AGENT_LIMIT=2800; // Emergency performance guard only; local ecological dynamics regulate actual population.
+const patchFor=(x,y)=>Math.floor(y/PATCH_SIZE)*PATCH_COLS+Math.floor(x/PATCH_SIZE);
 const off=document.createElement('canvas');off.width=GW;off.height=GH;
 const oc=off.getContext('2d');const frame=oc.createImageData(GW,GH),rgba=frame.data;
 let u,v,nu,nv,resource,signalA,signalB,nsA,nsB,agents=[],rng,seed=0,clock=0,drawFrames=0,mutations=0,births=0,deaths=0,hiGen=0;
@@ -154,6 +157,9 @@ function sense(a,angle){
  return resource[i]*a.g[0]+v[i]*.4+(signalA[i]-signalB[i])*a.g[1]+.08*Math.sin(.09*x+.05*y+clock*.012);
 }
 function evolution(){
+ // Local population density increases competition for nutrients and energy.
+ const density=new Uint16Array(PATCH_COLS*PATCH_ROWS);
+ for(const individual of agents)density[patchFor(individual.x,individual.y)]++;
  const newborn=[];
  for(let k=agents.length-1;k>=0;k--){
  const a=agents[k],g=a.g,si=cell(a.x,a.y);
@@ -165,15 +171,17 @@ function evolution(){
  a.x=(a.x+Math.cos(a.h)*g[6]+GW)%GW;
  a.y=(a.y+Math.sin(a.h)*g[6]+GH)%GH;
  const i=cell(a.x,a.y),take=Math.min(resource[i],.014*g[9]);resource[i]-=take;
+ const neighbours=Math.max(0,density[patchFor(a.x,a.y)]-1);
+ const competition=.00125*neighbours;
  // Energy from finite local food, less than ideal metabolism can cause extinction.
- a.energy+=take*.68-g[4]-.00013*g[6];a.age++;
+ a.energy+=take*.68-g[4]-.00013*g[6]-competition;a.age++;
  if(g[7]>0)signalA[i]=bound(signalA[i]+.028*g[7],0,1);
  else signalB[i]=bound(signalB[i]+.028*(-g[7]),0,1);
  // Rare noisy chemical-seeding events couple organisms to the Gray–Scott substrate.
  if((a.age%37)===0)v[i]=bound(v[i]+.015,0,1);
- if(a.energy>g[5]&&a.age>62&&agents.length+newborn.length<390){
+ if(a.energy>g[5]&&a.age>62&&agents.length+newborn.length<SAFETY_AGENT_LIMIT&&rand()<Math.exp(-.09*neighbours)){
  const childGenome=newGenome(g),cx=(a.x+between(-2,2)+GW)%GW,cy=(a.y+between(-2,2)+GH)%GH;
- newborn.push(organism(cx,cy,childGenome,a.gen+1,a.energy*.42));a.energy*=.48;births++;
+ newborn.push(organism(cx,cy,childGenome,a.gen+1,a.energy*.33));a.energy*=.47;births++;
  if(a.gen+1>hiGen){hiGen=a.gen+1;if(hiGen<5||hiGen%5===0)addEvent('Ny generation '+hiGen+' har uppstått');}
  }
  if(a.energy<=0||a.age>4000){agents.splice(k,1);deaths++;}
