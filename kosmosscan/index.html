@@ -3,11 +3,39 @@
 <style>
 :root{color-scheme:dark;--bg:#030a14;--surface:#0b1627;--edge:#20324e;--muted:#91a9c4;--white:#eff6ff;--aqua:#4ce5ce;--gold:#ffc87a;--blue:#6c93ff;--red:#ffbba9}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(ellipse 90vw 50vw at 50% -8%,#123559 0%,transparent 62%),#030a14;color:var(--white);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,Arial,sans-serif;font-size:15px;line-height:1.5}a{color:#8cdcff}.wrap{max-width:1110px;margin:0 auto;padding:0 23px}.top{padding:22px 0;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #18304b}.brand{letter-spacing:.2em;font-weight:900;font-size:16px}.brand b{color:var(--aqua)}.status{color:#b4c8da;font-size:11px;letter-spacing:.04em}.status .green{display:inline-block;width:7px;height:7px;background:#56e1b7;border-radius:50%;box-shadow:0 0 10px #56e1b7;margin-right:6px}.hero{padding:55px 0 23px;text-align:center}.eyebrow{color:#6ef2d3;text-transform:uppercase;letter-spacing:.25em;font-size:11px;font-weight:800}.hero h1{font-weight:880;font-size:clamp(36px,5vw,68px);letter-spacing:-.05em;line-height:1.07;margin:16px 0}.hero h1 em{font-style:normal;background:linear-gradient(90deg,#95aafe,#53ebd3);background-clip:text;color:transparent}.sub{max-width:720px;margin:0 auto;color:#b5c9dc;font-size:clamp(14px,2vw,17px)}.mainbox{margin:24px auto 0;background:linear-gradient(180deg,#0c1d33,#071120);border:1px solid #2b4468;border-radius:22px;overflow:hidden;box-shadow:0 15px 65px #0006}.sky{position:relative;height:clamp(260px,41vw,430px);background:radial-gradient(ellipse at 50% 50%,#071e36 0%,#06111f 48%,#030914 100%);overflow:hidden}#starfield{position:absolute;inset:0;width:100%;height:100%;display:block}.sky:after{content:"";pointer-events:none;position:absolute;inset:0;background:linear-gradient(90deg,#030d19 0%,transparent 22%,transparent 78%,#030d19),linear-gradient(0deg,#081727,transparent 20%,transparent 85%,#081727)}.galaxy{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}.orb{border:1px solid rgba(112,176,246,.21);border-radius:50%;position:absolute;aspect-ratio:1;box-shadow:inset 0 0 28px #3989d20e}.orb.one{width:180px}.orb.two{width:290px;border-style:dashed;animation:rotate 60s linear infinite}.orb.three{width:415px}.orb.four{width:570px;border-color:#6b9def14}.core{width:21px;height:21px;background:#e9ffff;border-radius:50%;box-shadow:0 0 18px #74efff,0 0 65px #3b90ff,0 0 115px #349bff,0 0 155px #4ce5ce54;animation:pulse 3s ease-in-out infinite}.scope{position:absolute;inset:0;pointer-events:none;background:conic-gradient(from 90deg at 50% 50%,transparent 0deg,#3ad8ce04 50deg,#4de8d419 70deg,transparent 80deg);animation:rotate 10s linear infinite;opacity:0}.running .scope{opacity:1}.skyline{position:absolute;inset:15px 18px auto;display:flex;gap:10px;justify-content:space-between;color:#91a9c4;font-family:ui-monospace,Menlo,monospace;font-size:10px;letter-spacing:.06em}.skyline strong{color:#d9eefb}.skybottom{position:absolute;bottom:16px;left:18px;right:18px;z-index:2;display:flex;justify-content:space-between;gap:8px;font:11px ui-monospace,Menlo,monospace;color:#87a3bd}.dot{width:7px;height:7px;border-radius:50%;background:#55eacc;display:inline-block;margin-right:6px;box-shadow:0 0 12px #55eacc}.console{padding:22px 24px 25px}.console h2{margin:0;font-size:17px}.console p{margin:6px 0 0;color:var(--muted);font-size:13px}#go{display:block;border:0;cursor:pointer;width:min(100%,640px);padding:18px 14px;margin:23px auto 8px;background:linear-gradient(115deg,#55d9c8,#81b4f6);border-radius:13px;color:#031523;font-size:clamp(16px,2.4vw,19px);font-weight:850;box-shadow:0 8px 35px #39e0d326;transition:transform .2s,filter .2s}#go:hover{filter:brightness(1.06);transform:translateY(-2px)}#go:disabled{opacity:.65;cursor:progress;transform:none}.tiny{text-align:center;color:#8ea9c1;font-size:11px;margin-top:12px}.tiny strong{color:#cad8e7}.meterarea{display:none;padding:19px 0 0}.meterhead{display:flex;justify-content:space-between;align-items:center;gap:10px;color:#d0e5f5;font-size:12px}.meterhead span:last-child{font-variant-numeric:tabular-nums}.meter{height:7px;background:#1a2d45;border-radius:40px;overflow:hidden;margin:9px 0 0}.bar{height:100%;width:0%;background:linear-gradient(90deg,#3488eb,#63f3cf);transition:width .08s ease}.log{display:none;min-height:75px;max-height:182px;overflow-y:auto;background:#05101d;border:1px solid #23344a;border-radius:12px;margin-top:17px;padding:10px 12px;font:12px/1.8 ui-monospace,SFMono-Regular,Menlo,monospace;color:#a7c9db}.log .time{color:#6984a0;margin-right:7px}.log .high{color:#65eacf}.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;margin:19px 0}.stats[hidden]{display:none}.stat{background:#0a192b;border:1px solid #223a52;border-radius:14px;padding:18px}.stat small{display:block;color:#98b1c6;font-size:11px}.stat strong{display:block;font-size:clamp(25px,3.5vw,37px);line-height:1.3;font-weight:850;letter-spacing:-.04em;font-variant-numeric:tabular-nums}.stat .mark{color:var(--aqua)}.results{display:none;scroll-margin-top:25px;margin:22px 0 55px}.grid{display:grid;grid-template-columns:1.45fr 1fr;gap:16px}.panel{border:1px solid #223d58;background:#091626;border-radius:18px;padding:23px}.panel h3{font-size:21px;letter-spacing:-.025em;margin:0 0 10px}.panel p{color:#b5c8da;margin:8px 0;font-size:14px}.badge{display:inline-block;border:1px solid #315b66;background:#153a41;color:#82f4db;border-radius:50px;padding:5px 11px;font-size:11px;font-weight:800;margin-bottom:11px}.badge.warn{color:#ffdea9;background:#423018;border-color:#654c2c}.yellow{color:var(--gold)}.data-source{font-size:12px;padding:10px 12px;margin:14px 0;border:1px solid #274a63;border-radius:9px;background:#0a2031;color:#d3e7f6}.tablebox{margin:16px 0 0;border:1px solid #263952;border-radius:16px;overflow:hidden;background:#081627}.tablehead{display:flex;justify-content:space-between;align-items:center;padding:20px 20px 13px;gap:10px}.tablehead h3{font-size:18px;margin:0}.chip{border:1px solid #2e5263;background:#0e293c;color:#b8dff3;padding:5px 9px;border-radius:99px;font-size:11px}table{border-collapse:collapse;width:100%}th{text-align:left;font-size:11px;color:#91aec6;font-weight:600;padding:11px 18px;border-bottom:1px solid #263b50;background:#0c2031}td{padding:13px 18px;border-bottom:1px solid #1d3143;font-size:13px;color:#e0eef9}tbody tr:last-child td{border:0}td strong{color:#efffff}td .small{display:block;font-size:11px;color:#7895b1}.rowrank{color:#71e3d0;font-weight:700}.explain{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:15px}.info{border:1px solid #21394f;background:#0b1c2c;padding:18px;border-radius:14px}.info b{display:block;font-size:14px;margin-bottom:4px}.info p{margin:0;font-size:12px;color:#9cb3c9}.foot{margin:30px 0 45px;padding:22px 0 0;border-top:1px solid #24384b;color:#839eb8;font-size:11px}.foot a{color:#a4dbe9}.barlink{margin-top:12px;display:flex;gap:15px;flex-wrap:wrap;font-size:12px}.foot b{color:#bad5e5}@keyframes pulse{50%{transform:scale(1.18);opacity:.8}}@keyframes rotate{to{transform:rotate(360deg)}}@media(max-width:730px){.wrap{padding:0 15px}.top{padding:16px 0}.brand{font-size:13px}.status{font-size:10px}.hero{padding:35px 0 18px}.hero h1{font-size:clamp(34px,10vw,54px)}.hero .sub{font-size:13px}.mainbox{margin-top:15px;border-radius:16px}.sky{height:320px}.orb.one{width:145px}.orb.two{width:240px}.orb.three{width:320px}.orb.four{width:440px}.console{padding:19px 16px}.stats{gap:8px}.stat{padding:12px 10px}.stat small{font-size:10px}.stat strong{font-size:25px}.grid{grid-template-columns:1fr}.panel{padding:18px}.explain{grid-template-columns:1fr}.tablehead{padding:17px 11px}.tablehead h3{font-size:16px}th,td{padding:10px 8px;font-size:11px}th{font-size:10px}.skyline{font-size:9px}.skybottom{font-size:9px}}
 @media(prefers-reduced-motion:reduce){.scope,.orb,.core{animation:none!important}.bar{transition:none}}
+
+/* EMERGENCE ENGINE V3: isolated self-contained evolutionary laboratory */
+.evo{margin:36px 0 30px;border:1px solid #34506d;background:radial-gradient(ellipse at 62% -10%,#12334a 0%,#081522 55%,#06101e 100%);border-radius:22px;overflow:hidden;box-shadow:0 15px 60px #0005;scroll-margin-top:18px}
+.evo-head{display:flex;justify-content:space-between;align-items:flex-start;gap:15px;padding:23px 25px 13px}.evo-kicker{color:#75f5d1;font-size:10px;letter-spacing:.22em;font-weight:850}.evo h2{margin:8px 0 5px;font-size:clamp(23px,3.4vw,32px);letter-spacing:-.035em;line-height:1.14}.evo-intro{color:#a7bed3;font-size:13px;max-width:620px;margin:3px 0 0}.evo-state{white-space:nowrap;padding:7px 11px;border:1px solid #42627a;border-radius:20px;color:#e2f9ff;background:#0f2936;font:700 10px ui-monospace,monospace;letter-spacing:.05em}.evo-state.live{color:#87ffd8;border-color:#397f70}.evo-stage{margin:12px 24px 0;border-radius:15px;position:relative;overflow:hidden;background:#020a13;border:1px solid #254056;aspect-ratio:1.94/1;min-height:196px}.evo-stage canvas{display:block;width:100%;height:100%;touch-action:manipulation}.evo-overlay{position:absolute;z-index:1;top:11px;left:11px;right:11px;display:flex;justify-content:space-between;gap:7px;color:#a3bfdd;font:10px ui-monospace,monospace;pointer-events:none;text-shadow:0 2px 6px #001}.evo-overlay span{padding:5px 7px;border-radius:7px;background:#040e1caf}.evo-corner{position:absolute;left:12px;bottom:11px;z-index:1;background:#06111cc9;border:1px solid #25415d;color:#98afc5;font-size:10px;border-radius:7px;padding:5px 8px;pointer-events:none}.evo-actions{padding:16px 24px 13px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}.evo-primary{border:0;background:linear-gradient(110deg,#63edd6,#83b7fc);color:#071b23;border-radius:10px;font-size:13px;font-weight:850;padding:13px 19px;cursor:pointer;min-height:44px}.evo-secondary{border:1px solid #36556b;background:#11283c;color:#d8f4ff;border-radius:10px;font-size:12px;font-weight:750;padding:12px 16px;cursor:pointer;min-height:44px}.evo-secondary:disabled{opacity:.4;cursor:not-allowed}.evo-what{color:#7998b3;font-size:11px;flex:1;text-align:right}.evo-metrics{margin:0 24px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.evo-metric{background:#081e2d;border:1px solid #25475a;border-radius:10px;padding:11px 10px}.evo-metric b{display:block;font:850 clamp(16px,2.4vw,25px)/1.25 ui-monospace,monospace;color:#a9ffdf;font-variant-numeric:tabular-nums}.evo-metric span{font-size:10px;color:#91acc2;display:block;margin-top:3px}.evo-bottom{padding:14px 24px 23px;display:grid;grid-template-columns:1fr minmax(170px,300px);gap:12px;align-items:start}.evo-summary{font-size:12px;color:#b5cddd;line-height:1.6;margin:0}.evo-summary strong{color:#e9ffff}.evo-events{background:#050f1e;border:1px solid #254158;border-radius:9px;padding:8px 10px;max-height:109px;min-height:72px;overflow:auto;color:#a7c8dc;font:10px/1.65 ui-monospace,monospace}.evo-events div{border-bottom:1px solid #183046;padding:2px 0}.evo-events div:last-child{border:0}.evo-disclaimer{padding:10px 24px 16px;border-top:1px solid #203b53;color:#879eb7;font-size:11px}
+.evo-anchor{border:1px solid #346c73;border-radius:50px;padding:5px 10px;color:#adffe9;text-decoration:none;background:#13323a;font-size:11px;font-weight:700}
+@media(max-width:730px){.evo-head{padding:19px 14px 10px;flex-wrap:wrap}.evo-stage{margin:10px 12px 0;aspect-ratio:1.3/1;min-height:212px}.evo-actions{padding:13px 12px}.evo-primary{flex:1 1 100%;width:100%}.evo-what{flex:1;text-align:left}.evo-metrics{margin:0 12px;grid-template-columns:repeat(2,minmax(0,1fr))}.evo-bottom{padding:12px;grid-template-columns:1fr}.evo-events{max-height:82px}.evo-disclaimer{padding:12px;font-size:10px}.evo-overlay{font-size:9px;left:6px;right:6px;top:6px}}
 </style></head><body>
-<div class="wrap"><header class="top"><div class="brand">◈ KOSMOS<b>SCAN</b> <span style="color:#8aa3bb;font-weight:400">/ 2.0</span></div><span class="status"><i class="green"></i> VERKLIG KATALOGANALYS</span></header>
+<div class="wrap"><header class="top"><div class="brand">◈ KOSMOS<b>SCAN</b> <span style="color:#8aa3bb;font-weight:400">/ 2.0</span></div><a class="evo-anchor" href="#emergence">✦ THE UNKNOWN ENGINE ↓</a></header>
 <section class="hero"><div class="eyebrow">En knapp. En automatisk undersökning.</div><h1>Finns det någon<br><em>annan intelligens?</em></h1><p class="sub">Jag hämtar astronomiska observationer, granskar registrerade exoplaneter en efter en och letar efter världar som förtjänar en närmare undersökning. Du behöver inte göra något mer än att starta.</p></section>
 <section class="mainbox" id="mainbox"><div class="sky" id="sky"><canvas id="starfield" aria-hidden="true"></canvas><div class="galaxy"><div class="orb four"></div><div class="orb three"></div><div class="orb two"></div><div class="orb one"></div><div class="core"></div></div><div class="scope"></div><div class="skyline"><span>OBSERVATIONER: <strong id="skytype">VÄNTAR</strong></span><span>OBJEKT: <strong id="skynum">0</strong></span></div><div class="skybottom"><span><i class="dot"></i><span id="skystatus">SYSTEM REDO</span></span><span>ILLUSTRATIV STJÄRNKARTA</span></div></div><div class="console"><h2 id="title">Starta min undersökning av universum</h2><p id="hint">Programmet söker i verkliga arkiv – det låtsas inte att en animation är en teleskopobservation.</p><button id="go" type="button">✦ STARTA DEN VERKLIGA SÖKNINGEN</button><div class="tiny"><strong>1 knapp · 0 inställningar</strong> · NASA:s exoplanetarkiv → analys → slutsats</div><div class="meterarea" id="meterarea"><div class="meterhead"><span id="phase">Förbereder…</span><span id="pct">0 %</span></div><div class="meter"><div class="bar" id="bar"></div></div></div><div class="log" id="log" role="log" aria-live="polite"></div><div class="stats" id="stats" hidden><div class="stat"><small>Planetposter granskade</small><strong id="count">0</strong></div><div class="stat"><small>Utvalda världar</small><strong class="mark" id="matches">0</strong></div><div class="stat"><small>Verifierad utomjordisk AI</small><strong id="intel">0</strong></div></div></div></section>
 <section class="results" id="results"><div class="grid"><div class="panel"><span class="badge" id="proofbadge">RESULTAT</span><h3 id="resulttitle">Min slutsats</h3><p id="summary"></p><div class="data-source" id="source"></div><p style="font-size:12px">Här är <b>observationer och ett matematiskt urval</b>, inte en livsdetektor. Ingen av dessa planeter är därmed bevisat bebodd.</p></div><div class="panel"><span class="badge warn">HYPOTES TESTAD</span><h3>Kan gammal AI finnas?</h3><p id="ancient">Undersökningen visar vad som går att säga om äldre stjärnsystem.</p><p><b class="yellow">Viktig gräns:</b> Exoplanetarkivet innehåller inte råa radiomätningar, lasersignaler eller prov på artificiellt material. Därför kan det varken bekräfta eller utesluta tidigare AI.</p></div></div><div class="tablebox"><div class="tablehead"><h3>✦ Planeternas observationsprioritet</h3><span class="chip" id="candidatecount"></span></div><div style="overflow-x:auto"><table><thead><tr><th>#</th><th>Planet</th><th>Avstånd</th><th>Radie</th><th>Jämviktstemp.</th><th>Index*</th></tr></thead><tbody id="ranking"></tbody></table></div></div><div class="explain"><div class="info"><b>01 / Vad jag verkligen gör</b><p>Bearbetar katalogens verkliga mätvärden, filtrerar radie och jämviktstemperatur, rangordnar utifrån tydliga prioriteringsregler.</p></div><div class="info"><b>02 / Vad jag inte kan se</b><p>Ytvatten, atmosfär, mikrober, civilisationer eller AI – sådant kan inte avgöras med dessa katalogfält.</p></div><div class="info"><b>03 / Hur urvalet fungerar</b><p>Radie 0,5–1,8 jordradier och jämviktstemperatur 180–310 K. Indexet är en egen observationsprioritering, inte sannolikhet för liv.</p></div></div></section>
+
+<section class="evo" id="emergence">
+  <div class="evo-head">
+    <div><div class="evo-kicker">EXPERIMENT 01 / THE UNKNOWN ENGINE</div><h2>Vad uppstår om koden får utvecklas?</h2>
+      <p class="evo-intro">Ingen förutbestämd bild. Jag kopplar ihop reaktions–diffusionskemi, en simulerad näringsmiljö, nervliknande återkoppling och genetiska mutationer. Tryck en gång — se vad som utvecklas.</p></div>
+    <span class="evo-state" id="evo-state">EJ STARTAD</span>
+  </div>
+  <div class="evo-stage"><canvas id="evo-canvas" aria-label="Levande datorsimulering med kemiska mönster och digitala organismer"></canvas>
+    <div class="evo-overlay"><span id="evo-clock">TICK 000000</span><span id="evo-seed">FRÖ: —</span></div>
+    <div class="evo-corner" id="evo-tip">Tryck STARTA för att väcka världen</div>
+  </div>
+  <div class="evo-actions"><button type="button" class="evo-primary" id="evo-start">✦ STARTA DET OKÄNDA</button><button type="button" class="evo-secondary" id="evo-pause" disabled>⏸ PAUSA</button><span class="evo-what">Inga inställningar · nya resultat varje gång</span></div>
+  <div class="evo-metrics" aria-live="off">
+    <div class="evo-metric"><b id="evo-pop">0</b><span>Levande digitala organismer</span></div>
+    <div class="evo-metric"><b id="evo-gen">0</b><span>Högsta generation</span></div>
+    <div class="evo-metric"><b id="evo-births">0</b><span>Mutationer / födslar</span></div>
+    <div class="evo-metric"><b id="evo-structures">0,0</b><span>Kemisk struktur (index)</span></div>
+  </div>
+  <div class="evo-bottom"><p class="evo-summary" id="evo-summary"><strong>Vad kan hända?</strong> Kemiska mönster kan bilda öar, ringar eller trådar. Organismer kan dö ut, bilda kolonier eller förändra sina beteenden genom selektion. Utfallet räknas fram i realtid.</p>
+    <div class="evo-events" id="evo-events" role="log" aria-label="Verkliga händelser i simuleringen"><div>Laboratoriet väntar på start.</div></div></div>
+  <div class="evo-disclaimer"><b>DETTA ÄR ETT DIGITALT EXPERIMENT.</b> Organismerna är kod, inte upptäckt liv. Mönster och beteenden växer fram ur programmets regler och slumpfrö — inte ur verkliga teleskopobservationer. Tryck på själva bilden för att tillsätta näring och påverka experimentet.</div>
+</section>
 <footer class="foot"><b>ÄRLIG VETENSKAPLIG BEGRÄNSNING</b> · Ingen webbsida kan skanna hela universum direkt. Detta är en automatiserad sökning genom ett litet, observerat urval av universum: kända exoplaneter. Grafiken är dekorativ och representerar inte stjärnornas verkliga positioner. Resultatet visar inga oupptäckta radiosignaler.<div class="barlink"><a href="https://exoplanetarchive.ipac.caltech.edu/docs/TAP/usingTAP.html" target="_blank" rel="noopener">NASA Exoplanet Archive / API ↗</a><a href="https://github.com/Paosososo/beyond-earth" target="_blank" rel="noopener">Katalogspegel (3 nov 2026) ↗</a><a href="https://seti.berkeley.edu/opendata" target="_blank" rel="noopener">SETI rådata ↗</a></div></footer></div>
 <script>
 'use strict';
@@ -47,4 +75,199 @@ function rand(i){let a=Math.sin(i*87.19+4.52)*43758.5453;return a-Math.floor(a)}
 function resize(){const b=canvas.getBoundingClientRect();dpr=Math.min(2,window.devicePixelRatio||1);W=b.width;H=b.height;canvas.width=Math.max(1,W*dpr);canvas.height=Math.max(1,H*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);stars=Array.from({length:520},(_,i)=>({x:rand(i+3)*W,y:rand(i+701)*H,s:rand(i+200)*1.6+.15,tw:rand(i+1600)*6.28}));}
 function draw(time){if(!W||!H){requestAnimationFrame(draw);return;}ctx.clearRect(0,0,W,H);for(const s of stars){let a=.1+.42*(.5+.5*Math.sin(time/1900+s.tw));ctx.fillStyle='rgba(174,211,255,'+a+')';ctx.beginPath();ctx.arc(s.x,s.y,s.s,0,7);ctx.fill();}const cx=W/2,cy=H/2;for(let j=0;j<highlighted.length;j++){let h=highlighted[j],a=rand(h.i*7)*6.283,r=(.12+rand(h.i*11)*.35)*Math.min(W,H);const x=cx+Math.cos(a)*r,y=cy+Math.sin(a)*r;const p=.52+.48*Math.sin(time/780+j);ctx.beginPath();ctx.fillStyle='rgba(89,243,212,'+(.38+.38*p)+')';ctx.arc(x,y,1.5+2*p,0,7);ctx.fill();}requestAnimationFrame(draw);}
 addEventListener('resize',resize,{passive:true});resize();requestAnimationFrame(draw);
+
+/* COSMOS EMERGENCE ENGINE — real stochastic evolutionary ecology + Gray–Scott chemistry.
+   Coupled nonlinear reaction–diffusion, replenishable nutrients, two chemotactic signal
+   channels, recurrent adaptive controllers, mutation/selection and local fitness feedback.
+   Simulated biology, not evidence of alien intelligence. Standalone, no dependencies. */
+(function(){
+'use strict';
+const by=id=>document.getElementById(id);
+const canvas=by('evo-canvas');if(!canvas)return;
+const display=canvas.getContext('2d',{alpha:false});
+if(!display){by('evo-state').textContent='KAN INTE VISA CANVAS';return;}
+const GW=162,GH=94,N=GW*GH,PI=Math.PI,TAU=PI*2;
+const off=document.createElement('canvas');off.width=GW;off.height=GH;
+const oc=off.getContext('2d');const frame=oc.createImageData(GW,GH),rgba=frame.data;
+let u,v,nu,nv,resource,signalA,signalB,nsA,nsB,agents=[],rng,seed=0,clock=0,drawFrames=0,mutations=0,births=0,deaths=0,hiGen=0;
+let active=false,paused=false,last=0,raf=0,cssW=1,cssH=1,pixel=1,lastStats=0,lastEvent=0;
+const now=()=>typeof performance!=='undefined'?performance.now():Date.now();
+function rand(){let x=rng|0;x^=x<<13;x^=x>>>17;x^=x<<5;rng=x|0;return (x>>>0)/4294967296;}
+function between(a,b){return a+(b-a)*rand();}
+function bound(x,a,b){return x<a?a:(x>b?b:x);}
+function cell(x,y){let a=((x|0)%GW+GW)%GW,b=((y|0)%GH+GH)%GH;return b*GW+a;}
+function bump(arr,x,y,amount,radius){let cx=x|0,cy=y|0,r=radius|0;for(let oy=-r;oy<=r;oy++)for(let ox=-r;ox<=r;ox++){const d=ox*ox+oy*oy;if(d>r*r)continue;const z=cell(cx+ox,cy+oy);arr[z]=bound(arr[z]+amount*(1-d/(r*r+1)),0,1);}}
+function addEvent(t){const e=by('evo-events');const item=document.createElement('div');item.textContent='['+String(clock).padStart(5,'0')+'] '+t;e.prepend(item);while(e.children.length>6)e.lastChild.remove();}
+function newGenome(base){
+ if(!base)return [between(.2,1.6),between(-.9,1.4),between(3,12),between(.16,.55),between(.0025,.005),between(1.0,1.65),between(.46,1.1),between(-1,1),between(.02,.26),between(.5,1.4)];
+ const g=base.slice();for(let k=0;k<g.length;k++)if(rand()<.24){const scale=[.25,.22,2.2,.09,.0007,.17,.14,.28,.07,.18][k];g[k]+=between(-scale,scale);mutations++;}
+ return [bound(g[0],-.8,2.5),bound(g[1],-2,2.5),bound(g[2],2,16),bound(g[3],.07,.86),bound(g[4],.001,.009),bound(g[5],.85,2.5),bound(g[6],.18,1.5),bound(g[7],-1.5,1.5),bound(g[8],.005,.65),bound(g[9],.2,1.8)];
+}
+function organism(x,y,genome,gen,energy){return{x,y,h:between(0,TAU),energy,age:0,gen,g:genome,m:0,n:0,line:Math.floor((genome[7]+1.6)*43)%360};}
+function reset(){
+ seed=((typeof crypto!=='undefined'&&crypto.getRandomValues)?crypto.getRandomValues(new Uint32Array(1))[0]:(Date.now()^(Math.random()*4294967296)))>>>0;
+ rng=seed||0x9E3779B9;clock=0;drawFrames=0;mutations=0;births=0;deaths=0;hiGen=0;lastEvent=0;lastStats=0;
+ u=new Float32Array(N);v=new Float32Array(N);nu=new Float32Array(N);nv=new Float32Array(N);
+ resource=new Float32Array(N);signalA=new Float32Array(N);signalB=new Float32Array(N);nsA=new Float32Array(N);nsB=new Float32Array(N);
+ for(let y=0;y<GH;y++)for(let x=0;x<GW;x++){const i=y*GW+x;u[i]=1;resource[i]=between(.18,.55);}
+ for(let j=0;j<22;j++){const x=between(5,GW-5),y=between(5,GH-5);bump(v,x,y,between(.5,.95),between(2,7)|0);bump(resource,x,y,.4,8);}
+ agents=Array.from({length:125},()=>organism(between(1,GW-1),between(1,GH-1),newGenome(),0,between(.8,1.1)));
+ by('evo-seed').textContent='FRÖ: '+seed.toString(16).toUpperCase().padStart(8,'0');
+ by('evo-start').textContent='↻ NYTT UNIVERSUM';by('evo-pause').disabled=false;by('evo-pause').textContent='⏸ PAUSA';
+ by('evo-state').textContent='UTVECKLING PÅGÅR';by('evo-state').classList.add('live');
+ by('evo-tip').textContent='Färger = kemiska fält · prickar = organismer';
+ by('evo-events').innerHTML='';addEvent('125 organismer födda · kemiska fält initierade');
+ by('evo-summary').innerHTML='<strong>Experimentet är igång.</strong> Den här världens mönster skapas av verklig numerisk integration och mutation. Slumpfrö: '+seed.toString(16).toUpperCase()+'.';
+ active=true;paused=false;last=0;paint();stats();
+}
+function chemistry(){
+ // 2D Gray–Scott reaction–diffusion with periodic boundaries; two integration substeps.
+ for(let sub=0;sub<2;sub++){
+ for(let y=0;y<GH;y++){
+ const up=(y===0?GH-1:y-1)*GW,down=(y===GH-1?0:y+1)*GW,row=y*GW;
+ for(let x=0;x<GW;x++){
+ const i=row+x,l=row+(x===0?GW-1:x-1),r=row+(x===GW-1?0:x+1),a=up+x,b=down+x;
+ const A=u[i],B=v[i],reaction=A*B*B;
+ const lapA=.2*(u[l]+u[r]+u[a]+u[b]-4*A);
+ const lapB=.2*(v[l]+v[r]+v[a]+v[b]-4*B);
+ const feed=.0322+.005*Math.sin(x*.037+seed*.000001)*Math.cos(y*.061);
+ const kill=.0598+.0015*Math.sin(y*.055);
+ nu[i]=bound(A+(lapA-reaction+feed*(1-A))*.87,0,1);
+ nv[i]=bound(B+(.54*lapB+reaction-(feed+kill)*B)*.87,0,1);
+ }
+ }
+ let t=u;u=nu;nu=t;t=v;v=nv;nv=t;
+ }
+ // Nutrient replenishment, chemotactic signal diffusion + evaporation.
+ // Chunk chemistry and signalling on alternating steps to keep iPhone efficient.
+ if((clock&1)===0){
+ for(let y=0;y<GH;y++){const up=(y===0?GH-1:y-1)*GW,down=(y===GH-1?0:y+1)*GW,row=y*GW;
+ for(let x=0;x<GW;x++){const i=row+x,l=row+(x===0?GW-1:x-1),r=row+(x===GW-1?0:x+1);
+ resource[i]=bound(resource[i]+.0012*(.66-resource[i])+.0008*v[i],0,1);
+ nsA[i]=Math.max(0,(signalA[i]*.92+(signalA[l]+signalA[r]+signalA[up+x]+signalA[down+x])*.015)*.985);
+ nsB[i]=Math.max(0,(signalB[i]*.92+(signalB[l]+signalB[r]+signalB[up+x]+signalB[down+x])*.015)*.985);
+ }}let t=signalA;signalA=nsA;nsA=t;t=signalB;signalB=nsB;nsB=t;
+ }
+}
+function sense(a,angle){
+ const d=a.g[2],x=a.x+Math.cos(a.h+angle)*d,y=a.y+Math.sin(a.h+angle)*d,i=cell(x,y);
+ return resource[i]*a.g[0]+v[i]*.4+(signalA[i]-signalB[i])*a.g[1]+.08*Math.sin(.09*x+.05*y+clock*.012);
+}
+function evolution(){
+ const newborn=[];
+ for(let k=agents.length-1;k>=0;k--){
+ const a=agents[k],g=a.g,si=cell(a.x,a.y);
+ const front=sense(a,0),left=sense(a,-.64),right=sense(a,.64);
+ const bias=(right-left)*g[3]+(right+left-2*front)*.11;
+ // Recurrence stores a fading trace of sensory imbalance, giving simple adaptive memory.
+ a.m=a.m*.83+bias*.17;a.n=a.n*.74+(.5-front)*.26;
+ a.h+=(Math.tanh(a.m*2.7+a.n*g[7]*.12)+between(-g[8],g[8]))*g[3];
+ a.x=(a.x+Math.cos(a.h)*g[6]+GW)%GW;
+ a.y=(a.y+Math.sin(a.h)*g[6]+GH)%GH;
+ const i=cell(a.x,a.y),take=Math.min(resource[i],.014*g[9]);resource[i]-=take;
+ // Energy from finite local food, less than ideal metabolism can cause extinction.
+ a.energy+=take*.68-g[4]-.00013*g[6];a.age++;
+ if(g[7]>0)signalA[i]=bound(signalA[i]+.028*g[7],0,1);
+ else signalB[i]=bound(signalB[i]+.028*(-g[7]),0,1);
+ // Rare noisy chemical-seeding events couple organisms to the Gray–Scott substrate.
+ if((a.age%37)===0)v[i]=bound(v[i]+.015,0,1);
+ if(a.energy>g[5]&&a.age>62&&agents.length+newborn.length<390){
+ const childGenome=newGenome(g),cx=(a.x+between(-2,2)+GW)%GW,cy=(a.y+between(-2,2)+GH)%GH;
+ newborn.push(organism(cx,cy,childGenome,a.gen+1,a.energy*.42));a.energy*=.48;births++;
+ if(a.gen+1>hiGen){hiGen=a.gen+1;if(hiGen<5||hiGen%5===0)addEvent('Ny generation '+hiGen+' har uppstått');}
+ }
+ if(a.energy<=0||a.age>4000){agents.splice(k,1);deaths++;}
+ }
+ if(newborn.length)agents.push(...newborn);
+ // A true rescue rule prevents an empty experiment from being mistaken for a frozen canvas.
+ if(agents.length===0){addEvent('Populationen dog ut · ingen automatisk återuppståndelse');by('evo-state').textContent='UTDÖD · KEMI FORTSÄTTER';by('evo-state').classList.remove('live');}
+}
+function structuralIndex(){
+ // Spatial chemical gradients, deliberately not a proxy for intelligence.
+ let gradients=0;
+ for(let y=0;y<GH;y+=3)for(let x=0;x<GW;x+=3){const i=y*GW+x,ri=y*GW+(x+1)%GW,di=((y+1)%GH)*GW+x;gradients+=Math.abs(v[i]-v[ri])+Math.abs(v[i]-v[di])+.45*(Math.abs(signalA[i]-signalA[ri])+Math.abs(signalB[i]-signalB[di]));}
+ return Math.min(100,gradients/(Math.ceil(GW/3)*Math.ceil(GH/3))*590);
+}
+function stats(){
+ by('evo-pop').textContent=String(agents.length);
+ by('evo-gen').textContent=String(hiGen);
+ by('evo-births').textContent=births.toLocaleString('sv-SE')+' / '+mutations.toLocaleString('sv-SE');
+ by('evo-structures').textContent=structuralIndex().toLocaleString('sv-SE',{maximumFractionDigits:1});
+ by('evo-clock').textContent='TICK '+String(clock).padStart(6,'0');
+ if(clock>0&&clock%450===0){addEvent(''+agents.length+' överlevande · '+births+' födslar · '+deaths+' dödsfall');}
+ if(clock>0&&clock%600===0){
+ const text=agents.length===0?'Populationen har dött ut. Kemiska fält fortsätter ändå att bilda strukturer.':
+ 'Populationen: '+agents.length+'. Födslar: '+births+', dödsfall: '+deaths+'. Högsta generation: '+hiGen+'. Mönsterindex beskriver bara kemiska gradienter, inte intelligens.';
+ by('evo-summary').innerHTML='<strong>Min senaste observation:</strong> '+text;
+ }
+}
+function paint(){
+ const cc=rgba;
+ for(let i=0;i<N;i++){
+ const B=Math.min(1,v[i]*4.1),A=Math.min(1,signalA[i]*1.55),C=Math.min(1,signalB[i]*1.55),R=resource[i];
+ const q=i<<2;
+ cc[q]=Math.min(255,4+R*10+B*34+A*24+C*185);
+ cc[q+1]=Math.min(255,11+R*24+B*217+A*190+C*55);
+ cc[q+2]=Math.min(255,27+R*44+B*155+A*140+C*155);
+ cc[q+3]=255;
+ }
+ oc.putImageData(frame,0,0);
+ display.setTransform(pixel,0,0,pixel,0,0);
+ display.imageSmoothingEnabled=true;
+ display.drawImage(off,0,0,cssW,cssH);
+ display.save();display.globalCompositeOperation='lighter';
+ const sx=cssW/GW,sy=cssH/GH;
+ for(const a of agents){
+ const x=a.x*sx,y=a.y*sy,rr=Math.max(1.1,Math.min(2.6,1.3+Math.max(.1,a.energy)*.4))*Math.min(1.3,cssW/400);
+ display.beginPath();display.arc(x,y,rr*2.35,0,TAU);
+ display.fillStyle=a.g[7]>0?'rgba(50,247,207,.08)':'rgba(244,95,251,.08)';display.fill();
+ display.beginPath();display.arc(x,y,rr,0,TAU);
+ const alpha=bound(.4+a.energy*.25,.4,.95);
+ display.fillStyle=a.g[7]>0?'rgba(148,255,219,'+alpha+')':'rgba(255,155,230,'+alpha+')';
+ display.fill();
+ }
+ display.restore();
+}
+function resize(){
+ const box=canvas.getBoundingClientRect();cssW=Math.max(1,box.width);cssH=Math.max(1,box.height);
+ pixel=Math.min(window.devicePixelRatio||1,1.65);
+ canvas.width=Math.floor(cssW*pixel);canvas.height=Math.floor(cssH*pixel);
+ display.setTransform(pixel,0,0,pixel,0,0);
+ paintBlank();
+}
+function paintBlank(){
+ display.fillStyle='#06131f';display.fillRect(0,0,cssW,cssH);
+ const gl=display.createRadialGradient(cssW*.5,cssH*.5,2,cssW*.5,cssH*.5,cssW*.55);
+ gl.addColorStop(0,'rgba(51,131,160,.17)');gl.addColorStop(1,'rgba(1,5,16,0)');
+ display.fillStyle=gl;display.fillRect(0,0,cssW,cssH);
+ display.fillStyle='#7795aa';display.font='12px system-ui';display.textAlign='center';
+ display.fillText('Världen väntar på sitt första ögonblick',cssW/2,cssH/2);
+}
+function loop(ts){
+ raf=requestAnimationFrame(loop);
+ if(!active||paused||document.hidden)return;
+ if(last&&ts-last<32)return;last=ts;
+ try{clock++;chemistry();evolution();paint();if(clock-lastStats>=16){stats();lastStats=clock;}}
+ catch(err){paused=true;by('evo-state').textContent='BERÄKNINGSFEL';by('evo-state').classList.remove('live');addEvent('Fel: '+(err.message||'okänt'));by('evo-pause').textContent='▶ ÅTERUPPTA';}
+}
+by('evo-start').addEventListener('click',()=>{
+ try{reset();}catch(err){by('evo-state').textContent='FEL VID START';addEvent('Fel: '+err.message);}
+});
+by('evo-pause').addEventListener('click',()=>{
+ if(!active)return;paused=!paused;
+ by('evo-pause').textContent=paused?'▶ FORTSÄTT':'⏸ PAUSA';
+ by('evo-state').textContent=paused?'PAUSAD':'UTVECKLING PÅGÅR';
+ by('evo-state').classList.toggle('live',!paused);
+ last=0;
+});
+canvas.addEventListener('pointerdown',event=>{
+ if(!active||!resource)return;
+ const b=canvas.getBoundingClientRect(),x=(event.clientX-b.left)/b.width*GW,y=(event.clientY-b.top)/b.height*GH;
+ if(!Number.isFinite(x)||!Number.isFinite(y))return;
+ bump(resource,x,y,.8,9);bump(v,x,y,.6,4);
+ if(clock-lastEvent>25){addEvent('Extern energi tillförd vid ('+(x|0)+','+(y|0)+')');lastEvent=clock;}
+});
+addEventListener('resize',resize,{passive:true});
+resize();raf=requestAnimationFrame(loop);
+})();
 </script></body></html>
