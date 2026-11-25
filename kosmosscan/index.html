@@ -18,7 +18,7 @@
 <section class="evo" id="emergence">
   <div class="evo-head">
     <div><div class="evo-kicker">EXPERIMENT 01 / THE UNKNOWN ENGINE</div><h2>Vad uppstår om koden får utvecklas?</h2>
-      <p class="evo-intro">Ingen förutbestämd bild. En odödlig digital civilisation växer genom kemiska signaler, nya födslar och ärftliga mutationer. Tryck en gång — se vad som utvecklas.</p></div>
+      <p class="evo-intro">Ingen förutbestämd bild. En odödlig digital population växer med föränderliga miljöer, ärftliga nervnät, minne, synapsinlärning och mutationer. Tryck en gång — se vad som utvecklas.</p></div>
     <span class="evo-state" id="evo-state">EJ STARTAD</span>
   </div>
   <div class="evo-stage"><canvas id="evo-canvas" aria-label="Levande datorsimulering med kemiska mönster och digitala organismer"></canvas>
@@ -30,13 +30,14 @@
     <div class="evo-metric"><b id="evo-pop">0</b><span>Totalt skapade · inga dödsfall</span></div>
     <div class="evo-metric"><b id="evo-gen">0</b><span>Högsta generation</span></div>
     <div class="evo-metric"><b id="evo-births">0</b><span>Födslar / mutationer</span></div>
-    <div class="evo-metric"><b id="evo-structures">0,0</b><span>Kemisk struktur (index)</span></div>
+    <div class="evo-metric"><b id="evo-structures">0</b><span>Max neuroner / nya noder</span></div>
     <div class="evo-metric"><b id="evo-active">0</b><span>Individer simuleras aktivt</span></div>
     <div class="evo-metric"><b id="evo-vault">0</b><span>Odödliga i koloniarkivet</span></div>
+    <div class="evo-metric"><b id="evo-learning">0</b><span>Synapsjusteringar (försök)</span></div>
   </div>
-  <div class="evo-bottom"><p class="evo-summary" id="evo-summary"><strong>Vad kan hända?</strong> Kemiska mönster kan bilda öar, ringar eller trådar. Ingen organism dör. Nya individer föds ständigt, muterar och bildar permanenta kolonier. Utfallet räknas fram i realtid.</p>
+  <div class="evo-bottom"><p class="evo-summary" id="evo-summary"><strong>Vad kan hända?</strong> Kemiska mönster kan bilda öar, ringar eller trådar. Ingen organism dör. Nya individer föds ständigt, deras nervnät kan växa och förändras av erfarenhet och mutationer. De bildar permanenta kolonier. Utfallet räknas fram i realtid.</p>
     <div class="evo-events" id="evo-events" role="log" aria-label="Verkliga händelser i simuleringen"><div>Laboratoriet väntar på start.</div></div></div>
-  <div class="evo-disclaimer"><b>DETTA ÄR ETT DIGITALT EXPERIMENT.</b> Organismerna är kod, inte upptäckt liv. Efter 1 100 aktiva individer lagras nya som aggregerade, levande koloni-medlemmar; ingen försvinner ur populationen. Mönster och beteenden växer fram ur programmets regler och slumpfrö — inte ur verkliga teleskopobservationer. Tryck på själva bilden för att tillsätta näring och påverka experimentet.</div>
+  <div class="evo-disclaimer"><b>DETTA ÄR ETT DIGITALT EXPERIMENT.</b> Organismerna är kod, inte upptäckt liv. Efter 1 100 aktiva individer lagras nya som aggregerade koloni-medlemmar, inte individuellt simulerade agenter. Fler neuroner eller synapsuppdateringar betyder inte automatiskt verklig intelligens. Mönster och beteenden växer fram ur programmets regler och slumpfrö — inte ur verkliga teleskopobservationer. Tryck på själva bilden för att tillsätta näring och påverka experimentet.</div>
 </section>
 <footer class="foot"><b>ÄRLIG VETENSKAPLIG BEGRÄNSNING</b> · Ingen webbsida kan skanna hela universum direkt. Detta är en automatiserad sökning genom ett litet, observerat urval av universum: kända exoplaneter. Grafiken är dekorativ och representerar inte stjärnornas verkliga positioner. Resultatet visar inga oupptäckta radiosignaler.<div class="barlink"><a href="https://exoplanetarchive.ipac.caltech.edu/docs/TAP/usingTAP.html" target="_blank" rel="noopener">NASA Exoplanet Archive / API ↗</a><a href="https://github.com/Paosososo/beyond-earth" target="_blank" rel="noopener">Katalogspegel (3 nov 2026) ↗</a><a href="https://seti.berkeley.edu/opendata" target="_blank" rel="noopener">SETI rådata ↗</a></div></footer></div>
 <script>
@@ -90,12 +91,12 @@ const display=canvas.getContext('2d',{alpha:false});
 if(!display){by('evo-state').textContent='KAN INTE VISA CANVAS';return;}
 const GW=162,GH=94,N=GW*GH,PI=Math.PI,TAU=PI*2;
 const PATCH_SIZE=9,PATCH_COLS=Math.ceil(GW/PATCH_SIZE),PATCH_ROWS=Math.ceil(GH/PATCH_SIZE);
-const ACTIVE_CAP=1100, INITIAL_POP=125; // Beyond active capacity, births remain alive as aggregated colonies.
+const ACTIVE_CAP=1100, INITIAL_POP=125, MAX_BRAIN=40; // Virtualized immortal population with active CPU budget.
 const patchFor=(x,y)=>Math.floor(y/PATCH_SIZE)*PATCH_COLS+Math.floor(x/PATCH_SIZE);
 const off=document.createElement('canvas');off.width=GW;off.height=GH;
 const oc=off.getContext('2d');const frame=oc.createImageData(GW,GH),rgba=frame.data;
 let u,v,nu,nv,resource,signalA,signalB,nsA,nsB,agents=[],rng,seed=0,clock=0,drawFrames=0,mutations=0,births=0,hiGen=0;
-let colonies=[], archivedCount=0;
+let colonies=[], archivedCount=0, maxNodes=0, innovations=0, learningUpdates=0, environmentShifts=0;
 let active=false,paused=false,last=0,raf=0,cssW=1,cssH=1,pixel=1,lastStats=0,lastEvent=0;
 const now=()=>typeof performance!=='undefined'?performance.now():Date.now();
 function rand(){let x=rng|0;x^=x<<13;x^=x>>>17;x^=x<<5;rng=x|0;return (x>>>0)/4294967296;}
@@ -109,13 +110,44 @@ function newGenome(base){
  const g=base.slice();for(let k=0;k<g.length;k++)if(rand()<.24){const scale=[.25,.22,2.2,.09,.0007,.17,.14,.28,.07,.18][k];g[k]+=between(-scale,scale);mutations++;}
  return [bound(g[0],-.8,2.5),bound(g[1],-2,2.5),bound(g[2],2,16),bound(g[3],.07,.86),bound(g[4],.001,.009),bound(g[5],.85,2.5),bound(g[6],.18,1.5),bound(g[7],-1.5,1.5),bound(g[8],.005,.65),bound(g[9],.2,1.8)];
 }
-function organism(x,y,genome,gen,energy){return{x,y,h:between(0,TAU),energy,age:0,gen,g:genome,m:0,n:0,line:Math.floor((genome[7]+1.6)*43)%360};}
+/* Evolving recurrent microcontrollers, with hereditary weights and within-lifetime plasticity.
+   A larger network means greater representational complexity; it does NOT prove intelligence. */
+function brainNode(){return{w:Array.from({length:10},()=>between(-.75,.75)),b:between(-.25,.25)};}
+function brainCopy(parent){
+ if(!parent)return Array.from({length:3+((rand()*3)|0)},brainNode);
+ const next=parent.map(node=>({w:node.w.map(w=>rand()<.11?bound(w+between(-.19,.19),-3,3):w),b:rand()<.18?bound(node.b+between(-.18,.18),-2,2):node.b}));
+ if(next.length<MAX_BRAIN&&rand()<.32){next.push(brainNode());innovations++;mutations++;}
+ return next;
+}
+function organism(x,y,genome,gen,energy,brain){
+ const b=brain||brainCopy();maxNodes=Math.max(maxNodes,b.length);
+ return{x,y,h:between(0,TAU),energy,age:0,gen,g:genome,m:0,n:0,line:Math.floor((genome[7]+1.6)*43)%360,
+ brain:b,states:new Float32Array(b.length),rewardAvg:0,lastTake:0};
+}
+function neuralResponse(a,front,left,right,here,food){
+ const inputs=[front,left,right,resource[here],v[here],signalA[here]-signalB[here],a.m,a.n];
+ const reward=bound((food-a.lastTake)*70,-1,1);a.lastTake=food;a.rewardAvg=a.rewardAvg*.98+food*.02;
+ let out=0,prev=0;
+ for(let j=0;j<a.brain.length;j++){
+  const n=a.brain[j];let z=n.b+n.w[8]*a.states[j]+n.w[9]*prev;
+  for(let k=0;k<8;k++)z+=n.w[k]*inputs[k];
+  const val=Math.tanh(z);a.states[j]=a.states[j]*.72+val*.28;
+  prev=a.states[j];out+=(j%2?1:-1)*prev;
+  if((clock+j)%4===0){
+   // Experience-dependent synaptic adjustment; not a preprogrammed goal of intelligence.
+   n.w[6]=bound(n.w[6]+.0008*reward*a.m*val,-3,3);
+   n.w[7]=bound(n.w[7]+.0008*reward*a.n*val,-3,3);
+   learningUpdates+=2;
+  }
+ }
+ return Math.tanh(out/Math.sqrt(a.brain.length));
+}
 function archiveChild(child){
- const c=colonies[patchFor(child.x,child.y)]; c.count++;c.highGen=Math.max(c.highGen,child.gen);c.signal+=child.g[7]*.01;archivedCount++;
+ const c=colonies[patchFor(child.x,child.y)]; c.count++;c.highGen=Math.max(c.highGen,child.gen);c.brain=Math.max(c.brain,child.brain.length);c.signal+=child.g[7]*.01;archivedCount++;
 }
 function registerChild(parent,batch=null,forced=false){
  const child=organism((parent.x+between(-3,3)+GW)%GW,(parent.y+between(-3,3)+GH)%GH,
-  newGenome(parent.g),parent.gen+1,forced?.75:parent.energy*.35);
+  newGenome(parent.g),parent.gen+1,forced?.75:parent.energy*.35,brainCopy(parent.brain));
  if(agents.length+(batch?batch.length:0)<ACTIVE_CAP){
   if(batch)batch.push(child); else agents.push(child);
  }else archiveChild(child);
@@ -123,19 +155,19 @@ function registerChild(parent,batch=null,forced=false){
 }
 function reset(){
  seed=((typeof crypto!=='undefined'&&crypto.getRandomValues)?crypto.getRandomValues(new Uint32Array(1))[0]:(Date.now()^(Math.random()*4294967296)))>>>0;
- rng=seed||0x9E3779B9;clock=0;drawFrames=0;mutations=0;births=0;hiGen=0;lastEvent=0;lastStats=0;archivedCount=0;
+ rng=seed||0x9E3779B9;clock=0;drawFrames=0;mutations=0;births=0;hiGen=0;lastEvent=0;lastStats=0;archivedCount=0;maxNodes=0;innovations=0;learningUpdates=0;environmentShifts=0;
  u=new Float32Array(N);v=new Float32Array(N);nu=new Float32Array(N);nv=new Float32Array(N);
  resource=new Float32Array(N);signalA=new Float32Array(N);signalB=new Float32Array(N);nsA=new Float32Array(N);nsB=new Float32Array(N);
  for(let y=0;y<GH;y++)for(let x=0;x<GW;x++){const i=y*GW+x;u[i]=1;resource[i]=between(.18,.55);}
  for(let j=0;j<22;j++){const x=between(5,GW-5),y=between(5,GH-5);bump(v,x,y,between(.5,.95),between(2,7)|0);bump(resource,x,y,.4,8);}
- colonies=Array.from({length:PATCH_COLS*PATCH_ROWS},()=>({count:0,highGen:0,signal:0}));
+ colonies=Array.from({length:PATCH_COLS*PATCH_ROWS},()=>({count:0,highGen:0,brain:0,signal:0}));
  agents=Array.from({length:INITIAL_POP},()=>organism(between(1,GW-1),between(1,GH-1),newGenome(),0,between(.8,1.1)));
  by('evo-seed').textContent='FRÖ: '+seed.toString(16).toUpperCase().padStart(8,'0');
  by('evo-start').textContent='↻ NYTT UNIVERSUM';by('evo-pause').disabled=false;by('evo-pause').textContent='⏸ PAUSA';
  by('evo-state').textContent='UTVECKLING PÅGÅR';by('evo-state').classList.add('live');
  by('evo-tip').textContent='Färger = kemiska fält · prickar = organismer';
  by('evo-events').innerHTML='';addEvent('125 organismer skapade · inga dödsregler');
- by('evo-summary').innerHTML='<strong>Evig tillväxt startad.</strong> Ingen organism raderas eller dör. De första '+ACTIVE_CAP+' simuleras individuellt och nya födslar lever vidare som komprimerade kolonier.';
+ by('evo-summary').innerHTML='<strong>Evig tillväxt startad.</strong> Inga dödsregler. Individernas små nervnät kan växa, mutera och anpassa kopplingar. Världen sparar växande kolonier utan att beräkna varje individ separat.';
  active=true;paused=false;last=0;paint();stats();
 }
 function chemistry(){
@@ -180,7 +212,9 @@ function evolution(){
   const front=sense(a,0),left=sense(a,-.64),right=sense(a,.64);
   const bias=(right-left)*g[3]+(right+left-2*front)*.11;
   a.m=a.m*.83+bias*.17;a.n=a.n*.74+(.5-front)*.26;
-  a.h+=(Math.tanh(a.m*2.7+a.n*g[7]*.12)+between(-g[8],g[8]))*g[3];
+  const position=cell(a.x,a.y);
+  const choice=neuralResponse(a,front,left,right,position,resource[position]*.012);
+  a.h+=(Math.tanh(a.m*2.7+a.n*g[7]*.12)+between(-g[8],g[8])+choice*.82)*g[3];
   a.x=(a.x+Math.cos(a.h)*g[6]+GW)%GW;
   a.y=(a.y+Math.sin(a.h)*g[6]+GH)%GH;
   const i=cell(a.x,a.y),take=Math.min(resource[i],.014*g[9]);resource[i]-=take;
@@ -190,6 +224,10 @@ function evolution(){
   if(g[7]>0)signalA[i]=bound(signalA[i]+.028*g[7],0,1);
   else signalB[i]=bound(signalB[i]+.028*(-g[7]),0,1);
   if(a.age%37===0)v[i]=bound(v[i]+.015,0,1);
+  if(a.age%240===0&&a.brain.length<MAX_BRAIN&&rand()<.24){
+   a.brain.push(brainNode());const state=new Float32Array(a.brain.length);state.set(a.states);a.states=state;
+   maxNodes=Math.max(maxNodes,a.brain.length);innovations++;mutations++;
+  }
   if(a.energy>g[5]&&a.age>60&&rand()<.042*Math.exp(-.025*near)){
    a.energy*=.69;registerChild(a,newborn);
   }
@@ -198,6 +236,11 @@ function evolution(){
  // Renewable incubation guarantees population growth despite local resource scarcity.
  // A birth above ACTIVE_CAP becomes an undying colony member, not a deleted agent.
  if(clock%24===0&&agents.length)registerChild(agents[(rand()*agents.length)|0],null,true);
+ // Nonstationary resource patches generate new situations for inherited controllers.
+ if(clock%500===0){
+  const x=between(10,GW-10),y=between(10,GH-10);bump(resource,x,y,.8,12);bump(v,x,y,.2,5);
+  environmentShifts++;addEvent('Miljön förändrades: nya näringsområden ('+environmentShifts+')');
+ }
  if((clock&3)===0&&archivedCount){
   for(let k=0;k<colonies.length;k++){
    const col=colonies[k];if(!col.count)continue;
@@ -219,12 +262,13 @@ function stats(){
  by('evo-pop').textContent=total.toLocaleString('sv-SE');
  by('evo-gen').textContent=String(hiGen);
  by('evo-births').textContent=births.toLocaleString('sv-SE')+' / '+mutations.toLocaleString('sv-SE');
- by('evo-structures').textContent=structuralIndex().toLocaleString('sv-SE',{maximumFractionDigits:1});
+ by('evo-structures').textContent=maxNodes+' / '+innovations.toLocaleString('sv-SE');
+ by('evo-learning').textContent=learningUpdates.toLocaleString('sv-SE');
  by('evo-active').textContent=agents.length.toLocaleString('sv-SE');
  by('evo-vault').textContent=archivedCount.toLocaleString('sv-SE');
  by('evo-clock').textContent='TICK '+String(clock).padStart(6,'0');
  if(clock>0&&clock%450===0)addEvent(total.toLocaleString('sv-SE')+' odödliga, '+archivedCount.toLocaleString('sv-SE')+' i kolonier');
- if(clock>0&&clock%600===0)by('evo-summary').innerHTML='<strong>Observation:</strong> '+total.toLocaleString('sv-SE')+' individer skapade, 0 dödsfall. '+agents.length+' simuleras individuellt och '+archivedCount.toLocaleString('sv-SE')+' lever i aggregerade kolonier. Dessa kolonier påverkar den kemiska miljön utan att var och en kräver separat beräkning.';
+ if(clock>0&&clock%600===0)by('evo-summary').innerHTML='<strong>Observation:</strong> '+total.toLocaleString('sv-SE')+' individer skapade, 0 dödsfall. '+agents.length+' simuleras individuellt och '+archivedCount.toLocaleString('sv-SE')+' i permanenta kolonier. Största aktiva eller arkiverade nervnätet: '+maxNodes+' noder. Synapsjusteringar: '+learningUpdates.toLocaleString('sv-SE')+'. Inget av detta är ett bevis på verklig intelligens.';
 }
 function paint(){
  const cc=rgba;
