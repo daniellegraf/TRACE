@@ -39,7 +39,7 @@
     <div class="evo-metric"><b id="evo-active">0</b><span>Egna individuella nervnät</span></div>
     <div class="evo-metric"><b id="evo-progress">0 / 0</b><span>Behandlade denna cykel</span></div>
     <div class="evo-metric"><b id="evo-learning">0</b><span>Synapsjusteringar (försök)</span></div>
-    <div class="evo-metric"><b id="evo-rate">0 /s</b><span>Verklig födelsetakt</span></div>
+    <div class="evo-metric"><b id="evo-rate">0 /s</b><span>Födslar/s · mål 100/s</span></div>
     <div class="evo-metric"><b id="evo-morph">0</b><span>Ärftliga utseendetyper</span></div>
     <div class="evo-metric"><b id="evo-mchanges">0</b><span>Mutationer i utseendet</span></div>
   </div>
@@ -49,7 +49,7 @@
   </div>
   <div class="evo-bottom"><p class="evo-summary" id="evo-summary"><strong>Vad kan hända?</strong> Kemiska mönster kan bilda öar, ringar eller trådar. Ingen organism dör. Nya individer föds ständigt och alla behåller sin egen arvsmassa och sitt eget nervnät. Utfallet räknas fram i realtid.</p>
     <div class="evo-events" id="evo-events" role="log" aria-label="Verkliga händelser i simuleringen"><div>Laboratoriet väntar på start.</div></div></div>
-  <div class="evo-disclaimer"><b>DETTA ÄR ETT DIGITALT EXPERIMENT.</b> Alla individer har egna tillstånd och uppdateras i varje fullständig simuleringscykel; ingen arkiveras eller raderas. Vid många individer tar en cykel längre tid, och bildens punkter förenklas till en densitetskarta eftersom skärmen har begränsat antal pixlar. Inget garanterar framväxande intelligens. Begränsningen på sikt är telefonens minne och processor. Existerande organismer eller framsteg sparas inte automatiskt om sidan stängs.</div>
+  <div class="evo-disclaimer"><b>DETTA ÄR ETT DIGITALT EXPERIMENT.</b> Alla individer har egna tillstånd och uppdateras i varje fullständig simuleringscykel; ingen arkiveras eller raderas. Vid många individer tar en cykel längre tid, och bildens punkter förenklas till en densitetskarta eftersom skärmen har begränsat antal pixlar. Inget garanterar framväxande intelligens. Målet är 100 födslar per sekund medan sidan är aktiv, men verklig takt kan sjunka om telefonens processor eller minne blir överbelastat. Inget system kan lova obegränsad tillväxt med konstant beräkningshastighet på en mobil. Existerande organismer eller framsteg sparas inte automatiskt om sidan stängs.</div>
 </section>
 <footer class="foot"><b>ÄRLIG VETENSKAPLIG BEGRÄNSNING</b> · Ingen webbsida kan skanna hela universum direkt. Detta är en automatiserad sökning genom ett litet, observerat urval av universum: kända exoplaneter. Grafiken är dekorativ och representerar inte stjärnornas verkliga positioner. Resultatet visar inga oupptäckta radiosignaler.<div class="barlink"><a href="https://exoplanetarchive.ipac.caltech.edu/docs/TAP/usingTAP.html" target="_blank" rel="noopener">NASA Exoplanet Archive / API ↗</a><a href="https://github.com/Paosososo/beyond-earth" target="_blank" rel="noopener">Katalogspegel (3 nov 2026) ↗</a><a href="https://seti.berkeley.edu/opendata" target="_blank" rel="noopener">SETI rådata ↗</a></div></footer></div>
 <script>
@@ -85,10 +85,11 @@ $('ancient').textContent=s.withAge?'Jag kunde läsa stjärnåldrar för '+fmt(s.
 $('candidatecount').textContent=fmt(found.length)+' kandidater';$('ranking').innerHTML=found.slice(0,16).map((p,i)=>'<tr><td class="rowrank">'+(i+1)+'</td><td><strong>'+esc(p.n)+'</strong><span class="small">Upptäckt '+(p.y||'–')+'</span></td><td>'+(p.d==null?'–':fmt(Math.round(p.d*3.26156))+' ljusår')+'</td><td>'+p.r.toLocaleString('sv-SE',{maximumFractionDigits:2})+' R⊕</td><td>'+Math.round(p.t)+' K</td><td>'+Math.round(p.s)+'/100</td></tr>').join('');if(found.length>16){$('ranking').innerHTML+='<tr><td colspan="6" style="color:#99afc6">Visar de 16 högst prioriterade av '+fmt(found.length)+' kandidater.</td></tr>';} }
 $('go').addEventListener('click',run);
 // Deliberately abstract graphics: points are not sky positions and do not depict verified discoveries.
-const canvas=$('starfield'),ctx=canvas.getContext('2d');let W=0,H=0,stars=[],started=performance.now(),dpr=1;
+const canvas=$('starfield'),ctx=canvas.getContext('2d');let W=0,H=0,stars=[],started=performance.now(),dpr=1,lastStarDraw=0,starVisible=true;
+if(typeof IntersectionObserver!=='undefined'){const obs=new IntersectionObserver(es=>{starVisible=es.some(e=>e.isIntersecting)},{rootMargin:'80px'});obs.observe(canvas);}
 function rand(i){let a=Math.sin(i*87.19+4.52)*43758.5453;return a-Math.floor(a)}
 function resize(){const b=canvas.getBoundingClientRect();dpr=Math.min(2,window.devicePixelRatio||1);W=b.width;H=b.height;canvas.width=Math.max(1,W*dpr);canvas.height=Math.max(1,H*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);stars=Array.from({length:520},(_,i)=>({x:rand(i+3)*W,y:rand(i+701)*H,s:rand(i+200)*1.6+.15,tw:rand(i+1600)*6.28}));}
-function draw(time){if(!W||!H){requestAnimationFrame(draw);return;}ctx.clearRect(0,0,W,H);for(const s of stars){let a=.1+.42*(.5+.5*Math.sin(time/1900+s.tw));ctx.fillStyle='rgba(174,211,255,'+a+')';ctx.beginPath();ctx.arc(s.x,s.y,s.s,0,7);ctx.fill();}const cx=W/2,cy=H/2;for(let j=0;j<highlighted.length;j++){let h=highlighted[j],a=rand(h.i*7)*6.283,r=(.12+rand(h.i*11)*.35)*Math.min(W,H);const x=cx+Math.cos(a)*r,y=cy+Math.sin(a)*r;const p=.52+.48*Math.sin(time/780+j);ctx.beginPath();ctx.fillStyle='rgba(89,243,212,'+(.38+.38*p)+')';ctx.arc(x,y,1.5+2*p,0,7);ctx.fill();}requestAnimationFrame(draw);}
+function draw(time){if(!W||!H||!starVisible||time-lastStarDraw<55){requestAnimationFrame(draw);return;}lastStarDraw=time;ctx.clearRect(0,0,W,H);for(const s of stars){let a=.1+.42*(.5+.5*Math.sin(time/1900+s.tw));ctx.fillStyle='rgba(174,211,255,'+a+')';ctx.beginPath();ctx.arc(s.x,s.y,s.s,0,7);ctx.fill();}const cx=W/2,cy=H/2;for(let j=0;j<highlighted.length;j++){let h=highlighted[j],a=rand(h.i*7)*6.283,r=(.12+rand(h.i*11)*.35)*Math.min(W,H);const x=cx+Math.cos(a)*r,y=cy+Math.sin(a)*r;const p=.52+.48*Math.sin(time/780+j);ctx.beginPath();ctx.fillStyle='rgba(89,243,212,'+(.38+.38*p)+')';ctx.arc(x,y,1.5+2*p,0,7);ctx.fill();}requestAnimationFrame(draw);}
 addEventListener('resize',resize,{passive:true});resize();requestAnimationFrame(draw);
 
 /* COSMOS EMERGENCE ENGINE — real stochastic evolutionary ecology + Gray–Scott chemistry.
@@ -147,7 +148,7 @@ function makeMorph(parent){
  return m;
 }
 function morphColor(m){return 'hsl('+Math.round(m[0])+',90%,69%)';}
-function morphType(m){return (m[1]|0)+'-'+Math.floor(m[0]/45)+'-'+(m[3]>.5?'B':'A');}
+function morphType(m){return (m[1]|0)+'-'+Math.floor(m[0]/12)+'-'+Math.floor(m[3]*4)+'-'+Math.floor(m[4]*4)+'-'+Math.floor(m[5]*4);}
 function organism(x,y,genome,gen,energy,brain,morph){
  const b=brain||brainCopy();maxNodes=Math.max(maxNodes,b.length);
  const body=morph||makeMorph();phenotypeTypes.add(morphType(body));
@@ -446,7 +447,7 @@ function loop(ts){
  raf=requestAnimationFrame(loop);
  if(!active||paused||document.hidden){lastWall=0;return;}
  if(last&&ts-last<16)return;
- const delta=lastWall?Math.max(0,Math.min(350,ts-lastWall)):16.67;
+ const delta=lastWall?Math.max(0,Math.min(1000,ts-lastWall)):16.67;
  last=ts;lastWall=ts;
  try{
   // Spawn before CPU-bound simulation; birth cadence is tied to elapsed wall time.
