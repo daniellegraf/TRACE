@@ -124,7 +124,7 @@ function updateMetrics(m){
   'v7-body':fnum(m.bodyComplexity),'v7-genes':fnum(m.geneticParts),
   'v7-lineages':fnum(m.lineageBranches),'v7-sexual':fnum(m.sexualBirths),
   'v7-asexual':fnum(m.clonalBirths),'v7-learning':((m.benchmark?.improvement||0)>=0?'+':'')+fnum(m.benchmark?.improvement,3),
-  'v7-signals':fnum(m.signalsShared),'v7-signal-success':fnum(m.signalSuccess),'v7-fail':fnum(m.failedPrototypes)
+  'v7-signals':fnum(m.signalsShared),'v7-signal-success':fnum(m.signalSuccess),'v7-fail':fnum(m.failedPrototypes),'v7-readiness':fnum((m.biologicalCultureReadiness||0)*100)+'%'
  };
  for(const [id,val]of Object.entries(values))write(id,val);
  const b=m.benchmark||{};
