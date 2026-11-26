@@ -52,7 +52,7 @@ function createClan(i){
  inventions:[],cities:[],resources:{food:40,material:12,power:4,ideas:0},
  research:0,social:.2,trust:.2,languageAge:0,space:0,launches:0,discovery:0,lastMessage:0,
  innovationSeed:rand(),worldview:(rand()*4)|0,era:0,inventionKeys:new Set(),
- signals:new Map(),signalAttempts:0,signalRewards:0,culturalLearning:0};
+ signals:new Map(),signalAttempts:0,signalRewards:0,culturalLearning:0,bioReadiness:0,educated:0};
 }
 function grammar(clan,words){
  const w=words.map(k=>clan.language[clamp(k|0,0,WORDS.length-1)]);
@@ -259,6 +259,11 @@ function individualTick(a){
   if(rand()<.01&&n.known&&!a.known){a.known=n.known;teaching++;}
  }
  const c=clans[a.clan];
+ // Civilization's prerequisite is developed organism capabilities, never only elapsed time.
+ if(a.age%20===0&&a.g.cells>=2&&a.g.brain.length>=4&&a.fitness>.0001){
+  c.bioReadiness=Math.min(40,c.bioReadiness+.012*a.g.curiosity*(Math.min(8,a.g.cells)/3));
+  c.educated++;
+ }
  if(cultureEnabled&&n&&n.clan===a.clan&&rand()<.021*a.g.speech){
   // A word for a location is useful only if the recipient subsequently finds food.
   const cell=pos(a.x,a.y),key=(cell%17);
@@ -468,11 +473,15 @@ function societalAction(){
  // Wall-clock social evolution proceeds independently of full organism biology ticks.
  for(const c of clans){
   const t=c.tech;
+  const readiness=clamp(c.bioReadiness/14,0,1);
   c.resources.food+=.07+c.members*.00016;
   c.resources.material+=.72+c.members*.018+c.cities.reduce((sum,id)=>sum+(cities[id-1]?.workshops||0)*.07,0);
   c.resources.power+=.03+c.cities.length*.016;
   const researcher=c.members*.012+c.social*.55+c.resources.ideas*.003+c.cities.length*.12;
-  c.research+=researcher*between(.6,1.3);
+  // Genuine biological prerequisite: simple cells cannot automatically
+  // research metallurgy, optics or spaceflight through a wall timer.
+  c.research+=researcher*between(.6,1.3)*readiness;
+  if(readiness<.07)continue;
   c.social=clamp(c.social+.0006*c.members/30,0,1);
   // Research efforts select among feasible domains with preference weighted by worldview.
   if(c.research>=3.5){
@@ -487,10 +496,10 @@ function societalAction(){
     gainSkill(c,k);
    }
   }
-  if(c.tech[3]>.16&&c.tech[1]>.16&&rand()<.12)foundCity(c);
-  if(c.cities.length&&rand()<.21)developCity(c);
-  if(c.cities.length&&rand()<.05/(1+c.inventions.length/55))invent(c);
-  if(c.cities.length&&rand()<.032&&c.tech[5]>.16){
+  if(readiness>.24&&c.tech[3]>.16&&c.tech[1]>.16&&rand()<.12)foundCity(c);
+  if(readiness>.24&&c.cities.length&&rand()<.21)developCity(c);
+  if(readiness>.24&&c.cities.length&&rand()<.05/(1+c.inventions.length/55))invent(c);
+  if(readiness>.2&&c.cities.length&&rand()<.032&&c.tech[5]>.16){
    c.grammar=(c.grammar+1+((rand()*5)|0))%6;c.languageAge++;
    speech(c,'språk','Språket i '+c.name+' förändrades genom nya grammatiska former.',[0,22,11,17]);
   }
@@ -522,6 +531,7 @@ function metrics(){
   updates:updatesPerSecond,progress:cycle?cycle.index:agents.length,progressTotal:cycle?cycle.total:agents.length,
   cities:cities.length,buildings,inventions:inventions.length,messages:sentences,teaching,transmissions,socialSpeed,spaceDiscoveries:extraPlanetary,
   launchCount:flights.length,achievements:skillsFound,cultures:clans.filter(c=>c.knowledge).length,
+ biologicalCultureReadiness:clans.reduce((sum,c)=>sum+c.bioReadiness/14,0)/clans.length,
  reproductionTarget:18*rateFactor,sexualBirths,clonalBirths,lineageBranches,
  geneticParts:maxGeneticParts,bodyComplexity,environmentChanges,signalsShared,signalSuccess,failedPrototypes,
  biologyFactor,rateFactor,cultureEnabled,learningEnabled,mutationEnabled,
@@ -532,7 +542,7 @@ function siteSummary(city){
  return{id:city.id,name:city.name,clan:city.clan,clanName:c.name,x:city.x,y:city.y,hue:c.hue,
   level:city.level,structures:city.structures,library:city.library,workshops:city.workshops,
   power:city.power,wealth:city.wealth,people:c.members,tech:Array.from(c.tech,x=>Math.round(x*100)/100),knowledge:c.knowledge,
-  population:Math.floor(c.members/Math.max(1,c.cities.length)),
+  population:Math.floor(c.members/Math.max(1,c.cities.length)),bioReadiness:c.bioReadiness,
   discoveries:c.inventions.length,language:c.languageAge,grammar:c.grammar,flights:c.launches};
 }
 function details(id){
