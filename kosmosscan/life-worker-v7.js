@@ -239,7 +239,11 @@ function individualTick(a){
  const k=pos(a.x,a.y),take=Math.min(nutrition[k],(.0045+a.body.forage*.002)*niche);
  nutrition[k]-=take;
  const cost=a.g.energyNeed+a.body.cost*.0003+a.g.brain.length*.000025+mv*.00004;
- const adapted=take*niche*(.66+a.body.storage*.08);
+ // Light collection is an ecological niche with an energetic cost tradeoff.
+ // Bodies with filtering structures can harvest a small amount of local sunlight.
+ const filtered=Math.max(0,(a.body.forage||0)-.2);
+ const photoGain=sunlight[j]*filtered*.00065;
+ const adapted=take*niche*(.66+a.body.storage*.08)+photoGain;
  a.energy=clamp(a.energy+adapted-cost+.0019,.01,2.7);
  a.fitness=a.fitness*.988+take*.012;
  const outcome=clamp((adapted-cost)*85,-1,1);
