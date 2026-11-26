@@ -531,7 +531,7 @@ function metrics(){
   updates:updatesPerSecond,progress:cycle?cycle.index:agents.length,progressTotal:cycle?cycle.total:agents.length,
   cities:cities.length,buildings,inventions:inventions.length,messages:sentences,teaching,transmissions,socialSpeed,spaceDiscoveries:extraPlanetary,
   launchCount:flights.length,achievements:skillsFound,cultures:clans.filter(c=>c.knowledge).length,
- biologicalCultureReadiness:clans.reduce((sum,c)=>sum+c.bioReadiness/14,0)/clans.length,
+ biologicalCultureReadiness:clans.reduce((sum,c)=>sum+clamp(c.bioReadiness/14,0,1),0)/clans.length,
  reproductionTarget:18*rateFactor,sexualBirths,clonalBirths,lineageBranches,
  geneticParts:maxGeneticParts,bodyComplexity,environmentChanges,signalsShared,signalSuccess,failedPrototypes,
  biologyFactor,rateFactor,cultureEnabled,learningEnabled,mutationEnabled,
