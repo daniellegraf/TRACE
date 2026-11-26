@@ -11,10 +11,11 @@ let rateFactor=1,biologyFactor=1,mutationEnabled=true,learningEnabled=true,cultu
 let biologicalCycles=0,sexualBirths=0,clonalBirths=0,lineageBranches=0,bodyComplexity=1;
 let maxGeneticParts=0,rewardImprovement=0,learningTrials=0,lastBenchmark=null,signalsShared=0,signalSuccess=0;
 let ancestry=[],saves=0,environmentChanges=0,benchmarks={trained:0,control:0,improvement:0};
-let temperature=new Float32Array(SIZE),water=new Float32Array(SIZE),sunlight=new Float32Array(SIZE);
+let temperature,water,sunlight;
 let dynamicCycle=0;
 
 const W=180,H=112,SIZE=W*H,TAU=Math.PI*2;
+temperature=new Float32Array(SIZE);water=new Float32Array(SIZE);sunlight=new Float32Array(SIZE);
 const SYL=['ka','ri','ve','nu','sha','to','mi','la','zor','el','ai','um','ith','ra','vo','sen','ki','dra','no','ul','yx','en','ta','or'];
 const WORDS=['vi','kunskap','föda','bygga','plats','samarbete','ljus','rörelse','energi','material','himmel','minne','tid','förändring','signal','handel','fara','verktyg','vatten','väg','forska','färdas','bevara','lära'];
 const DOMAINS=['Signaler','Samarbete','Verktyg','Skydd','Odling','Symboler','Handel','Organisation','Material','Energi','Optik','Beräkning','Astronomi','Navigation','Automation','Framdrift'];
