@@ -18,6 +18,29 @@ const STAGES=[
  ['CIVILISATION','Civilisationsliknande nätverk','Flera avancerade bosättningar är förenade av komplex kultur och teknik.']
 ];
 const posNames=['URCELL','DOTTER','UTVECKLAD','SENASTE FÖDSEL'];
+const TECH_NAMES=['Signaler','Samarbete','Verktyg','Skydd','Odling','Handel','Symboler','Organisation','Vetenskap','Maskiner'];
+const techRows=[];
+function buildTechRows(){
+ const root=$('life-tech');if(!root)return;
+ for(let i=0;i<TECH_NAMES.length;i++){
+  const cell=document.createElement('div');cell.className='life-knowledge';
+  const heading=document.createElement('div');heading.className='life-knowledge-title';
+  const label=document.createElement('span');label.textContent=TECH_NAMES[i];
+  const value=document.createElement('b');value.textContent='0 %';
+  heading.append(label,value);
+  const track=document.createElement('div');track.className='life-knowledge-track';
+  const fill=document.createElement('div');fill.className='life-knowledge-fill';
+  track.append(fill);cell.append(heading,track);root.append(cell);
+  techRows.push({fill,value});
+ }
+}
+function updateTech(values){
+ for(let i=0;i<techRows.length;i++){
+  const v=Math.max(0,Math.min(100,+(values?.[i]||0)));
+  techRows[i].value.textContent=v+' %';
+  techRows[i].fill.style.width=v+'%';
+ }
+}
 let worker=null,running=false,paused=false,started=false,state=null,events=[],dirty=false,lastDraw=0;
 let frameCount=0,lastFps=0,drawFps=0,canvasSize={w:0,h:0,r:1},portraitSize={w:0,h:0,r:1};
 let birthAvg=0,sessionSeed=0;
@@ -101,6 +124,21 @@ function drawWorld(){
  }
  const m=state.metrics,sites=state.sites||[];
  ctx.save();
+ // Social/technological links are only drawn once actual settlements exist.
+ if(m.stage>=3&&sites.length>1){
+  ctx.strokeStyle='rgba(112,233,202,.20)';ctx.lineWidth=.8;
+  for(let i=0;i<sites.length;i++){
+   const [x1,y1,lvl]=sites[i];if(lvl<1)continue;
+   let links=0;
+   for(let j=i+1;j<sites.length;j++){
+    const [x2,y2]=sites[j],dx=x1-x2,dy=y1-y2;
+    if(dx*dx+dy*dy<230&&links<3){
+     ctx.beginPath();ctx.moveTo(x1/168*w,y1/100*h);
+     ctx.lineTo(x2/168*w,y2/100*h);ctx.stroke();links++;
+    }
+   }
+  }
+ }
  ctx.strokeStyle='rgba(109,233,184,.3)';
  for(const s of sites){
   const [sx,sy,lev,hue]=s,x=sx/168*w,y=sy/100*h,size=3+lev*2;
@@ -178,6 +216,7 @@ function updateMetrics(){
  }))text(id,v);
  text('life-complexity','Ø '+(+m.meanCells||1).toFixed(1)+' celler · Ø '+(+m.meanBrain||3).toFixed(1)+' neuroner');
  setStage(m.stage);
+ updateTech(m.techAdoption);
  const rate=$('life-rate');rate.style.color=m.rate>85?'#7ef3cf':m.rate>55?'#ffcc85':'#ff9c94';
 }
 function setRunning(flag){
@@ -239,5 +278,5 @@ window.addEventListener('resize',()=>{
  if(state){drawWorld();drawGallery();}
  else{drawWorld();drawGallery();}
 },{passive:true});
-setStage(0);drawWorld();drawGallery();
+buildTechRows();setStage(0);drawWorld();drawGallery();
 })();
