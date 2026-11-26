@@ -668,8 +668,27 @@ function render(){
   sample[o+1]=clamp((a.y/H*255)|0,0,255);
   sample[o+2]=a.clan%255;sample[o+3]=a.g.form||0;
  }
- const summaries=cities.length<600?cities.map(siteSummary):
-  cities.filter((_,i)=>i%Math.ceil(cities.length/600)===0).map(siteSummary);
+ // Every village contributes to territory statistics, even when thousands
+ // exist. The list of clickable markers remains bounded for responsive maps.
+ const districts=Array.from({length:96},(_,i)=>({x:i%12,y:Math.floor(i/12),
+  cities:0,homes:0,level:0,hue:0}));
+ for(const city of cities){
+  const cx=Math.max(0,Math.min(11,Math.floor(city.x/W*12)));
+  const cy=Math.max(0,Math.min(7,Math.floor(city.y/H*8)));
+  const district=districts[cx+cy*12];
+  district.cities++;district.homes+=city.homes||0;
+  district.level=Math.max(district.level,city.level);
+  district.hue+=clans[city.clan]?.hue||170;
+ }
+ for(const d of districts)if(d.cities)d.hue/=d.cities;
+ let visibleCities=cities;
+ if(cities.length>600){
+  const landmarks=new Map(),stride=Math.ceil(cities.length/470);
+  for(let i=0;i<cities.length;i+=stride)landmarks.set(cities[i].id,cities[i]);
+  for(const city of cities.slice(-110))landmarks.set(city.id,city);
+  visibleCities=[...landmarks.values()];
+ }
+ const summaries=visibleCities.map(siteSummary);
  const paths=[];
  // Bounded visual road derivation. Social geography is never capped.
  for(let i=0;i<summaries.length&&i<350;i++){
@@ -705,7 +724,7 @@ function render(){
  birthMarks=birthMarks.filter(b=>clock-b.at<4200);
  postMessage({type:'frame',metrics:{...metrics(),inView,displayed:creatures.length,
    births:sexualBirths+clonalBirths},camera:{...camera},
-  creatures,births:birthMarks.slice(-25),sample,sites:summaries,paths,craft,
+  creatures,births:birthMarks.slice(-25),sample,sites:summaries,districts,paths,craft,
   messages:messages.slice(0,35),discoveries:inventions.slice(-28).reverse(),specimens,
   events:milestones.slice(0,14),clans:clans.map(c=>({id:c.id,name:c.name,hue:c.hue,
    people:c.members,knowledge:bits(c.knowledge),inventions:c.inventions.length,
