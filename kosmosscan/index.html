@@ -85,6 +85,20 @@
  .life-overlay{font-size:8px}.life-worldnote{font-size:9px}
 }
 
+
+.life-research{margin:12px 24px 0;padding:16px;background:#071b2d;border:1px solid #2c4b60;border-radius:13px}
+.life-research-header{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.life-research-header b{font-size:12px;color:#bafae6;letter-spacing:.045em}
+.life-research-header p{margin:5px 0 0;font-size:11px;color:#9db9cc;max-width:710px;line-height:1.5}
+.life-research-header small{font-size:10px;color:#77cbb7;white-space:nowrap}
+.life-tech{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-top:13px}
+.life-knowledge{background:#0b2635;border:1px solid #315264;border-radius:9px;padding:9px;min-width:0}
+.life-knowledge-title{display:flex;justify-content:space-between;gap:6px;font-size:10px;color:#a9c8d7;white-space:nowrap}
+.life-knowledge-title b{color:#e4fff0;font:800 11px ui-monospace,monospace}
+.life-knowledge-track{height:5px;border-radius:10px;background:#183d4c;overflow:hidden;margin-top:8px}
+.life-knowledge-fill{height:100%;width:0;background:linear-gradient(90deg,#2699ba,#75f6c9);transition:width .5s}
+@media(max-width:750px){.life-research{margin:9px 11px;padding:12px}.life-tech{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.life-research-header small{display:none}}
+
 </style></head><body>
 <div class="wrap"><header class="top"><div class="brand">◈ KOSMOS<b>SCAN</b> <span style="color:#8aa3bb;font-weight:400">/ 2.0</span></div><a class="evo-anchor" href="#emergence">✦ THE UNKNOWN ENGINE ↓</a></header>
 <section class="hero"><div class="eyebrow">En knapp. En automatisk undersökning.</div><h1>Finns det någon<br><em>annan intelligens?</em></h1><p class="sub">Jag hämtar astronomiska observationer, granskar registrerade exoplaneter en efter en och letar efter världar som förtjänar en närmare undersökning. Du behöver inte göra något mer än att starta.</p></section>
@@ -123,6 +137,10 @@
    <div id="life-stage-4" class="life-step"><b>05</b><span>Tekniska samhällen</span><small class="stage-state">INTE UPPNÅTT</small></div>
    <div id="life-stage-5" class="life-step"><b>06</b><span>Civilisation</span><small class="stage-state">INTE UPPNÅTT</small></div>
   </div>
+ </div>
+ <div class="life-research">
+  <div class="life-research-header"><div><b>🌍 KULTURELL EVOLUTION</b><p>Färdigheter uppfinns av individer och sprids genom möten, undervisning och arv. Staplarna visar ungefärlig andel som kan varje färdighet.</p></div><small>10 kunskapsområden</small></div>
+  <div id="life-tech" class="life-tech"></div>
  </div>
  <div class="life-metrics">
   <div class="life-metric"><b id="life-pop">0</b><span>Individuellt simulerade</span></div>
