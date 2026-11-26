@@ -211,7 +211,7 @@ function updateMetrics(){
   'life-gen':nfmt(m.gen),'life-brain':nfmt(m.brain),'life-cells':nfmt(m.peakCells),
   'life-species':nfmt(m.phenotypes),'life-culture':nfmt(m.teaching),
   'life-innovations':nfmt(m.ideas),'life-sites':nfmt(m.sites),
-  'life-mutants':nfmt(m.appearanceMutations),'life-tick':nfmt(m.ticks),
+  'life-mutants':nfmt(m.appearanceMutations),'life-updates':nfmt(m.individualUpdatesPerSecond)+' /s','life-tick':nfmt(m.ticks),
   'life-work':nfmt(m.cycleProgress)+' / '+nfmt(m.cycleTotal)
  }))text(id,v);
  text('life-complexity','Ø '+(+m.meanCells||1).toFixed(1)+' celler · Ø '+(+m.meanBrain||3).toFixed(1)+' neuroner');
