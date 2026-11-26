@@ -9,10 +9,10 @@
 .evo-head{display:flex;justify-content:space-between;align-items:flex-start;gap:15px;padding:23px 25px 13px}.evo-kicker{color:#75f5d1;font-size:10px;letter-spacing:.22em;font-weight:850}.evo h2{margin:8px 0 5px;font-size:clamp(23px,3.4vw,32px);letter-spacing:-.035em;line-height:1.14}.evo-intro{color:#a7bed3;font-size:13px;max-width:620px;margin:3px 0 0}.evo-state{white-space:nowrap;padding:7px 11px;border:1px solid #42627a;border-radius:20px;color:#e2f9ff;background:#0f2936;font:700 10px ui-monospace,monospace;letter-spacing:.05em}.evo-state.live{color:#87ffd8;border-color:#397f70}.evo-stage{margin:12px 24px 0;border-radius:15px;position:relative;overflow:hidden;background:#020a13;border:1px solid #254056;aspect-ratio:1.94/1;min-height:196px}.evo-stage canvas{display:block;width:100%;height:100%;touch-action:manipulation}.evo-overlay{position:absolute;z-index:1;top:11px;left:11px;right:11px;display:flex;justify-content:space-between;gap:7px;color:#a3bfdd;font:10px ui-monospace,monospace;pointer-events:none;text-shadow:0 2px 6px #001}.evo-overlay span{padding:5px 7px;border-radius:7px;background:#040e1caf}.evo-corner{position:absolute;left:12px;bottom:11px;z-index:1;background:#06111cc9;border:1px solid #25415d;color:#98afc5;font-size:10px;border-radius:7px;padding:5px 8px;pointer-events:none}.evo-actions{padding:16px 24px 13px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}.evo-primary{border:0;background:linear-gradient(110deg,#63edd6,#83b7fc);color:#071b23;border-radius:10px;font-size:13px;font-weight:850;padding:13px 19px;cursor:pointer;min-height:44px}.evo-secondary{border:1px solid #36556b;background:#11283c;color:#d8f4ff;border-radius:10px;font-size:12px;font-weight:750;padding:12px 16px;cursor:pointer;min-height:44px}.evo-secondary:disabled{opacity:.4;cursor:not-allowed}.evo-what{color:#7998b3;font-size:11px;flex:1;text-align:right}.evo-metrics{margin:0 24px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.evo-metric{background:#081e2d;border:1px solid #25475a;border-radius:10px;padding:11px 10px}.evo-metric b{display:block;font:850 clamp(16px,2.4vw,25px)/1.25 ui-monospace,monospace;color:#a9ffdf;font-variant-numeric:tabular-nums}.evo-metric span{font-size:10px;color:#91acc2;display:block;margin-top:3px}.evo-bottom{padding:14px 24px 23px;display:grid;grid-template-columns:1fr minmax(170px,300px);gap:12px;align-items:start}.evo-summary{font-size:12px;color:#b5cddd;line-height:1.6;margin:0}.evo-summary strong{color:#e9ffff}.evo-events{background:#050f1e;border:1px solid #254158;border-radius:9px;padding:8px 10px;max-height:109px;min-height:72px;overflow:auto;color:#a7c8dc;font:10px/1.65 ui-monospace,monospace}.evo-events div{border-bottom:1px solid #183046;padding:2px 0}.evo-events div:last-child{border:0}.evo-disclaimer{padding:10px 24px 16px;border-top:1px solid #203b53;color:#879eb7;font-size:11px}
 .evo-anchor{border:1px solid #346c73;border-radius:50px;padding:5px 10px;color:#adffe9;text-decoration:none;background:#13323a;font-size:11px;font-weight:700}
 @media(max-width:730px){.evo-head{padding:19px 14px 10px;flex-wrap:wrap}.evo-stage{margin:10px 12px 0;aspect-ratio:1.3/1;min-height:212px}.evo-actions{padding:13px 12px}.evo-primary{flex:1 1 100%;width:100%}.evo-what{flex:1;text-align:left}.evo-metrics{margin:0 12px;grid-template-columns:repeat(2,minmax(0,1fr))}.evo-bottom{padding:12px;grid-template-columns:1fr}.evo-events{max-height:82px}.evo-disclaimer{padding:12px;font-size:10px}.evo-overlay{font-size:9px;left:6px;right:6px;top:6px}}
-.evo-specimen-panel{display:grid;grid-template-columns:1fr minmax(190px,38%);gap:12px;align-items:center;margin:12px 24px 4px;padding:13px 16px;background:#091c2c;border:1px solid #315a70;border-radius:12px}
+.evo-specimen-panel{display:grid;grid-template-columns:1fr;gap:12px;align-items:center;margin:12px 24px 4px;padding:13px 16px;background:#091c2c;border:1px solid #315a70;border-radius:12px}
 .evo-specimen-panel b{font-size:14px;color:#d3fbea}.evo-specimen-panel small{display:block;color:#9db7ca;font-size:11px;line-height:1.55;margin-top:5px}
 #evo-specimen-label{display:block;color:#6ee9d3;font:11px ui-monospace,monospace;margin-top:9px}
-#evo-specimen{width:100%;height:110px;display:block}
+#evo-specimen{width:100%;height:124px;display:block}
 @media(max-width:730px){.evo-specimen-panel{grid-template-columns:1fr;margin:10px 12px}.evo-specimen-panel canvas{height:100px}}
 </style></head><body>
 <div class="wrap"><header class="top"><div class="brand">◈ KOSMOS<b>SCAN</b> <span style="color:#8aa3bb;font-weight:400">/ 2.0</span></div><a class="evo-anchor" href="#emergence">✦ THE UNKNOWN ENGINE ↓</a></header>
@@ -44,7 +44,7 @@
     <div class="evo-metric"><b id="evo-mchanges">0</b><span>Mutationer i utseendet</span></div>
   </div>
   <div class="evo-specimen-panel">
-    <div><b>🧬 Evolutionens skyltfönster</b><small>En förstorad varelse ur den växande populationen. Kroppsform, färg, vingar, antenner och svans är ärftliga.</small><span id="evo-specimen-label">Ingen individ vald</span></div>
+    <div><b>🧬 Evolutionens skyltfönster</b><small>Jämför urformen med senare generationer och nya mutationer. Kroppsform, färg och utskott är ärftliga.</small><span id="evo-specimen-label">Ingen individ vald</span></div>
     <canvas id="evo-specimen" aria-label="Förstorad organism som visar ärftliga utseendeförändringar"></canvas>
   </div>
   <div class="evo-bottom"><p class="evo-summary" id="evo-summary"><strong>Vad kan hända?</strong> Kemiska mönster kan bilda öar, ringar eller trådar. Ingen organism dör. Nya individer föds ständigt och alla behåller sin egen arvsmassa och sitt eget nervnät. Utfallet räknas fram i realtid.</p>
@@ -112,7 +112,7 @@ const oc=off.getContext('2d');const frame=oc.createImageData(GW,GH),rgba=frame.d
 let u,v,nu,nv,resource,signalA,signalB,nsA,nsB,agents=[],rng,seed=0,clock=0,drawFrames=0,mutations=0,births=0,hiGen=0;
 let maxNodes=0, innovations=0, learningUpdates=0, environmentShifts=0, cycle=null, lastProcessed=0;
 let birthAccumulator=0, lastWall=0, lastUi=0, lastPaint=0, birthRateMeasured=0, birthWindowMs=0, birthWindowCount=0;
-let nextOrganismId=1, morphChanges=0, showcased=null, phenotypeTypes=new Set(), completedTicks=0, lastShowcase=0;
+let nextOrganismId=1, morphChanges=0, showcased=null, originSpecimen=null, newMutation=null, phenotypeTypes=new Set(), completedTicks=0, lastShowcase=0;
 let active=false,paused=false,last=0,raf=0,cssW=1,cssH=1,pixel=1,lastStats=0,lastEvent=0;
 const now=()=>typeof performance!=='undefined'?performance.now():Date.now();
 function rand(){let x=rng|0;x^=x<<13;x^=x>>>17;x^=x<<5;rng=x|0;return (x>>>0)/4294967296;}
@@ -180,18 +180,19 @@ function registerChild(parent,batch=null,forced=false){
  if(batch)batch.push(child);else agents.push(child);
  births++;birthWindowCount++;
  if(!showcased||child.gen>showcased.gen||(child.gen===showcased.gen&&child.id%29===0))showcased=child;
+ if(morphType(child.morph)!==morphType(parent.morph))newMutation=child;
  if(child.gen>hiGen){hiGen=child.gen;if(hiGen<=5||hiGen%5===0)addEvent('Ny generation '+hiGen+' har uppstått');}
 }
 function reset(){
  seed=((typeof crypto!=='undefined'&&crypto.getRandomValues)?crypto.getRandomValues(new Uint32Array(1))[0]:(Date.now()^(Math.random()*4294967296)))>>>0;
  rng=seed||0x9E3779B9;clock=0;drawFrames=0;mutations=0;births=0;hiGen=0;lastEvent=0;lastStats=0;maxNodes=0;innovations=0;learningUpdates=0;environmentShifts=0;cycle=null;lastProcessed=0;
- birthAccumulator=0;lastWall=0;lastUi=0;lastPaint=0;birthRateMeasured=0;birthWindowMs=0;birthWindowCount=0;nextOrganismId=1;morphChanges=0;phenotypeTypes.clear();showcased=null;completedTicks=0;lastShowcase=0;
+ birthAccumulator=0;lastWall=0;lastUi=0;lastPaint=0;birthRateMeasured=0;birthWindowMs=0;birthWindowCount=0;nextOrganismId=1;morphChanges=0;phenotypeTypes.clear();showcased=null;originSpecimen=null;newMutation=null;completedTicks=0;lastShowcase=0;
  u=new Float32Array(N);v=new Float32Array(N);nu=new Float32Array(N);nv=new Float32Array(N);
  resource=new Float32Array(N);signalA=new Float32Array(N);signalB=new Float32Array(N);nsA=new Float32Array(N);nsB=new Float32Array(N);
  for(let y=0;y<GH;y++)for(let x=0;x<GW;x++){const i=y*GW+x;u[i]=1;resource[i]=between(.18,.55);}
  for(let j=0;j<22;j++){const x=between(5,GW-5),y=between(5,GH-5);bump(v,x,y,between(.5,.95),between(2,7)|0);bump(resource,x,y,.4,8);}
  agents=Array.from({length:INITIAL_POP},()=>organism(between(1,GW-1),between(1,GH-1),newGenome(),0,between(.8,1.1)));
- showcased=agents[0];
+ showcased=agents[0];originSpecimen=agents[0];newMutation=agents[0];
  by('evo-seed').textContent='FRÖ: '+seed.toString(16).toUpperCase().padStart(8,'0');
  by('evo-start').textContent='↻ NYTT UNIVERSUM';by('evo-pause').disabled=false;by('evo-pause').textContent='⏸ PAUSA';
  by('evo-state').textContent='UTVECKLING PÅGÅR';by('evo-state').classList.add('live');
@@ -372,37 +373,44 @@ function paint(){
  display.restore();
 }
 function drawSpecimen(){
- const c=by('evo-specimen'),d=c.getContext('2d');
- if(!d)return;
+ const c=by('evo-specimen'),d=c.getContext('2d');if(!d)return;
  const rect=c.getBoundingClientRect(),w=Math.max(1,rect.width),h=Math.max(1,rect.height);
- const res=Math.min(window.devicePixelRatio||1,1.7);
- if(c.width!==Math.round(w*res)||c.height!==Math.round(h*res)){
-  c.width=Math.round(w*res);c.height=Math.round(h*res);
- }
+ const res=Math.min(window.devicePixelRatio||1,1.6);
+ if(c.width!==Math.round(w*res)||c.height!==Math.round(h*res)){c.width=Math.round(w*res);c.height=Math.round(h*res);}
  d.setTransform(res,0,0,res,0,0);d.clearRect(0,0,w,h);
- const a=showcased||agents[0];if(!a)return;
- const m=a.morph,sz=Math.min(w*.13,h*.24),color=a.visual;
- d.save();d.translate(w*.38,h*.5);d.rotate(-.2);
- d.shadowColor=color;d.shadowBlur=25;d.fillStyle=color;
- const shape=m[1]|0;
- d.beginPath();
- if(shape===0){d.arc(0,0,sz,0,TAU);}
- else if(shape===1){d.moveTo(sz*1.6,0);d.lineTo(-sz,-sz*.8);d.lineTo(-sz*.4,0);d.lineTo(-sz,sz*.8);}
- else if(shape===2){d.ellipse(0,0,sz*1.5,sz*.65,0,0,TAU);}
- else if(shape===3){d.rect(-sz,-sz*.65,sz*2,sz*1.3);}
- else if(shape===4){for(let i=0;i<12;i++){const ang=i*TAU/12,r=i%2?sz*.62:sz*(1.15+m[2]*.6);if(i===0)d.moveTo(r,0);else d.lineTo(Math.cos(ang)*r,Math.sin(ang)*r);}}
- else{d.moveTo(-sz*1.5,-sz);d.lineTo(sz*1.3,0);d.lineTo(-sz*1.5,sz);d.lineTo(-sz*.5,0);}
- d.closePath();d.fill();d.shadowBlur=0;d.strokeStyle=color;d.lineWidth=2.7;
- for(let j=0;j<Math.round(m[5]*5);j++){
-  const side=j%2?1:-1;d.beginPath();d.moveTo(sz*.3,side*sz*.3);
-  d.lineTo(sz*(1.2+m[5]),side*sz*(.6+(j/3)*m[2]));d.stroke();
+ const specimens=[originSpecimen,showcased,newMutation];
+ const captions=['URSPRUNG','SENASTE GENERATION','NY KROPPSMUTATION'];
+ for(let index=0;index<3;index++){
+  const a=specimens[index]||agents[0];if(!a)continue;
+  const m=a.morph,shape=m[1]|0,color=a.visual;
+  const centerX=w*(index+.5)/3,centerY=h*.49,size=Math.min(w/22,h/5);
+  if(index){
+   d.beginPath();d.moveTo(w*index/3,8);d.lineTo(w*index/3,h-8);
+   d.strokeStyle='#24475c';d.lineWidth=1;d.stroke();
+  }
+  d.textAlign='center';d.font='9px ui-monospace,monospace';
+  d.fillStyle='#97b5c8';d.fillText(captions[index],centerX,17);
+  d.save();d.translate(centerX,centerY);d.rotate(-.16);
+  d.shadowColor=color;d.shadowBlur=14;d.fillStyle=color;d.beginPath();
+  if(shape===0)d.arc(0,0,size,0,TAU);
+  else if(shape===1){d.moveTo(size*1.55,0);d.lineTo(-size,-size*.8);d.lineTo(-size*.4,0);d.lineTo(-size,size*.8);}
+  else if(shape===2)d.ellipse(0,0,size*1.5,size*.68,0,0,TAU);
+  else if(shape===3)d.rect(-size,-size*.7,size*2,size*1.4);
+  else if(shape===4){for(let j=0;j<12;j++){const ang=j*TAU/12,rr=j%2?size*.62:size*(1.1+m[2]*.75);if(j===0)d.moveTo(rr,0);else d.lineTo(Math.cos(ang)*rr,Math.sin(ang)*rr);}}
+  else{d.moveTo(-size*1.5,-size);d.lineTo(size*1.3,0);d.lineTo(-size*1.5,size);d.lineTo(-size*.5,0);}
+  d.closePath();d.fill();
+  d.shadowBlur=0;d.strokeStyle=color;d.lineWidth=1.8;
+  for(let j=0;j<Math.round(m[5]*5);j++){
+   const dir=j%2?1:-1;d.beginPath();d.moveTo(size*.25,dir*size*.3);
+   d.lineTo(size*(1.3+m[5]),dir*size*(.6+(j/3)*m[2]));d.stroke();
+  }
+  if(m[4]>.2){d.beginPath();d.moveTo(-size,0);d.lineTo(-size*(1+m[4]*2),size*m[6]);d.stroke();}
+  d.restore();
+  d.font='10px ui-monospace,monospace';d.fillStyle='#b4e8f1';
+  d.fillText('GEN '+a.gen+' • FORM '+(shape+1),centerX,h-10);
  }
- if(m[4]>.2){d.beginPath();d.moveTo(-sz,0);d.lineTo(-sz*(1+m[4]*2),sz*m[6]);d.stroke();}
- d.restore();
- d.fillStyle='#bdd7ec';d.font='12px ui-monospace,monospace';d.textAlign='left';
- d.fillText('GEN '+a.gen,Math.min(w*.68,w-90),h*.44);
- d.fillText('FORM '+(shape+1)+'/6',Math.min(w*.68,w-90),h*.62);
- by('evo-specimen-label').textContent='Individ #'+a.id+' · generation '+a.gen+' · '+a.brain.length+' neuroner';
+ const a=showcased||agents[0];
+ if(a)by('evo-specimen-label').textContent='Från generation 0 till '+a.gen+' · '+phenotypeTypes.size+' ärftliga utseendetyper hittills';
 }
 function resize(){
  const box=canvas.getBoundingClientRect();cssW=Math.max(1,box.width);cssH=Math.max(1,box.height);
