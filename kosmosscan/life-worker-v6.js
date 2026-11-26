@@ -433,7 +433,7 @@ function heartbeat(){
   }
   if(clock-lastFrame>280){render();lastFrame=clock;}
   if(!lastRateAt)lastRateAt=clock;
-  if(clock-lastRateAt>1000){rate=Math.round(rateBorn/((clock-lastRateAt)/1000));updatesPerSecond=Math.round(updateWindow/((clock-lastRateAt)/1000));rateBorn=0;updateWindow=0;lastRateAt=clock;}
+  if(clock-lastRateAt>1000){rate=+(rateBorn/((clock-lastRateAt)/1000)).toFixed(1);updatesPerSecond=Math.round(updateWindow/((clock-lastRateAt)/1000));rateBorn=0;updateWindow=0;lastRateAt=clock;}
  }catch(e){paused=true;postMessage({type:'error',message:e.message});return;}
  timer=setTimeout(heartbeat,22);
 }
