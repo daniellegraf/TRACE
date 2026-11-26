@@ -112,7 +112,7 @@ const oc=off.getContext('2d');const frame=oc.createImageData(GW,GH),rgba=frame.d
 let u,v,nu,nv,resource,signalA,signalB,nsA,nsB,agents=[],rng,seed=0,clock=0,drawFrames=0,mutations=0,births=0,hiGen=0;
 let maxNodes=0, innovations=0, learningUpdates=0, environmentShifts=0, cycle=null, lastProcessed=0;
 let birthAccumulator=0, lastWall=0, lastUi=0, lastPaint=0, birthRateMeasured=0, birthWindowMs=0, birthWindowCount=0;
-let nextOrganismId=1, morphChanges=0, showcased=null, phenotypeTypes=new Set(), completedTicks=0;
+let nextOrganismId=1, morphChanges=0, showcased=null, phenotypeTypes=new Set(), completedTicks=0, lastShowcase=0;
 let active=false,paused=false,last=0,raf=0,cssW=1,cssH=1,pixel=1,lastStats=0,lastEvent=0;
 const now=()=>typeof performance!=='undefined'?performance.now():Date.now();
 function rand(){let x=rng|0;x^=x<<13;x^=x>>>17;x^=x<<5;rng=x|0;return (x>>>0)/4294967296;}
@@ -185,7 +185,7 @@ function registerChild(parent,batch=null,forced=false){
 function reset(){
  seed=((typeof crypto!=='undefined'&&crypto.getRandomValues)?crypto.getRandomValues(new Uint32Array(1))[0]:(Date.now()^(Math.random()*4294967296)))>>>0;
  rng=seed||0x9E3779B9;clock=0;drawFrames=0;mutations=0;births=0;hiGen=0;lastEvent=0;lastStats=0;maxNodes=0;innovations=0;learningUpdates=0;environmentShifts=0;cycle=null;lastProcessed=0;
- birthAccumulator=0;lastWall=0;lastUi=0;lastPaint=0;birthRateMeasured=0;birthWindowMs=0;birthWindowCount=0;nextOrganismId=1;morphChanges=0;phenotypeTypes.clear();showcased=null;completedTicks=0;
+ birthAccumulator=0;lastWall=0;lastUi=0;lastPaint=0;birthRateMeasured=0;birthWindowMs=0;birthWindowCount=0;nextOrganismId=1;morphChanges=0;phenotypeTypes.clear();showcased=null;completedTicks=0;lastShowcase=0;
  u=new Float32Array(N);v=new Float32Array(N);nu=new Float32Array(N);nv=new Float32Array(N);
  resource=new Float32Array(N);signalA=new Float32Array(N);signalB=new Float32Array(N);nsA=new Float32Array(N);nsB=new Float32Array(N);
  for(let y=0;y<GH;y++)for(let x=0;x<GW;x++){const i=y*GW+x;u[i]=1;resource[i]=between(.18,.55);}
@@ -321,13 +321,13 @@ function paint(){
  display.save();display.globalCompositeOperation='lighter';
  // Every agent gets drawn. No visual or simulation sampling by population count.
  const sx=cssW/GW,sy=cssH/GH;
- const scale=Math.min(1.55,Math.max(.10,Math.sqrt(700/agents.length)));
+ const scale=Math.min(1.55,Math.max(.08,Math.sqrt(480/agents.length)));
  const baseRadius=Math.max(.17,2.7*scale);
  for(let k=0;k<agents.length;k++){
   const a=agents[k],m=a.morph,x=a.x*sx,y=a.y*sy;
   const size=baseRadius*(.75+m[3]*.75),shape=m[1]|0;
   display.fillStyle=a.visual;
-  if(scale<.29){
+  if(scale<.45){
    // Smaller dots, not fewer agents; minimum is a subpixel-sized rectangle.
    display.fillRect(x-size*.5,y-size*.5,size,size);
    continue;
@@ -420,30 +420,6 @@ function paintBlank(){
  display.fillText('Världen väntar på sitt första ögonblick',cssW/2,cssH/2);
 }
 function chooseParent(){
- // Small fitness tournament: foraging performance and energy determine reproductive success.
- let best=null;
- for(let j=0;j<6;j++){
-  const a=agents[(rand()*agents.length)|0];
-  if(!best||(a.fitness*.7+a.energy*.1+a.gen*.004)>(best.fitness*.7+best.energy*.1+best.gen*.004))best=a;
- }
- return best;
-}
-function wallBirths(delta){
- birthAccumulator+=delta*TARGET_BIRTHS_PER_SECOND/1000;
- // Real-time catch-up to keep mean birth rate independent of simulation tick speed.
- // Limit backlog per frame; if even this fails, the device's CPU is genuinely exhausted.
- const count=Math.min(80,Math.floor(birthAccumulator));
- if(count>0){
-  birthAccumulator-=count;
-  for(let i=0;i<count;i++)registerChild(chooseParent(),null,true);
- }
- birthWindowMs+=delta;
- if(birthWindowMs>=1000){
-  birthRateMeasured=birthWindowCount/(birthWindowMs/1000);
-  birthWindowMs=0;birthWindowCount=0;
- }
-}
-function chooseParent(){
  let best=null;
  for(let j=0;j<6;j++){
   const a=agents[(rand()*agents.length)|0];
@@ -471,7 +447,7 @@ function loop(ts){
   const done=evolution();drawFrames++;
   if(ts-lastUi>=180){stats();lastUi=ts;}
   if(ts-lastPaint>=170){paint();lastPaint=ts;}
-  if(ts%4100<18)drawSpecimen();
+  if(ts-lastShowcase>=2500){drawSpecimen();lastShowcase=ts;}
  }catch(err){
   paused=true;by('evo-state').textContent='BERÄKNINGSFEL';by('evo-state').classList.remove('live');
   addEvent('Fel: '+(err.message||'okänt'));by('evo-pause').textContent='▶ ÅTERUPPTA';
