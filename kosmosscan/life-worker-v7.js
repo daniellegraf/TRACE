@@ -87,7 +87,8 @@ function organism(parent=null,clan=null,mate=null){
    }
  }
  g.bio=parent?mutationEnabled?G7.child(parent.g.bio,mate?.g.bio):parent.g.bio:G7.founder(g.hue);
- const dev=G7.phenotype(g.bio);
+ const maturity=parent?.35:0.24;
+ const dev=G7.phenotype(g.bio,maturity);
  g.hue=g.bio.pigment;g.cells=Math.min(256,dev.segments);g.form=dev.segments%6;
  g.limbs=dev.appendages;g.size=.45+dev.segments*.026;
  maxCells=Math.max(maxCells,g.cells);
@@ -102,7 +103,7 @@ function organism(parent=null,clan=null,mate=null){
   lineage=nextID;lineageBranches++;
   if(ancestry.length<10000)ancestry.push({id:nextID,parent:parent.id,step,gen:parent.gen+1,kind:'branch'});
  }
- const a={id:++id,clan:c.id,x,y,angle:between(0,TAU),g,body:dev.functions,
+ const a={id:++id,clan:c.id,x,y,angle:between(0,TAU),g,maturity,body:dev.functions,
   bodyScore:dev.score,lineage,parents:parent?[parent.id,mate?.id||null]:[],root,
   gen:parent?parent.gen+1:0,age:0,energy:parent?.8:between(.6,1.2),xp:0,fitness:0,
   network:new Float32Array(g.brain.length),memory:new Float32Array(4),
@@ -264,8 +265,12 @@ function individualTick(a){
  if(a.role===1)c.resources.material+=take*.17;
  if(a.role===2)c.resources.ideas+=a.g.inventiveness*.0007;
  if(a.role===3)c.resources.power+=take*.008;
- if(a.age%30===0&&a.g.cells<24&&a.energy>.5&&rand()<.04*a.g.curiosity){
-  a.g.cells++;maxCells=Math.max(maxCells,a.g.cells);
+ // Somatic growth follows inherited body plan. No genetically uncaused new cells.
+ if(a.age%30===0&&a.maturity<1){
+  a.maturity=Math.min(1,a.maturity+.085);
+  const grown=G7.phenotype(a.g.bio,a.maturity);
+  a.body=grown.functions;a.bodyScore=grown.score;a.g.cells=grown.segments;
+  maxCells=Math.max(maxCells,grown.segments);
  }
  if(a.age%85===0&&a.g.brain.length<28&&mutationEnabled&&rand()<(.03+.04*a.g.bio.brainGrowth)*a.g.curiosity){
   a.g.brain.push(Array.from({length:6},()=>between(-1,1)));
@@ -528,7 +533,7 @@ function render(){
  const craft=flights.map(f=>({x:f.x,y:f.y,id:f.id,name:f.name,progress:f.progress,clan:f.clan})).slice(-20);
  const picks=[agents[0],agents[Math.floor(agents.length*.25)],agents[Math.floor(agents.length*.75)],agents.at(-1)];
  const specimens=picks.filter(Boolean).map(a=>{
-  const morph=G7.phenotype(a.g.bio);
+  const morph=G7.phenotype(a.g.bio,a.maturity);
   return{id:a.id,gen:a.gen,clan:a.clan,parents:a.parents,lineage:a.lineage,
    eyes:morph.eyes,appendages:morph.appendages,segments:morph.segments,
    nodes:morph.nodes.slice(0,85),body:morph.functions,
@@ -671,7 +676,7 @@ onmessage=event=>{
   const a=agents[(+m.id||1)-1];
   postMessage({type:'organismDetail',id:m.id,agent:a?
     {id:a.id,gen:a.gen,clan:a.clan,parents:a.parents,lineage:a.lineage,
-     genome:a.g.bio,body:G7.phenotype(a.g.bio),memory:Array.from(a.memory),
+     genome:a.g.bio,body:G7.phenotype(a.g.bio,a.maturity),memory:Array.from(a.memory),
      brain:a.g.brain,fitness:a.fitness,learning:a.learning}:null});
  }else if(m.type==='setSpeed'){
   socialSpeed=m.fast?4:1;
