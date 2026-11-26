@@ -14,42 +14,136 @@
 #evo-specimen-label{display:block;color:#6ee9d3;font:11px ui-monospace,monospace;margin-top:9px}
 #evo-specimen{width:100%;height:124px;display:block}
 @media(max-width:730px){.evo-specimen-panel{grid-template-columns:1fr;margin:10px 12px}.evo-specimen-panel canvas{height:100px}}
+
+/* LIFE ENGINE 5 — the cosmic and ecological laboratory */
+.life-lab{padding-bottom:0;overflow:hidden;background:radial-gradient(ellipse 95% 55% at 55% -18%,#184e54 0%,#0a1e33 53%,#071324 100%);}
+.life-head{display:flex;justify-content:space-between;gap:16px;padding:28px 26px 14px;align-items:flex-start}
+.life-kicker{font-weight:800;letter-spacing:.19em;color:#67efd1;font-size:10px}
+.life-head h2{margin:12px 0 9px;line-height:1.08;letter-spacing:-.045em;font-weight:900;font-size:clamp(27px,4.5vw,44px)}
+.life-head p{margin:0;color:#b5ccdc;font-size:13px;max-width:690px;line-height:1.65}
+.life-status{padding:8px 10px;min-width:92px;text-align:center;white-space:nowrap;border-radius:99px;color:#bdd3e3;border:1px solid #3b556d;background:#10273a;font-size:10px;font-weight:800;letter-spacing:.05em}
+.life-status.life-live{border-color:#4caa98;color:#78ffdc;background:#0b3433}
+.life-world{position:relative;border:1px solid #31566c;overflow:hidden;background:#04111f;border-radius:16px;margin:12px 24px 0;height:clamp(255px,43vw,430px)}
+#life-stage{display:block;width:100%;height:100%;touch-action:manipulation}
+.life-overlay{position:absolute;left:13px;right:13px;top:10px;display:flex;justify-content:space-between;gap:10px;color:#b4dfde;font:10px ui-monospace,monospace;pointer-events:none;text-shadow:0 1px 8px #000a}
+.life-overlay span{background:#061b2cb9;border:1px solid #3860716c;border-radius:7px;padding:5px 8px}
+.life-worldnote{position:absolute;left:12px;bottom:10px;padding:5px 7px;font-size:10px;border-radius:7px;background:#061626c9;color:#a5c1d4;pointer-events:none}
+.life-actions{padding:16px 24px 10px;display:flex;flex-wrap:wrap;gap:9px;align-items:center}
+.life-actions button{border-radius:11px;min-height:46px;cursor:pointer;padding:12px 15px;font-size:13px;font-weight:800}
+.life-start{background:linear-gradient(113deg,#66f0cb,#82bafc);border:0;color:#082031;flex:0 1 330px}
+.life-pause{background:#133247;border:1px solid #3c6779;color:#d2eaff}
+.life-pause:disabled{opacity:.35;cursor:not-allowed}
+.life-actions>span{font-size:11px;color:#7d9db1;margin-left:auto}
+.life-stagearea{margin:10px 24px 0;border:1px solid #25465b;background:#081b2e;border-radius:14px;padding:18px}
+.life-stagehead{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.life-stagehead small{letter-spacing:.14em;font-size:9px;color:#70c9b6;font-weight:800}
+.life-stagehead h3{font-size:20px;margin:4px 0;letter-spacing:-.03em}
+.life-stagehead p{font-size:12px;color:#a2bccf;line-height:1.5;margin:3px 0}
+.life-progressfact{text-align:center;min-width:130px}
+.life-progressfact strong{display:block;font:800 21px ui-monospace,monospace;color:#bafce9}
+.life-progressfact span{display:block;font-size:9px;color:#779cb1}
+.life-timeline{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;margin-top:17px}
+.life-step{border:1px solid #284558;border-radius:9px;padding:10px 8px;min-height:76px;background:#071523}
+.life-step b{display:inline-flex;border-radius:50%;background:#263b54;width:21px;height:21px;align-items:center;justify-content:center;color:#8ea4c0;font-size:10px}
+.life-step span{display:block;font-size:10px;font-weight:750;color:#b1bfcf;margin:6px 0 4px;line-height:1.2}
+.life-step small{font-size:8px;color:#77889e;line-height:1.3}
+.life-step.done{background:#113235;border-color:#4b7773}.life-step.done b{background:#246858;color:#bcffec}
+.life-step.done span{color:#c7fce9}.life-step.done small{color:#7fe1c4}
+.life-step.current{box-shadow:inset 0 0 15px #2ee8bb19}
+.life-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:14px 24px 7px}
+.life-metric{background:#091d30;border:1px solid #2a455a;border-radius:11px;padding:12px}
+.life-metric b{display:block;font:800 clamp(16px,2.4vw,24px)/1.3 ui-monospace,monospace;color:#aefbe5;overflow-wrap:anywhere}
+.life-metric span{font-size:10px;color:#94adbe;display:block;margin-top:4px}
+.life-complexity{padding:0 26px 3px;color:#8fb6c9;font:11px ui-monospace,monospace}
+.life-gallerypanel{margin:12px 24px 0;background:#061829;border:1px solid #2b4d61;border-radius:12px;padding:15px}
+.life-galleryhead{display:flex;gap:10px;justify-content:space-between;flex-wrap:wrap;margin-bottom:8px}
+.life-galleryhead b{font-size:12px;color:#e7f7ff}.life-galleryhead span{font-size:11px;color:#9ab7c9}
+#life-gallery{width:100%;height:167px;display:block}
+.life-logpanel{margin:13px 24px 14px;padding:14px 16px;background:#051522;border:1px solid #2b4659;border-radius:12px}
+.life-logpanel>b{font-size:11px;color:#c8e5e9;letter-spacing:.07em}
+#life-log{margin-top:10px;height:145px;overflow-y:auto;scrollbar-width:thin}
+.life-logitem{padding:7px 0;border-bottom:1px solid #1d354a;color:#a4c7d8;font:11px/1.5 ui-monospace,monospace}
+.life-logitem span{color:#5fbda9;margin-right:7px}
+.life-conditions{border-top:1px solid #28465a;padding:16px 24px 20px;color:#90a9bb;font-size:11px;line-height:1.6;background:#061526}
+.life-conditions b{color:#c5e8df}
+@media(max-width:750px){
+ .life-head{padding:20px 14px 11px;display:block}.life-status{display:inline-block;margin-top:13px}
+ .life-world{margin:8px 11px 0;height:300px}
+ .life-actions{padding:13px 11px;gap:7px}.life-start{flex:1 1 100%}.life-pause{flex:1}
+ .life-actions>span{flex:1 1 100%;font-size:10px;text-align:center;margin:2px 0}
+ .life-stagearea{margin:8px 11px;padding:13px}
+ .life-stagehead h3{font-size:17px}.life-progressfact{min-width:70px}.life-progressfact strong{font-size:16px}
+ .life-timeline{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin-top:13px}
+ .life-step{min-height:66px;padding:7px}
+ .life-metrics{grid-template-columns:repeat(2,minmax(0,1fr));margin:11px 11px 6px;gap:7px}
+ .life-metric{padding:11px 10px}.life-metric b{font-size:20px}
+ .life-complexity{padding:3px 13px}
+ .life-gallerypanel{margin:10px 11px 0;padding:11px 8px}
+ #life-gallery{height:155px}
+ .life-logpanel{margin:11px;padding:12px}#life-log{height:120px}
+ .life-conditions{padding:12px}
+ .life-overlay{font-size:8px}.life-worldnote{font-size:9px}
+}
+
 </style></head><body>
 <div class="wrap"><header class="top"><div class="brand">◈ KOSMOS<b>SCAN</b> <span style="color:#8aa3bb;font-weight:400">/ 2.0</span></div><a class="evo-anchor" href="#emergence">✦ THE UNKNOWN ENGINE ↓</a></header>
 <section class="hero"><div class="eyebrow">En knapp. En automatisk undersökning.</div><h1>Finns det någon<br><em>annan intelligens?</em></h1><p class="sub">Jag hämtar astronomiska observationer, granskar registrerade exoplaneter en efter en och letar efter världar som förtjänar en närmare undersökning. Du behöver inte göra något mer än att starta.</p></section>
 <section class="mainbox" id="mainbox"><div class="sky" id="sky"><canvas id="starfield" aria-hidden="true"></canvas><div class="galaxy"><div class="orb four"></div><div class="orb three"></div><div class="orb two"></div><div class="orb one"></div><div class="core"></div></div><div class="scope"></div><div class="skyline"><span>OBSERVATIONER: <strong id="skytype">VÄNTAR</strong></span><span>OBJEKT: <strong id="skynum">0</strong></span></div><div class="skybottom"><span><i class="dot"></i><span id="skystatus">SYSTEM REDO</span></span><span>ILLUSTRATIV STJÄRNKARTA</span></div></div><div class="console"><h2 id="title">Starta min undersökning av universum</h2><p id="hint">Programmet söker i verkliga arkiv – det låtsas inte att en animation är en teleskopobservation.</p><button id="go" type="button">✦ STARTA DEN VERKLIGA SÖKNINGEN</button><div class="tiny"><strong>1 knapp · 0 inställningar</strong> · NASA:s exoplanetarkiv → analys → slutsats</div><div class="meterarea" id="meterarea"><div class="meterhead"><span id="phase">Förbereder…</span><span id="pct">0 %</span></div><div class="meter"><div class="bar" id="bar"></div></div></div><div class="log" id="log" role="log" aria-live="polite"></div><div class="stats" id="stats" hidden><div class="stat"><small>Planetposter granskade</small><strong id="count">0</strong></div><div class="stat"><small>Utvalda världar</small><strong class="mark" id="matches">0</strong></div><div class="stat"><small>Verifierad utomjordisk AI</small><strong id="intel">0</strong></div></div></div></section>
 <section class="results" id="results"><div class="grid"><div class="panel"><span class="badge" id="proofbadge">RESULTAT</span><h3 id="resulttitle">Min slutsats</h3><p id="summary"></p><div class="data-source" id="source"></div><p style="font-size:12px">Här är <b>observationer och ett matematiskt urval</b>, inte en livsdetektor. Ingen av dessa planeter är därmed bevisat bebodd.</p></div><div class="panel"><span class="badge warn">HYPOTES TESTAD</span><h3>Kan gammal AI finnas?</h3><p id="ancient">Undersökningen visar vad som går att säga om äldre stjärnsystem.</p><p><b class="yellow">Viktig gräns:</b> Exoplanetarkivet innehåller inte råa radiomätningar, lasersignaler eller prov på artificiellt material. Därför kan det varken bekräfta eller utesluta tidigare AI.</p></div></div><div class="tablebox"><div class="tablehead"><h3>✦ Planeternas observationsprioritet</h3><span class="chip" id="candidatecount"></span></div><div style="overflow-x:auto"><table><thead><tr><th>#</th><th>Planet</th><th>Avstånd</th><th>Radie</th><th>Jämviktstemp.</th><th>Index*</th></tr></thead><tbody id="ranking"></tbody></table></div></div><div class="explain"><div class="info"><b>01 / Vad jag verkligen gör</b><p>Bearbetar katalogens verkliga mätvärden, filtrerar radie och jämviktstemperatur, rangordnar utifrån tydliga prioriteringsregler.</p></div><div class="info"><b>02 / Vad jag inte kan se</b><p>Ytvatten, atmosfär, mikrober, civilisationer eller AI – sådant kan inte avgöras med dessa katalogfält.</p></div><div class="info"><b>03 / Hur urvalet fungerar</b><p>Radie 0,5–1,8 jordradier och jämviktstemperatur 180–310 K. Indexet är en egen observationsprioritering, inte sannolikhet för liv.</p></div></div></section>
 
-<section class="evo" id="emergence">
-  <div class="evo-head">
-    <div><div class="evo-kicker">EXPERIMENT 01 / THE UNKNOWN ENGINE</div><h2>Vad uppstår om koden får utvecklas?</h2>
-      <p class="evo-intro">Ingen förutbestämd bild. En odödlig digital population växer med föränderliga miljöer, ärftliga nervnät, minne, synapsinlärning och mutationer. Tryck en gång — se vad som utvecklas.</p></div>
-    <span class="evo-state" id="evo-state">EJ STARTAD</span>
+
+<section class="evo life-lab" id="emergence">
+ <div class="life-head">
+  <div><div class="life-kicker">KOSMOSSCAN / LIFE ENGINE V5 · AUTONOM BIOLOGI OCH KULTUR</div>
+   <h2>Från en cell till en civilisation.</h2>
+   <p>En självutvecklande digital värld där individer får egna kroppar, nervnät, erfarenheter och kulturella traditioner. De kan hitta lösningar, lära av varandra, utveckla verktyg och bilda bosättningar. Vad som faktiskt uppstår beror på simuleringens händelser.</p></div>
+  <span id="life-status" class="life-status">EJ STARTAD</span>
+ </div>
+ <div class="life-world">
+  <canvas id="life-stage" aria-label="Värld med individuellt simulerade organismer i biologisk och kulturell evolution"></canvas>
+  <div class="life-overlay"><span>✦ ORGANISMER</span><span>BERÄKNINGAR I BAKGRUNDSTRÅD</span></div>
+  <div class="life-worldnote">Tryck på världen för att tillföra näring.</div>
+ </div>
+ <div class="life-actions">
+  <button id="life-start" type="button" class="life-start">✦ SKAPA OCH VÄCK LIV</button>
+  <button id="life-pause" type="button" class="life-pause" disabled>⏸ PAUSA</button>
+  <span>Inga förutbestämda civilisationer · ny slump varje gång</span>
+ </div>
+ <div class="life-stagearea">
+  <div class="life-stagehead"><div>
+    <small>UPPNÅDD UTVECKLINGSNIVÅ</small>
+    <h3 id="life-era">URSPRUNG · Encelligt liv</h3>
+    <p id="life-era-desc">Enkla autonoma celler förbrukar energi och navigerar.</p>
+   </div><div class="life-progressfact"><strong id="life-tick">0</strong><span>avslutade ekosystemsteg</span></div></div>
+  <div class="life-timeline">
+   <div id="life-stage-0" class="life-step done current"><b>01</b><span>Encelligt</span><small class="stage-state">UPPNÅTT</small></div>
+   <div id="life-stage-1" class="life-step"><b>02</b><span>Flercellighet</span><small class="stage-state">INTE UPPNÅTT</small></div>
+   <div id="life-stage-2" class="life-step"><b>03</b><span>Kultur</span><small class="stage-state">INTE UPPNÅTT</small></div>
+   <div id="life-stage-3" class="life-step"><b>04</b><span>Bosättningar</span><small class="stage-state">INTE UPPNÅTT</small></div>
+   <div id="life-stage-4" class="life-step"><b>05</b><span>Tekniska samhällen</span><small class="stage-state">INTE UPPNÅTT</small></div>
+   <div id="life-stage-5" class="life-step"><b>06</b><span>Civilisation</span><small class="stage-state">INTE UPPNÅTT</small></div>
   </div>
-  <div class="evo-stage"><canvas id="evo-canvas" aria-label="Levande datorsimulering med kemiska mönster och digitala organismer"></canvas>
-    <div class="evo-overlay"><span id="evo-clock">TICK 000000</span><span id="evo-seed">FRÖ: —</span></div>
-    <div class="evo-corner" id="evo-tip">Tryck STARTA för att väcka världen</div>
-  </div>
-  <div class="evo-actions"><button type="button" class="evo-primary" id="evo-start">✦ STARTA DET OKÄNDA</button><button type="button" class="evo-secondary" id="evo-pause" disabled>⏸ PAUSA</button><span class="evo-what">Inga inställningar · nya resultat varje gång</span></div>
-  <div class="evo-metrics" aria-live="off">
-    <div class="evo-metric"><b id="evo-pop">0</b><span>Unika levande individer</span></div>
-    <div class="evo-metric"><b id="evo-gen">0</b><span>Högsta generation</span></div>
-    <div class="evo-metric"><b id="evo-births">0</b><span>Födslar / mutationer</span></div>
-    <div class="evo-metric"><b id="evo-structures">0</b><span>Max neuroner / nya noder</span></div>
-    <div class="evo-metric"><b id="evo-active">0</b><span>Egna individuella nervnät</span></div>
-    <div class="evo-metric"><b id="evo-progress">0 / 0</b><span>Behandlade denna cykel</span></div>
-    <div class="evo-metric"><b id="evo-learning">0</b><span>Synapsjusteringar (försök)</span></div>
-    <div class="evo-metric"><b id="evo-rate">0 /s</b><span>Födslar/s · mål 100/s</span></div>
-    <div class="evo-metric"><b id="evo-morph">0</b><span>Ärftliga utseendetyper</span></div>
-    <div class="evo-metric"><b id="evo-mchanges">0</b><span>Mutationer i utseendet</span></div>
-  </div>
-  <div class="evo-specimen-panel">
-    <div><b>🧬 Evolutionens skyltfönster</b><small>Jämför urformen med senare generationer och nya mutationer. Kroppsform, färg och utskott är ärftliga.</small><span id="evo-specimen-label">Ingen individ vald</span></div>
-    <canvas id="evo-specimen" aria-label="Förstorad organism som visar ärftliga utseendeförändringar"></canvas>
-  </div>
-  <div class="evo-bottom"><p class="evo-summary" id="evo-summary"><strong>Vad kan hända?</strong> Kemiska mönster kan bilda öar, ringar eller trådar. Ingen organism dör. Nya individer föds ständigt och alla behåller sin egen arvsmassa och sitt eget nervnät. Utfallet räknas fram i realtid.</p>
-    <div class="evo-events" id="evo-events" role="log" aria-label="Verkliga händelser i simuleringen"><div>Laboratoriet väntar på start.</div></div></div>
-  <div class="evo-disclaimer"><b>DETTA ÄR ETT DIGITALT EXPERIMENT.</b> Alla individer har egna tillstånd och uppdateras i varje fullständig simuleringscykel; ingen arkiveras eller raderas. Vid många individer tar en cykel längre tid, och bildens punkter förenklas till en densitetskarta eftersom skärmen har begränsat antal pixlar. Inget garanterar framväxande intelligens. Målet är 100 födslar per sekund medan sidan är aktiv, men verklig takt kan sjunka om telefonens processor eller minne blir överbelastat. Inget system kan lova obegränsad tillväxt med konstant beräkningshastighet på en mobil. Existerande organismer eller framsteg sparas inte automatiskt om sidan stängs.</div>
+ </div>
+ <div class="life-metrics">
+  <div class="life-metric"><b id="life-pop">0</b><span>Individuellt simulerade</span></div>
+  <div class="life-metric"><b id="life-rate">—</b><span>Födslar/s · mål 100</span></div>
+  <div class="life-metric"><b id="life-gen">0</b><span>Generationer</span></div>
+  <div class="life-metric"><b id="life-cells">1</b><span>Max celler i kroppen</span></div>
+  <div class="life-metric"><b id="life-brain">3</b><span>Max neuroner</span></div>
+  <div class="life-metric"><b id="life-species">0</b><span>Ärftliga utseenden</span></div>
+  <div class="life-metric"><b id="life-culture">0</b><span>Delade lärdomar</span></div>
+  <div class="life-metric"><b id="life-innovations">0</b><span>Upptäckter</span></div>
+  <div class="life-metric"><b id="life-sites">0</b><span>Bosättningar</span></div>
+  <div class="life-metric"><b id="life-mutants">0</b><span>Kroppsmutationer</span></div>
+  <div class="life-metric"><b id="life-work">0 / 0</b><span>Uppdaterade detta steg</span></div>
+ </div>
+ <div class="life-complexity" id="life-complexity">Ø 1,0 celler · Ø 3,0 neuroner</div>
+ <div class="life-gallerypanel">
+  <div class="life-galleryhead"><b>🧬 EVOLUTION UNDER MIKROSKOPET</b><span>Jämför individuella kroppar i olika generationer.</span></div>
+  <canvas id="life-gallery" aria-label="Fyra detaljerade kroppar med olika biologiska och kulturella egenskaper"></canvas>
+ </div>
+ <div class="life-logpanel"><b>HÄNDELSER I VÄRLDEN</b><div id="life-log" role="log" aria-live="off"><div class="life-logitem">Väntar på att den första organismen ska födas.</div></div></div>
+ <div class="life-conditions"><b>VAD ÄR VERKLIGT HÄR?</b> Livsalgoritmen är en konstgjord simulering, inte ett experiment som bevisar att liv eller civilisation måste uppstå som på jorden. Nya nivåer markeras bara om organismerna uppfyller konkreta biologiska och sociala villkor. Alla har egna tillstånd och uppdateras under varje fullständigt simuleringssteg. Födslar följer verklig tid och beror inte på när ett sådant steg blir klart. Med en obegränsat växande population går det inte att garantera konstant beräkningshastighet eller minnesanvändning på en telefon.</div>
 </section>
 <footer class="foot"><b>ÄRLIG VETENSKAPLIG BEGRÄNSNING</b> · Ingen webbsida kan skanna hela universum direkt. Detta är en automatiserad sökning genom ett litet, observerat urval av universum: kända exoplaneter. Grafiken är dekorativ och representerar inte stjärnornas verkliga positioner. Resultatet visar inga oupptäckta radiosignaler.<div class="barlink"><a href="https://exoplanetarchive.ipac.caltech.edu/docs/TAP/usingTAP.html" target="_blank" rel="noopener">NASA Exoplanet Archive / API ↗</a><a href="https://github.com/Paosososo/beyond-earth" target="_blank" rel="noopener">Katalogspegel (3 nov 2026) ↗</a><a href="https://seti.berkeley.edu/opendata" target="_blank" rel="noopener">SETI rådata ↗</a></div></footer></div>
 <script>
@@ -92,395 +186,6 @@ function resize(){const b=canvas.getBoundingClientRect();dpr=Math.min(2,window.d
 function draw(time){if(!W||!H||!starVisible||time-lastStarDraw<55){requestAnimationFrame(draw);return;}lastStarDraw=time;ctx.clearRect(0,0,W,H);for(const s of stars){let a=.1+.42*(.5+.5*Math.sin(time/1900+s.tw));ctx.fillStyle='rgba(174,211,255,'+a+')';ctx.beginPath();ctx.arc(s.x,s.y,s.s,0,7);ctx.fill();}const cx=W/2,cy=H/2;for(let j=0;j<highlighted.length;j++){let h=highlighted[j],a=rand(h.i*7)*6.283,r=(.12+rand(h.i*11)*.35)*Math.min(W,H);const x=cx+Math.cos(a)*r,y=cy+Math.sin(a)*r;const p=.52+.48*Math.sin(time/780+j);ctx.beginPath();ctx.fillStyle='rgba(89,243,212,'+(.38+.38*p)+')';ctx.arc(x,y,1.5+2*p,0,7);ctx.fill();}requestAnimationFrame(draw);}
 addEventListener('resize',resize,{passive:true});resize();requestAnimationFrame(draw);
 
-/* COSMOS EMERGENCE ENGINE — real stochastic evolutionary ecology + Gray–Scott chemistry.
-   Coupled nonlinear reaction–diffusion, replenishable nutrients, two chemotactic signal
-   channels, recurrent adaptive controllers, mutation/selection and local fitness feedback.
-   Simulated biology, not evidence of alien intelligence. Standalone, no dependencies. */
-(function(){
-'use strict';
-const by=id=>document.getElementById(id);
-const canvas=by('evo-canvas');if(!canvas)return;
-const display=canvas.getContext('2d',{alpha:false});
-if(!display){by('evo-state').textContent='KAN INTE VISA CANVAS';return;}
-const GW=162,GH=94,N=GW*GH,PI=Math.PI,TAU=PI*2;
-const PATCH_SIZE=9,PATCH_COLS=Math.ceil(GW/PATCH_SIZE),PATCH_ROWS=Math.ceil(GH/PATCH_SIZE);
-const INITIAL_POP=125, MAX_BRAIN=40, TARGET_BIRTHS_PER_SECOND=100;
-// Real-time births are independent of completion time for full ecological ticks.
-// Each organism retains a distinct genome, neural network, memory and phenotype.
-const patchFor=(x,y)=>Math.floor(y/PATCH_SIZE)*PATCH_COLS+Math.floor(x/PATCH_SIZE);
-const off=document.createElement('canvas');off.width=GW;off.height=GH;
-const oc=off.getContext('2d');const frame=oc.createImageData(GW,GH),rgba=frame.data;
-let u,v,nu,nv,resource,signalA,signalB,nsA,nsB,agents=[],rng,seed=0,clock=0,drawFrames=0,mutations=0,births=0,hiGen=0;
-let maxNodes=0, innovations=0, learningUpdates=0, environmentShifts=0, cycle=null, lastProcessed=0;
-let birthAccumulator=0, lastWall=0, lastUi=0, lastPaint=0, birthRateMeasured=0, birthWindowMs=0, birthWindowCount=0;
-let nextOrganismId=1, morphChanges=0, showcased=null, originSpecimen=null, newMutation=null, phenotypeTypes=new Set(), completedTicks=0, lastShowcase=0;
-let active=false,paused=false,last=0,raf=0,cssW=1,cssH=1,pixel=1,lastStats=0,lastEvent=0;
-const now=()=>typeof performance!=='undefined'?performance.now():Date.now();
-function rand(){let x=rng|0;x^=x<<13;x^=x>>>17;x^=x<<5;rng=x|0;return (x>>>0)/4294967296;}
-function between(a,b){return a+(b-a)*rand();}
-function bound(x,a,b){return x<a?a:(x>b?b:x);}
-function cell(x,y){let a=((x|0)%GW+GW)%GW,b=((y|0)%GH+GH)%GH;return b*GW+a;}
-function bump(arr,x,y,amount,radius){let cx=x|0,cy=y|0,r=radius|0;for(let oy=-r;oy<=r;oy++)for(let ox=-r;ox<=r;ox++){const d=ox*ox+oy*oy;if(d>r*r)continue;const z=cell(cx+ox,cy+oy);arr[z]=bound(arr[z]+amount*(1-d/(r*r+1)),0,1);}}
-function addEvent(t){const e=by('evo-events');const item=document.createElement('div');item.textContent='['+String(clock).padStart(5,'0')+'] '+t;e.prepend(item);while(e.children.length>6)e.lastChild.remove();}
-function newGenome(base){
- if(!base)return [between(.2,1.6),between(-.9,1.4),between(3,12),between(.16,.55),between(.0025,.005),between(1.0,1.65),between(.46,1.1),between(-1,1),between(.02,.26),between(.5,1.4)];
- const g=base.slice();for(let k=0;k<g.length;k++)if(rand()<.24){const scale=[.25,.22,2.2,.09,.0007,.17,.14,.28,.07,.18][k];g[k]+=between(-scale,scale);mutations++;}
- return [bound(g[0],-.8,2.5),bound(g[1],-2,2.5),bound(g[2],2,16),bound(g[3],.07,.86),bound(g[4],.001,.009),bound(g[5],.85,2.5),bound(g[6],.18,1.5),bound(g[7],-1.5,1.5),bound(g[8],.005,.65),bound(g[9],.2,1.8)];
-}
-/* Evolving recurrent microcontrollers, with hereditary weights and within-lifetime plasticity.
-   A larger network means greater representational complexity; it does NOT prove intelligence. */
-function brainNode(){return{w:Array.from({length:10},()=>between(-.75,.75)),b:between(-.25,.25)};}
-function brainCopy(parent){
- if(!parent)return Array.from({length:3+((rand()*3)|0)},brainNode);
- const next=parent.map(node=>({w:node.w.map(w=>rand()<.11?bound(w+between(-.19,.19),-3,3):w),b:rand()<.18?bound(node.b+between(-.18,.18),-2,2):node.b}));
- if(next.length<MAX_BRAIN&&rand()<.32){next.push(brainNode());innovations++;mutations++;}
- return next;
-}
-// Observable inherited morphology. Changes affect body shape, appendages, pigmentation,
- // sensory antennae and decorative structures. These are simulation phenotypes.
-function makeMorph(parent){
- let m=parent?parent.slice():[rand()*360,(rand()*6)|0,between(.1,1),between(.2,1),between(.1,1),between(.1,1),between(.1,1)];
- if(parent){
-  if(rand()<.28){m[0]=(m[0]+between(-58,58)+360)%360;morphChanges++;}
-  if(rand()<.18){m[1]=(m[1]+1+((rand()*5)|0))%6;morphChanges++;}
-  for(let k=2;k<7;k++)if(rand()<.25){m[k]=bound(m[k]+between(-.31,.31),0,1);morphChanges++;}
- }
- return m;
-}
-function morphColor(m){return 'hsl('+Math.round(m[0])+',90%,69%)';}
-function morphType(m){return (m[1]|0)+'-'+Math.floor(m[0]/12)+'-'+Math.floor(m[3]*4)+'-'+Math.floor(m[4]*4)+'-'+Math.floor(m[5]*4);}
-function organism(x,y,genome,gen,energy,brain,morph){
- const b=brain||brainCopy();maxNodes=Math.max(maxNodes,b.length);
- const body=morph||makeMorph();phenotypeTypes.add(morphType(body));
- const organismData={x,y,h:between(0,TAU),energy,age:0,gen,g:genome,m:0,n:0,line:Math.floor((genome[7]+1.6)*43)%360,
- brain:b,states:new Float32Array(b.length),rewardAvg:0,lastTake:0,
- id:nextOrganismId++,morph:body,tint:body[0],visual:morphColor(body),fitness:0};
- return organismData;
-}
-function neuralResponse(a,front,left,right,here,food){
- const inputs=[front,left,right,resource[here],v[here],signalA[here]-signalB[here],a.m,a.n];
- const reward=bound((food-a.lastTake)*70,-1,1);a.lastTake=food;a.rewardAvg=a.rewardAvg*.98+food*.02;
- let out=0,prev=0;
- for(let j=0;j<a.brain.length;j++){
-  const n=a.brain[j];let z=n.b+n.w[8]*a.states[j]+n.w[9]*prev;
-  for(let k=0;k<8;k++)z+=n.w[k]*inputs[k];
-  const val=Math.tanh(z);a.states[j]=a.states[j]*.72+val*.28;
-  prev=a.states[j];out+=(j%2?1:-1)*prev;
-  if((clock+j)%4===0){
-   // Experience-dependent synaptic adjustment; not a preprogrammed goal of intelligence.
-   n.w[6]=bound(n.w[6]+.0008*reward*a.m*val,-3,3);
-   n.w[7]=bound(n.w[7]+.0008*reward*a.n*val,-3,3);
-   learningUpdates+=2;
-  }
- }
- return Math.tanh(out/Math.sqrt(a.brain.length));
-}
-function registerChild(parent,batch=null,forced=false){
- const child=organism((parent.x+between(-3,3)+GW)%GW,(parent.y+between(-3,3)+GH)%GH,
- newGenome(parent.g),parent.gen+1,forced?.75:parent.energy*.35,brainCopy(parent.brain),makeMorph(parent.morph));
- if(batch)batch.push(child);else agents.push(child);
- births++;birthWindowCount++;
- if(!showcased||child.gen>showcased.gen||(child.gen===showcased.gen&&child.id%29===0))showcased=child;
- if(morphType(child.morph)!==morphType(parent.morph))newMutation=child;
- if(child.gen>hiGen){hiGen=child.gen;if(hiGen<=5||hiGen%5===0)addEvent('Ny generation '+hiGen+' har uppstått');}
-}
-function reset(){
- seed=((typeof crypto!=='undefined'&&crypto.getRandomValues)?crypto.getRandomValues(new Uint32Array(1))[0]:(Date.now()^(Math.random()*4294967296)))>>>0;
- rng=seed||0x9E3779B9;clock=0;drawFrames=0;mutations=0;births=0;hiGen=0;lastEvent=0;lastStats=0;maxNodes=0;innovations=0;learningUpdates=0;environmentShifts=0;cycle=null;lastProcessed=0;
- birthAccumulator=0;lastWall=0;lastUi=0;lastPaint=0;birthRateMeasured=0;birthWindowMs=0;birthWindowCount=0;nextOrganismId=1;morphChanges=0;phenotypeTypes.clear();showcased=null;originSpecimen=null;newMutation=null;completedTicks=0;lastShowcase=0;
- u=new Float32Array(N);v=new Float32Array(N);nu=new Float32Array(N);nv=new Float32Array(N);
- resource=new Float32Array(N);signalA=new Float32Array(N);signalB=new Float32Array(N);nsA=new Float32Array(N);nsB=new Float32Array(N);
- for(let y=0;y<GH;y++)for(let x=0;x<GW;x++){const i=y*GW+x;u[i]=1;resource[i]=between(.18,.55);}
- for(let j=0;j<22;j++){const x=between(5,GW-5),y=between(5,GH-5);bump(v,x,y,between(.5,.95),between(2,7)|0);bump(resource,x,y,.4,8);}
- agents=Array.from({length:INITIAL_POP},()=>organism(between(1,GW-1),between(1,GH-1),newGenome(),0,between(.8,1.1)));
- showcased=agents[0];originSpecimen=agents[0];newMutation=agents[0];
- by('evo-seed').textContent='FRÖ: '+seed.toString(16).toUpperCase().padStart(8,'0');
- by('evo-start').textContent='↻ NYTT UNIVERSUM';by('evo-pause').disabled=false;by('evo-pause').textContent='⏸ PAUSA';
- by('evo-state').textContent='UTVECKLING PÅGÅR';by('evo-state').classList.add('live');
- by('evo-tip').textContent='Kroppsform och färg är ärftliga · alla individer uppdateras';
- by('evo-events').innerHTML='';addEvent('125 organismer skapade · inga dödsregler');
- by('evo-summary').innerHTML='<strong>100 födslar per aktiv sekund (mål).</strong> Födslarna följer riktig tid i stället för beräkningscykeln. Varje individ behåller egen hjärna och kropp. När populationen växer tar en fullständig uppdatering längre tid.';
- active=true;paused=false;last=0;paint();stats();drawSpecimen();
-}
-function chemistry(){
- // 2D Gray–Scott reaction–diffusion with periodic boundaries; two integration substeps.
- for(let sub=0;sub<2;sub++){
- for(let y=0;y<GH;y++){
- const up=(y===0?GH-1:y-1)*GW,down=(y===GH-1?0:y+1)*GW,row=y*GW;
- for(let x=0;x<GW;x++){
- const i=row+x,l=row+(x===0?GW-1:x-1),r=row+(x===GW-1?0:x+1),a=up+x,b=down+x;
- const A=u[i],B=v[i],reaction=A*B*B;
- const lapA=.2*(u[l]+u[r]+u[a]+u[b]-4*A);
- const lapB=.2*(v[l]+v[r]+v[a]+v[b]-4*B);
- const feed=.0322+.005*Math.sin(x*.037+seed*.000001)*Math.cos(y*.061);
- const kill=.0598+.0015*Math.sin(y*.055);
- nu[i]=bound(A+(lapA-reaction+feed*(1-A))*.87,0,1);
- nv[i]=bound(B+(.54*lapB+reaction-(feed+kill)*B)*.87,0,1);
- }
- }
- let t=u;u=nu;nu=t;t=v;v=nv;nv=t;
- }
- // Nutrient replenishment, chemotactic signal diffusion + evaporation.
- // Chunk chemistry and signalling on alternating steps to keep iPhone efficient.
- if((clock&1)===0){
- for(let y=0;y<GH;y++){const up=(y===0?GH-1:y-1)*GW,down=(y===GH-1?0:y+1)*GW,row=y*GW;
- for(let x=0;x<GW;x++){const i=row+x,l=row+(x===0?GW-1:x-1),r=row+(x===GW-1?0:x+1);
- resource[i]=bound(resource[i]+.0012*(.66-resource[i])+.0008*v[i],0,1);
- nsA[i]=Math.max(0,(signalA[i]*.92+(signalA[l]+signalA[r]+signalA[up+x]+signalA[down+x])*.015)*.985);
- nsB[i]=Math.max(0,(signalB[i]*.92+(signalB[l]+signalB[r]+signalB[up+x]+signalB[down+x])*.015)*.985);
- }}let t=signalA;signalA=nsA;nsA=t;t=signalB;signalB=nsB;nsB=t;
- }
-}
-function sense(a,angle){
- const d=a.g[2],x=a.x+Math.cos(a.h+angle)*d,y=a.y+Math.sin(a.h+angle)*d,i=cell(x,y);
- return resource[i]*a.g[0]+v[i]*.4+(signalA[i]-signalB[i])*a.g[1]+.08*Math.sin(.09*x+.05*y+clock*.012);
-}
-function evolution(){
- if(!cycle){
-  const density=new Uint32Array(PATCH_COLS*PATCH_ROWS);
-  for(const a of agents)density[patchFor(a.x,a.y)]++;
-  cycle={density,cursor:0,total:agents.length,newborn:[]};
- }
- const density=cycle.density,newborn=cycle.newborn;
- let processed=0,deadline=now()+8;
- while(cycle.cursor<cycle.total){
-  const a=agents[cycle.cursor++];
-  const g=a.g;
-  const front=sense(a,0),left=sense(a,-.64),right=sense(a,.64);
-  const bias=(right-left)*g[3]+(right+left-2*front)*.11;
-  a.m=a.m*.83+bias*.17;a.n=a.n*.74+(.5-front)*.26;
-  const position=cell(a.x,a.y);
-  const choice=neuralResponse(a,front,left,right,position,resource[position]*.012);
-  a.h+=(Math.tanh(a.m*2.7+a.n*g[7]*.12)+between(-g[8],g[8])+choice*.82)*g[3];
-  a.x=(a.x+Math.cos(a.h)*g[6]+GW)%GW;
-  a.y=(a.y+Math.sin(a.h)*g[6]+GH)%GH;
-  const i=cell(a.x,a.y),take=Math.min(resource[i],.014*g[9]);resource[i]-=take;
-  const near=Math.max(0,density[patchFor(a.x,a.y)]-1);
-  a.energy=bound(a.energy+take*.76-g[4]-.0001*g[6]-.00042*near+.002,0,3.8);
-  a.fitness=a.fitness*.98+take*.02;
-  a.age++;
-  if(g[7]>0)signalA[i]=bound(signalA[i]+.028*g[7],0,1);
-  else signalB[i]=bound(signalB[i]+.028*(-g[7]),0,1);
-  if(a.age%37===0)v[i]=bound(v[i]+.015,0,1);
-  if(a.age%240===0&&a.brain.length<MAX_BRAIN&&rand()<.24){
-   a.brain.push(brainNode());const state=new Float32Array(a.brain.length);state.set(a.states);a.states=state;
-   maxNodes=Math.max(maxNodes,a.brain.length);innovations++;mutations++;
-  }
-  // Natural fitness influences parents chosen for the separate wall-clock birth scheduler.
-  // Individual neural updates remain independent from population birth rate.
-  // A cycle is not complete until each real organism has received one update.
-  if(((++processed)&127)===0&&now()>=deadline)break;
- }
- // Progress is shown by the UI timer to avoid DOM updates on every CPU slice.
- if(cycle.cursor<cycle.total)return false;
- lastProcessed=cycle.total;completedTicks++;
- for(const child of newborn)agents.push(child);
- // Births are scheduled independently by wall-clock timing in the animation driver.
- // Nonstationary resource patches generate new situations for inherited controllers.
- if(clock%500===0){
-  const x=between(10,GW-10),y=between(10,GH-10);bump(resource,x,y,.8,12);bump(v,x,y,.2,5);
-  environmentShifts++;addEvent('Miljön förändrades: nya näringsområden ('+environmentShifts+')');
- }
- cycle=null;
- return true;
-}
-function structuralIndex(){
- // Spatial chemical gradients, deliberately not a proxy for intelligence.
- let gradients=0;
- for(let y=0;y<GH;y+=3)for(let x=0;x<GW;x+=3){const i=y*GW+x,ri=y*GW+(x+1)%GW,di=((y+1)%GH)*GW+x;gradients+=Math.abs(v[i]-v[ri])+Math.abs(v[i]-v[di])+.45*(Math.abs(signalA[i]-signalA[ri])+Math.abs(signalB[i]-signalB[di]));}
- return Math.min(100,gradients/(Math.ceil(GW/3)*Math.ceil(GH/3))*590);
-}
-function stats(){
- const total=agents.length;
- by('evo-pop').textContent=total.toLocaleString('sv-SE');
- by('evo-gen').textContent=String(hiGen);
- by('evo-births').textContent=births.toLocaleString('sv-SE')+' / '+mutations.toLocaleString('sv-SE');
- by('evo-structures').textContent=maxNodes+' / '+innovations.toLocaleString('sv-SE');
- by('evo-learning').textContent=learningUpdates.toLocaleString('sv-SE');
- by('evo-rate').textContent=Math.round(birthRateMeasured).toLocaleString('sv-SE')+' /s';
- by('evo-morph').textContent=phenotypeTypes.size.toLocaleString('sv-SE');
- by('evo-mchanges').textContent=morphChanges.toLocaleString('sv-SE');
- by('evo-active').textContent=total.toLocaleString('sv-SE');
- by('evo-progress').textContent=(cycle?cycle.cursor:lastProcessed).toLocaleString('sv-SE')+' / '+(cycle?cycle.total:lastProcessed).toLocaleString('sv-SE');
- by('evo-clock').textContent='TICK '+String(clock).padStart(6,'0');
- if(clock>0&&clock%450===0)addEvent(total.toLocaleString('sv-SE')+' individuellt simulerade · inga dödsfall');
- if(clock>0&&clock%500===0&&!cycle)
-  by('evo-summary').innerHTML='<strong>Observation:</strong> '+total.toLocaleString('sv-SE')+' individuella organismer. Ärvda kroppstyper: '+phenotypeTypes.size+'. Förändringar i kroppsgener: '+morphChanges+'. Nätens utveckling är en möjlighet till komplexare beteenden, inte bevis på intelligens.';
-}
-function paint(){
- const cc=rgba;
- for(let i=0;i<N;i++){
-  const B=Math.min(1,v[i]*4.1),A=Math.min(1,signalA[i]*1.55),C=Math.min(1,signalB[i]*1.55),R=resource[i],q=i<<2;
-  cc[q]=Math.min(255,4+R*10+B*34+A*24+C*185);
-  cc[q+1]=Math.min(255,11+R*24+B*217+A*190+C*55);
-  cc[q+2]=Math.min(255,27+R*44+B*155+A*140+C*155);
-  cc[q+3]=255;
- }
- oc.putImageData(frame,0,0);
- display.setTransform(pixel,0,0,pixel,0,0);
- display.imageSmoothingEnabled=true;
- display.drawImage(off,0,0,cssW,cssH);
- display.save();display.globalCompositeOperation='lighter';
- // Every agent gets drawn. No visual or simulation sampling by population count.
- const sx=cssW/GW,sy=cssH/GH;
- const scale=Math.min(1.55,Math.max(.08,Math.sqrt(480/agents.length)));
- const baseRadius=Math.max(.17,2.7*scale);
- for(let k=0;k<agents.length;k++){
-  const a=agents[k],m=a.morph,x=a.x*sx,y=a.y*sy;
-  const size=baseRadius*(.75+m[3]*.75),shape=m[1]|0;
-  display.fillStyle=a.visual;
-  if(scale<.45){
-   // Smaller dots, not fewer agents; minimum is a subpixel-sized rectangle.
-   display.fillRect(x-size*.5,y-size*.5,size,size);
-   continue;
-  }
-  display.save();
-  display.translate(x,y);display.rotate(a.h);
-  if(shape===0){display.beginPath();display.arc(0,0,size,0,TAU);display.fill();}
-  else if(shape===1){
-   display.beginPath();display.moveTo(size*1.6,0);display.lineTo(-size,-size*.88);
-   display.lineTo(-size*.54,0);display.lineTo(-size,size*.88);display.closePath();display.fill();
-  }else if(shape===2){
-   display.beginPath();display.ellipse(0,0,size*1.6,size*.65,0,0,TAU);display.fill();
-  }else if(shape===3){
-   display.fillRect(-size,-size*.65,size*2,size*1.3);
-  }else if(shape===4){
-   display.beginPath();
-   for(let i=0;i<10;i++){
-    const a1=i*TAU/10,r=(i&1)?size*.67:size*(1.3+m[2]*.7);
-    const xp=Math.cos(a1)*r,yp=Math.sin(a1)*r;
-    if(i===0)display.moveTo(xp,yp);else display.lineTo(xp,yp);
-   }display.closePath();display.fill();
-  }else{
-   display.beginPath();display.moveTo(-size*1.5,-size);
-   display.lineTo(size*1.1,0);display.lineTo(-size*1.5,size);
-   display.lineTo(-size*.3,0);display.closePath();display.fill();
-  }
-  if(scale>.48){
-   display.strokeStyle=a.visual;display.lineWidth=Math.max(.3,scale*.75);
-   if(m[4]>.26){
-    display.beginPath();display.moveTo(-size,0);
-    display.lineTo(-size*(1.4+m[4]*1.8),m[6]*size*1.3);display.stroke();
-   }
-   if(m[5]>.42){
-    display.beginPath();display.moveTo(size*.35,0);
-    display.lineTo(size*(1.2+m[5]),-size*(.8+m[2]));
-    display.moveTo(size*.35,0);display.lineTo(size*(1.2+m[5]),size*(.8+m[2]));
-    display.stroke();
-   }
-  }
-  display.restore();
- }
- display.restore();
-}
-function drawSpecimen(){
- const c=by('evo-specimen'),d=c.getContext('2d');if(!d)return;
- const rect=c.getBoundingClientRect(),w=Math.max(1,rect.width),h=Math.max(1,rect.height);
- const res=Math.min(window.devicePixelRatio||1,1.6);
- if(c.width!==Math.round(w*res)||c.height!==Math.round(h*res)){c.width=Math.round(w*res);c.height=Math.round(h*res);}
- d.setTransform(res,0,0,res,0,0);d.clearRect(0,0,w,h);
- const specimens=[originSpecimen,showcased,newMutation];
- const captions=['URSPRUNG','SENASTE GENERATION','NY KROPPSMUTATION'];
- for(let index=0;index<3;index++){
-  const a=specimens[index]||agents[0];if(!a)continue;
-  const m=a.morph,shape=m[1]|0,color=a.visual;
-  const centerX=w*(index+.5)/3,centerY=h*.49,size=Math.min(w/22,h/5);
-  if(index){
-   d.beginPath();d.moveTo(w*index/3,8);d.lineTo(w*index/3,h-8);
-   d.strokeStyle='#24475c';d.lineWidth=1;d.stroke();
-  }
-  d.textAlign='center';d.font='9px ui-monospace,monospace';
-  d.fillStyle='#97b5c8';d.fillText(captions[index],centerX,17);
-  d.save();d.translate(centerX,centerY);d.rotate(-.16);
-  d.shadowColor=color;d.shadowBlur=14;d.fillStyle=color;d.beginPath();
-  if(shape===0)d.arc(0,0,size,0,TAU);
-  else if(shape===1){d.moveTo(size*1.55,0);d.lineTo(-size,-size*.8);d.lineTo(-size*.4,0);d.lineTo(-size,size*.8);}
-  else if(shape===2)d.ellipse(0,0,size*1.5,size*.68,0,0,TAU);
-  else if(shape===3)d.rect(-size,-size*.7,size*2,size*1.4);
-  else if(shape===4){for(let j=0;j<12;j++){const ang=j*TAU/12,rr=j%2?size*.62:size*(1.1+m[2]*.75);if(j===0)d.moveTo(rr,0);else d.lineTo(Math.cos(ang)*rr,Math.sin(ang)*rr);}}
-  else{d.moveTo(-size*1.5,-size);d.lineTo(size*1.3,0);d.lineTo(-size*1.5,size);d.lineTo(-size*.5,0);}
-  d.closePath();d.fill();
-  d.shadowBlur=0;d.strokeStyle=color;d.lineWidth=1.8;
-  for(let j=0;j<Math.round(m[5]*5);j++){
-   const dir=j%2?1:-1;d.beginPath();d.moveTo(size*.25,dir*size*.3);
-   d.lineTo(size*(1.3+m[5]),dir*size*(.6+(j/3)*m[2]));d.stroke();
-  }
-  if(m[4]>.2){d.beginPath();d.moveTo(-size,0);d.lineTo(-size*(1+m[4]*2),size*m[6]);d.stroke();}
-  d.restore();
-  d.font='10px ui-monospace,monospace';d.fillStyle='#b4e8f1';
-  d.fillText('GEN '+a.gen+' • FORM '+(shape+1),centerX,h-10);
- }
- const a=showcased||agents[0];
- if(a)by('evo-specimen-label').textContent='Från generation 0 till '+a.gen+' · '+phenotypeTypes.size+' ärftliga utseendetyper hittills';
-}
-function resize(){
- const box=canvas.getBoundingClientRect();cssW=Math.max(1,box.width);cssH=Math.max(1,box.height);
- pixel=Math.min(window.devicePixelRatio||1,1.65);
- canvas.width=Math.floor(cssW*pixel);canvas.height=Math.floor(cssH*pixel);
- display.setTransform(pixel,0,0,pixel,0,0);
- paintBlank();
-}
-function paintBlank(){
- display.fillStyle='#06131f';display.fillRect(0,0,cssW,cssH);
- const gl=display.createRadialGradient(cssW*.5,cssH*.5,2,cssW*.5,cssH*.5,cssW*.55);
- gl.addColorStop(0,'rgba(51,131,160,.17)');gl.addColorStop(1,'rgba(1,5,16,0)');
- display.fillStyle=gl;display.fillRect(0,0,cssW,cssH);
- display.fillStyle='#7795aa';display.font='12px system-ui';display.textAlign='center';
- display.fillText('Världen väntar på sitt första ögonblick',cssW/2,cssH/2);
-}
-function chooseParent(){
- let best=null;
- for(let j=0;j<6;j++){
-  const a=agents[(rand()*agents.length)|0];
-  if(!best||(a.fitness*.7+a.energy*.1+a.gen*.004)>(best.fitness*.7+best.energy*.1+best.gen*.004))best=a;
- }
- return best;
-}
-function wallBirths(delta){
- birthAccumulator+=delta*TARGET_BIRTHS_PER_SECOND/1000;
- const count=Math.min(80,Math.floor(birthAccumulator));
- if(count>0){birthAccumulator-=count;for(let i=0;i<count;i++)registerChild(chooseParent(),null,true);}
- birthWindowMs+=delta;
- if(birthWindowMs>=1000){birthRateMeasured=birthWindowCount/(birthWindowMs/1000);birthWindowMs=0;birthWindowCount=0;}
-}
-function loop(ts){
- raf=requestAnimationFrame(loop);
- if(!active||paused||document.hidden){lastWall=0;return;}
- if(last&&ts-last<16)return;
- const delta=lastWall?Math.max(0,Math.min(1000,ts-lastWall)):16.67;
- last=ts;lastWall=ts;
- try{
-  // Spawn before CPU-bound simulation; birth cadence is tied to elapsed wall time.
-  wallBirths(delta);
-  if(!cycle){clock++;chemistry();}
-  const done=evolution();drawFrames++;
-  if(ts-lastUi>=180){stats();lastUi=ts;}
-  if(ts-lastPaint>=170){paint();lastPaint=ts;}
-  if(ts-lastShowcase>=2500){drawSpecimen();lastShowcase=ts;}
- }catch(err){
-  paused=true;by('evo-state').textContent='BERÄKNINGSFEL';by('evo-state').classList.remove('live');
-  addEvent('Fel: '+(err.message||'okänt'));by('evo-pause').textContent='▶ ÅTERUPPTA';
- }
-}
-by('evo-start').addEventListener('click',()=>{
- try{reset();}catch(err){by('evo-state').textContent='FEL VID START';addEvent('Fel: '+err.message);}
-});
-by('evo-pause').addEventListener('click',()=>{
- if(!active)return;paused=!paused;
- by('evo-pause').textContent=paused?'▶ FORTSÄTT':'⏸ PAUSA';
- lastWall=0;
- by('evo-state').textContent=paused?'PAUSAD':'UTVECKLING PÅGÅR';
- by('evo-state').classList.toggle('live',!paused);
- last=0;
-});
-canvas.addEventListener('pointerdown',event=>{
- if(!active||!resource)return;
- const b=canvas.getBoundingClientRect(),x=(event.clientX-b.left)/b.width*GW,y=(event.clientY-b.top)/b.height*GH;
- if(!Number.isFinite(x)||!Number.isFinite(y))return;
- bump(resource,x,y,.8,9);bump(v,x,y,.6,4);
- if(clock-lastEvent>25){addEvent('Extern energi tillförd vid ('+(x|0)+','+(y|0)+')');lastEvent=clock;}
-});
-addEventListener('resize',resize,{passive:true});
-resize();raf=requestAnimationFrame(loop);
-})();
-</script></body></html>
+</script>
+<script src="./life-ui.js" defer></script>
+</body></html>
