@@ -18,7 +18,7 @@ let nextAgent=new Int32Array(512);
 let birthCredit=0,cycle=null,step=0,last=0,lastFrame=0,lastStats=0,clock=0,paused=true,live=false,rate=0,rateBorn=0,lastRateAt=0;
 let teaching=0,skillsFound=0,transmissions=0,sentences=0,innovations=0,buildings=0,roadCount=0;
 let maxCells=1,maxBrain=3,maxGen=0,underlyingTicks=0,individualUpdates=0,updateWindow=0,updatesPerSecond=0;
-let maxRecords=1000; // persistent only for discoveries/messages; agent population has no hard cap.
+let socialSpeed=1, extraPlanetary=0;
 function rand(){let x=rng|0;x^=x<<13;x^=x>>>17;x^=x<<5;rng=x|0;return(x>>>0)/4294967296;}
 function between(a,b){return a+(b-a)*rand();}
 function pick(a){return a[(rand()*a.length)|0];}
@@ -85,7 +85,7 @@ function organism(parent=null,clan=null){
 }
 function setup(newSeed){
  rng=(newSeed||123456789)|0;seed=newSeed>>>0;id=0;step=0;clock=0;
- messages=[];inventions=[];milestones=[];flights=[];clans=[];cities=[];agents=[];
+ messages=[];inventions=[];milestones=[];flights=[];clans=[];cities=[];agents=[];socialSpeed=1;extraPlanetary=0;
  nextAgent=new Int32Array(512);occupancy.fill(-1);nutrition.fill(0);signal.fill(0);
  teaching=0;skillsFound=0;transmissions=0;sentences=0;innovations=0;buildings=0;roadCount=0;
  maxCells=1;maxBrain=3;maxGen=0;individualUpdates=0;updatesPerSecond=0;updateWindow=0;
@@ -210,7 +210,7 @@ function gainSkill(c,k){
 }
 function cityName(c){return c.name+'-'+pick(['ara','os','en','kal','ima','tor','esh']);}
 function foundCity(c){
- if(c.cities.length>=4)return;
+ if(c.cities.length>=2)return;
  if(c.tech[1]<.16||c.tech[3]<.16||c.resources.material<6)return;
  const position=c.cities.length?{
   x:mod(c.x+between(-22,22),W),y:mod(c.y+between(-18,18),H)
@@ -245,7 +245,7 @@ function compoundName(c,k1,k2,effect){
  return (a.slice(0,Math.min(4,a.length))+b.slice(0,Math.min(5,b.length))+'-'+e).toLowerCase();
 }
 function invent(c){
- if(!c.cities.length||c.inventions.length>=240)return;
+ if(!c.cities.length||c.inventions.length>=180||c.resources.material<2.8||c.resources.power<1.0)return;
  const known=[];
  // Technical building blocks arise from both material knowledge and cultural techniques.
  for(let i=0;i<COMPONENTS.length;i++){
@@ -255,26 +255,44 @@ function invent(c){
  if(known.length<2)return;
  let a=pick(known),b=pick(known),effect=(rand()*EFFECTS.length)|0;
  if(a===b)b=known[(known.indexOf(b)+1)%known.length];
+ // Complex effects have hard knowledge prerequisites; they are not conjured by random names.
+ if(effect===8&&c.tech[15]<.22)return;
+ if(effect===12&&c.tech[11]<.20)return;
+ if(effect===11&&c.tech[10]<.20)return;
+ if(effect===7&&c.tech[13]<.2)return;
  const fingerprint=[Math.min(a,b),Math.max(a,b),effect].join(':');
  if(c.inventions.some(id=>inventions[id-1]?.key===fingerprint))return;
  const parents=c.inventions.length>2&&rand()<.5?
    [pick(c.inventions),pick(c.inventions)]:[];
  const complexity=1+Math.floor(Math.log2(c.inventions.length+1))+(parents.length?1:0);
+ const experimentCost=1.1+complexity*.18;
+ if(c.resources.material<experimentCost||c.resources.power<.7+complexity*.08)return;
  const inv={id:inventions.length+1,key:fingerprint,clan:c.id,tick:step,
   name:compoundName(c,a,b,effect),parts:[COMPONENTS[a],COMPONENTS[b]],effect:EFFECTS[effect],
   complexity,parents,uses:0,detail:'Kombination av '+COMPONENTS[a]+' och '+COMPONENTS[b]+' för '+EFFECTS[effect]+'.',
   type:effect===8?'framdrift':effect===10?'koordination':'uppfinning'};
  inventions.push(inv);c.inventions.push(inv.id);innovations++;
+ c.resources.material-=experimentCost;c.resources.power-=.7+complexity*.08;
  const location=cities.find(city=>city.clan===c.id);
  if(location){location.inventions.push(inv.id);if(location.inventions.length>36)location.inventions.shift();}
  speech(c,'uppfinning',c.name+' skapade '+inv.name+' genom att kombinera '+inv.parts.join(' och ')+'.',
   [0,20,2,9,11],{invention:inv.id,city:location?.id||null});
  addEvent('invention',c.name+' skapade '+inv.name+'.',c.id);
- c.resources.power=clamp(c.resources.power+(effect===4?.7:effect===8?.5:.2),0,200);
- c.resources.material+=effect===9?.6:.1;
+ // Each invention contributes a domain-specific, measurable in-simulation benefit.
+ if(effect===3||effect===10)c.research+=1+complexity*.18; // control / coordination
+ if(effect===9)c.resources.material+=1.9+complexity*.25; // production
+ if(effect===4||effect===5)c.resources.power+=1.4+complexity*.2;
+ if(effect===0)c.resources.food+=2.4;
+ if(effect===1||effect===11||effect===12)c.resources.ideas+=.5+complexity*.25;
+ inv.uses++;
 }
 function attemptSpace(c){
- if(c.space>0)return;
+ if(c.space>0){
+  if(c.space>=1&&c.resources.power>=16&&c.resources.material>=14&&rand()<.015&&flights.length<25){
+   // A mature culture may construct more vehicles instead of stopping at one.
+   c.space=0;
+  }else return;
+ }
  const needed=[8,9,11,12,13,14,15]; // metallurgy, energy, computation, astronomy, navigation, autonomy, propulsion
  if(needed.some(k=>c.tech[k]<.30))return;
  if(c.inventions.length<14||!c.cities.some(id=>cities[id-1]?.level>=3))return;
@@ -291,6 +309,11 @@ function attemptSpace(c){
 }
 function advanceFlight(){
  for(const f of flights){
+  if(f.progress>=1){if(!f.arrived){f.arrived=true;extraPlanetary++;
+    const c=clans[f.clan];
+    speech(c,'rymdfart',f.name+' nådde sin simulerade utforskningsgräns och skickade tillbaka data.',[0,21,10,14,11],{flight:f.id});
+    addEvent('space',f.name+' nådde fram och rapporterade upptäckter.',f.clan);
+   }continue;}
   f.progress=Math.min(1,f.progress+.0007);
   f.x=mod(f.x+Math.cos(f.angle)*.28,W);
   f.y=mod(f.y+Math.sin(f.angle)*.28,H);
@@ -321,12 +344,12 @@ function societalAction(){
   }
   if(c.tech[3]>.16&&c.tech[1]>.16&&rand()<.12)foundCity(c);
   if(c.cities.length&&rand()<.21)developCity(c);
-  if(c.cities.length&&rand()<.2+(c.cities.length*.015))invent(c);
-  if(c.cities.length&&rand()<.065&&c.tech[5]>.16){
+  if(c.cities.length&&rand()<.09+(c.cities.length*.012))invent(c);
+  if(c.cities.length&&rand()<.032&&c.tech[5]>.16){
    c.grammar=(c.grammar+1+((rand()*5)|0))%6;c.languageAge++;
    speech(c,'språk','Språket i '+c.name+' förändrades genom nya grammatiska former.',[0,22,11,17]);
   }
-  if(rand()<.12&&c.tech[0]>.16){
+  if(rand()<.045&&c.tech[0]>.16){
    speech(c,'samtal',pick([
     c.name+' delar en observation om energin i området.',
     c.name+' efterfrågar samarbete kring en byggnad.',
@@ -352,14 +375,14 @@ function societalAction(){
 function metrics(){
  return{count:agents.length,rate,gen:maxGen,brain:maxBrain,cells:maxCells,ticks:step,
   updates:updatesPerSecond,progress:cycle?cycle.index:agents.length,progressTotal:cycle?cycle.total:agents.length,
-  cities:cities.length,buildings,inventions:inventions.length,messages:sentences,teaching,transmissions,
+  cities:cities.length,buildings,inventions:inventions.length,messages:sentences,teaching,transmissions,socialSpeed,spaceDiscoveries:extraPlanetary,
   launchCount:flights.length,achievements:skillsFound,cultures:clans.filter(c=>c.knowledge).length};
 }
 function siteSummary(city){
  const c=clans[city.clan];
  return{id:city.id,name:city.name,clan:city.clan,clanName:c.name,x:city.x,y:city.y,hue:c.hue,
   level:city.level,structures:city.structures,library:city.library,workshops:city.workshops,
-  power:city.power,wealth:city.wealth,people:c.members,tech:Array.from(c.tech,Math.round),knowledge:c.knowledge,
+  power:city.power,wealth:city.wealth,people:c.members,tech:Array.from(c.tech,x=>Math.round(x*100)/100),knowledge:c.knowledge,
   population:Math.floor(c.members/Math.max(1,c.cities.length)),
   discoveries:c.inventions.length,language:c.languageAge,grammar:c.grammar,flights:c.launches};
 }
@@ -400,7 +423,11 @@ function heartbeat(){
  budgetBirths(dt);
  try{
   stepIndividuals();
-  if(clock-lastStats>190){societalAction();lastStats=clock;}
+  if(clock-lastStats>190){
+   // Fast-forward cultural deliberation without duplicating biological individuals.
+   for(let i=0;i<socialSpeed;i++)societalAction();
+   lastStats=clock;
+  }
   if(clock-lastFrame>280){render();lastFrame=clock;}
   if(!lastRateAt)lastRateAt=clock;
   if(clock-lastRateAt>1000){rate=Math.round(rateBorn/((clock-lastRateAt)/1000));updatesPerSecond=Math.round(updateWindow/((clock-lastRateAt)/1000));rateBorn=0;updateWindow=0;lastRateAt=clock;}
@@ -417,6 +444,9 @@ onmessage=event=>{
   paused=true;if(timer!==null){clearTimeout(timer);timer=null;}postMessage({type:'paused'});
  }else if(m.type==='resume'){
   if(!live)return;if(timer!==null)clearTimeout(timer);last=0;paused=false;heartbeat();
+ }else if(m.type==='setSpeed'){
+  socialSpeed=m.fast?4:1;
+  postMessage({type:'speed',value:socialSpeed});
  }else if(m.type==='inspect'){
   postMessage({type:'detail',request:m.request,city:details(+m.id)});
  }else if(m.type==='addFood'){
