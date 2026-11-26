@@ -45,7 +45,7 @@ function makeSelection(){
  const titles=['URCELL','TIDIG ÄTTLING','SENARE ÄTTLING','SENASTE FÖDELSE'];
  exemplars.forEach((s,i)=>{
   const button=document.createElement('button');button.type='button';
-  button.textContent=titles[i]+' · #'+s.id;
+  button.textContent=(s.role||titles[i])+' · #'+s.id;
   if(s.id===selected)button.classList.add('selected');
   button.addEventListener('click',()=>{
    selected=s.id;makeSelection();
@@ -111,7 +111,7 @@ function draw(){
   if(i){ctx.strokeStyle='#284a59';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(i*tw,10);ctx.lineTo(i*tw,h-10);ctx.stroke();}
   if(focus){ctx.fillStyle='rgba(42,145,115,.13)';ctx.fillRect(i*tw,1,tw,h-1);}
   ctx.textAlign='center';ctx.fillStyle='#9ad9cd';ctx.font='bold 10px ui-monospace,monospace';
-  ctx.fillText(captions[i]||'MUTATION',xx,18);
+  ctx.fillText(s.role||captions[i]||'MUTATION',xx,18);
   morphology(s,xx,yy,Math.min(tw*.38,h*.34));
   ctx.fillStyle='#b1e9de';ctx.font='10px ui-monospace,monospace';
   ctx.fillText('GEN '+s.gen+' · '+s.segments+' SEG',xx,h-30);
@@ -168,7 +168,8 @@ function onMessage(m){
    ' · energikostnad '+fnum(b.functions.cost,2)+
    '\nNeuronkopplingar: '+a.brain.length+
    ' · energiinlärning '+fnum(a.learning.success,3)+
-   ' · arbetsminne: '+a.memory.map(x=>fnum(x,2)).join(' / '));
+   ' · arbetsminne: '+a.memory.map(x=>fnum(x,2)).join(' / ')+
+   '\nVerifierad förfäderskedja: '+(a.lineagePath||[]).map(x=>'#'+x.id+' (gen '+x.gen+')').join(' → '));
  }else if(m.type==='checkpoint'){
   waitingSave=false;
   saveWorld(m.data).then(()=>report('✓ Världen sparad lokalt i IndexedDB: '+fnum(m.data.agents.length)+' individuella organismer, med nervnät, arvsmassa och historik.'))
