@@ -9,6 +9,11 @@
 .evo-head{display:flex;justify-content:space-between;align-items:flex-start;gap:15px;padding:23px 25px 13px}.evo-kicker{color:#75f5d1;font-size:10px;letter-spacing:.22em;font-weight:850}.evo h2{margin:8px 0 5px;font-size:clamp(23px,3.4vw,32px);letter-spacing:-.035em;line-height:1.14}.evo-intro{color:#a7bed3;font-size:13px;max-width:620px;margin:3px 0 0}.evo-state{white-space:nowrap;padding:7px 11px;border:1px solid #42627a;border-radius:20px;color:#e2f9ff;background:#0f2936;font:700 10px ui-monospace,monospace;letter-spacing:.05em}.evo-state.live{color:#87ffd8;border-color:#397f70}.evo-stage{margin:12px 24px 0;border-radius:15px;position:relative;overflow:hidden;background:#020a13;border:1px solid #254056;aspect-ratio:1.94/1;min-height:196px}.evo-stage canvas{display:block;width:100%;height:100%;touch-action:manipulation}.evo-overlay{position:absolute;z-index:1;top:11px;left:11px;right:11px;display:flex;justify-content:space-between;gap:7px;color:#a3bfdd;font:10px ui-monospace,monospace;pointer-events:none;text-shadow:0 2px 6px #001}.evo-overlay span{padding:5px 7px;border-radius:7px;background:#040e1caf}.evo-corner{position:absolute;left:12px;bottom:11px;z-index:1;background:#06111cc9;border:1px solid #25415d;color:#98afc5;font-size:10px;border-radius:7px;padding:5px 8px;pointer-events:none}.evo-actions{padding:16px 24px 13px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}.evo-primary{border:0;background:linear-gradient(110deg,#63edd6,#83b7fc);color:#071b23;border-radius:10px;font-size:13px;font-weight:850;padding:13px 19px;cursor:pointer;min-height:44px}.evo-secondary{border:1px solid #36556b;background:#11283c;color:#d8f4ff;border-radius:10px;font-size:12px;font-weight:750;padding:12px 16px;cursor:pointer;min-height:44px}.evo-secondary:disabled{opacity:.4;cursor:not-allowed}.evo-what{color:#7998b3;font-size:11px;flex:1;text-align:right}.evo-metrics{margin:0 24px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.evo-metric{background:#081e2d;border:1px solid #25475a;border-radius:10px;padding:11px 10px}.evo-metric b{display:block;font:850 clamp(16px,2.4vw,25px)/1.25 ui-monospace,monospace;color:#a9ffdf;font-variant-numeric:tabular-nums}.evo-metric span{font-size:10px;color:#91acc2;display:block;margin-top:3px}.evo-bottom{padding:14px 24px 23px;display:grid;grid-template-columns:1fr minmax(170px,300px);gap:12px;align-items:start}.evo-summary{font-size:12px;color:#b5cddd;line-height:1.6;margin:0}.evo-summary strong{color:#e9ffff}.evo-events{background:#050f1e;border:1px solid #254158;border-radius:9px;padding:8px 10px;max-height:109px;min-height:72px;overflow:auto;color:#a7c8dc;font:10px/1.65 ui-monospace,monospace}.evo-events div{border-bottom:1px solid #183046;padding:2px 0}.evo-events div:last-child{border:0}.evo-disclaimer{padding:10px 24px 16px;border-top:1px solid #203b53;color:#879eb7;font-size:11px}
 .evo-anchor{border:1px solid #346c73;border-radius:50px;padding:5px 10px;color:#adffe9;text-decoration:none;background:#13323a;font-size:11px;font-weight:700}
 @media(max-width:730px){.evo-head{padding:19px 14px 10px;flex-wrap:wrap}.evo-stage{margin:10px 12px 0;aspect-ratio:1.3/1;min-height:212px}.evo-actions{padding:13px 12px}.evo-primary{flex:1 1 100%;width:100%}.evo-what{flex:1;text-align:left}.evo-metrics{margin:0 12px;grid-template-columns:repeat(2,minmax(0,1fr))}.evo-bottom{padding:12px;grid-template-columns:1fr}.evo-events{max-height:82px}.evo-disclaimer{padding:12px;font-size:10px}.evo-overlay{font-size:9px;left:6px;right:6px;top:6px}}
+.evo-specimen-panel{display:grid;grid-template-columns:1fr minmax(190px,38%);gap:12px;align-items:center;margin:12px 24px 4px;padding:13px 16px;background:#091c2c;border:1px solid #315a70;border-radius:12px}
+.evo-specimen-panel b{font-size:14px;color:#d3fbea}.evo-specimen-panel small{display:block;color:#9db7ca;font-size:11px;line-height:1.55;margin-top:5px}
+#evo-specimen-label{display:block;color:#6ee9d3;font:11px ui-monospace,monospace;margin-top:9px}
+#evo-specimen{width:100%;height:110px;display:block}
+@media(max-width:730px){.evo-specimen-panel{grid-template-columns:1fr;margin:10px 12px}.evo-specimen-panel canvas{height:100px}}
 </style></head><body>
 <div class="wrap"><header class="top"><div class="brand">◈ KOSMOS<b>SCAN</b> <span style="color:#8aa3bb;font-weight:400">/ 2.0</span></div><a class="evo-anchor" href="#emergence">✦ THE UNKNOWN ENGINE ↓</a></header>
 <section class="hero"><div class="eyebrow">En knapp. En automatisk undersökning.</div><h1>Finns det någon<br><em>annan intelligens?</em></h1><p class="sub">Jag hämtar astronomiska observationer, granskar registrerade exoplaneter en efter en och letar efter världar som förtjänar en närmare undersökning. Du behöver inte göra något mer än att starta.</p></section>
@@ -34,6 +39,13 @@
     <div class="evo-metric"><b id="evo-active">0</b><span>Egna individuella nervnät</span></div>
     <div class="evo-metric"><b id="evo-progress">0 / 0</b><span>Behandlade denna cykel</span></div>
     <div class="evo-metric"><b id="evo-learning">0</b><span>Synapsjusteringar (försök)</span></div>
+    <div class="evo-metric"><b id="evo-rate">0 /s</b><span>Verklig födelsetakt</span></div>
+    <div class="evo-metric"><b id="evo-morph">0</b><span>Ärftliga utseendetyper</span></div>
+    <div class="evo-metric"><b id="evo-mchanges">0</b><span>Mutationer i utseendet</span></div>
+  </div>
+  <div class="evo-specimen-panel">
+    <div><b>🧬 Evolutionens skyltfönster</b><small>En förstorad varelse ur den växande populationen. Kroppsform, färg, vingar, antenner och svans är ärftliga.</small><span id="evo-specimen-label">Ingen individ vald</span></div>
+    <canvas id="evo-specimen" aria-label="Förstorad organism som visar ärftliga utseendeförändringar"></canvas>
   </div>
   <div class="evo-bottom"><p class="evo-summary" id="evo-summary"><strong>Vad kan hända?</strong> Kemiska mönster kan bilda öar, ringar eller trådar. Ingen organism dör. Nya individer föds ständigt och alla behåller sin egen arvsmassa och sitt eget nervnät. Utfallet räknas fram i realtid.</p>
     <div class="evo-events" id="evo-events" role="log" aria-label="Verkliga händelser i simuleringen"><div>Laboratoriet väntar på start.</div></div></div>
@@ -91,12 +103,16 @@ const display=canvas.getContext('2d',{alpha:false});
 if(!display){by('evo-state').textContent='KAN INTE VISA CANVAS';return;}
 const GW=162,GH=94,N=GW*GH,PI=Math.PI,TAU=PI*2;
 const PATCH_SIZE=9,PATCH_COLS=Math.ceil(GW/PATCH_SIZE),PATCH_ROWS=Math.ceil(GH/PATCH_SIZE);
-const INITIAL_POP=125, MAX_BRAIN=40; // No individual cap or archive; full population participates in each logical step.
+const INITIAL_POP=125, MAX_BRAIN=40, TARGET_BIRTHS_PER_SECOND=100;
+// Real-time births are independent of completion time for full ecological ticks.
+// Each organism retains a distinct genome, neural network, memory and phenotype.
 const patchFor=(x,y)=>Math.floor(y/PATCH_SIZE)*PATCH_COLS+Math.floor(x/PATCH_SIZE);
 const off=document.createElement('canvas');off.width=GW;off.height=GH;
 const oc=off.getContext('2d');const frame=oc.createImageData(GW,GH),rgba=frame.data;
 let u,v,nu,nv,resource,signalA,signalB,nsA,nsB,agents=[],rng,seed=0,clock=0,drawFrames=0,mutations=0,births=0,hiGen=0;
 let maxNodes=0, innovations=0, learningUpdates=0, environmentShifts=0, cycle=null, lastProcessed=0;
+let birthAccumulator=0, lastWall=0, lastUi=0, lastPaint=0, birthRateMeasured=0, birthWindowMs=0, birthWindowCount=0;
+let nextOrganismId=1, morphChanges=0, showcased=null, phenotypeTypes=new Set(), completedTicks=0;
 let active=false,paused=false,last=0,raf=0,cssW=1,cssH=1,pixel=1,lastStats=0,lastEvent=0;
 const now=()=>typeof performance!=='undefined'?performance.now():Date.now();
 function rand(){let x=rng|0;x^=x<<13;x^=x>>>17;x^=x<<5;rng=x|0;return (x>>>0)/4294967296;}
@@ -119,10 +135,26 @@ function brainCopy(parent){
  if(next.length<MAX_BRAIN&&rand()<.32){next.push(brainNode());innovations++;mutations++;}
  return next;
 }
-function organism(x,y,genome,gen,energy,brain){
+// Observable inherited morphology. Changes affect body shape, appendages, pigmentation,
+ // sensory antennae and decorative structures. These are simulation phenotypes.
+function makeMorph(parent){
+ let m=parent?parent.slice():[rand()*360,(rand()*6)|0,between(.1,1),between(.2,1),between(.1,1),between(.1,1),between(.1,1)];
+ if(parent){
+  if(rand()<.28){m[0]=(m[0]+between(-58,58)+360)%360;morphChanges++;}
+  if(rand()<.18){m[1]=(m[1]+1+((rand()*5)|0))%6;morphChanges++;}
+  for(let k=2;k<7;k++)if(rand()<.25){m[k]=bound(m[k]+between(-.31,.31),0,1);morphChanges++;}
+ }
+ return m;
+}
+function morphColor(m){return 'hsl('+Math.round(m[0])+',90%,69%)';}
+function morphType(m){return (m[1]|0)+'-'+Math.floor(m[0]/45)+'-'+(m[3]>.5?'B':'A');}
+function organism(x,y,genome,gen,energy,brain,morph){
  const b=brain||brainCopy();maxNodes=Math.max(maxNodes,b.length);
- return{x,y,h:between(0,TAU),energy,age:0,gen,g:genome,m:0,n:0,line:Math.floor((genome[7]+1.6)*43)%360,
- brain:b,states:new Float32Array(b.length),rewardAvg:0,lastTake:0};
+ const body=morph||makeMorph();phenotypeTypes.add(morphType(body));
+ const organismData={x,y,h:between(0,TAU),energy,age:0,gen,g:genome,m:0,n:0,line:Math.floor((genome[7]+1.6)*43)%360,
+ brain:b,states:new Float32Array(b.length),rewardAvg:0,lastTake:0,
+ id:nextOrganismId++,morph:body,tint:body[0],visual:morphColor(body),fitness:0};
+ return organismData;
 }
 function neuralResponse(a,front,left,right,here,food){
  const inputs=[front,left,right,resource[here],v[here],signalA[here]-signalB[here],a.m,a.n];
@@ -144,26 +176,29 @@ function neuralResponse(a,front,left,right,here,food){
 }
 function registerChild(parent,batch=null,forced=false){
  const child=organism((parent.x+between(-3,3)+GW)%GW,(parent.y+between(-3,3)+GH)%GH,
- newGenome(parent.g),parent.gen+1,forced?.75:parent.energy*.35,brainCopy(parent.brain));
+ newGenome(parent.g),parent.gen+1,forced?.75:parent.energy*.35,brainCopy(parent.brain),makeMorph(parent.morph));
  if(batch)batch.push(child);else agents.push(child);
- births++;
+ births++;birthWindowCount++;
+ if(!showcased||child.gen>showcased.gen||(child.gen===showcased.gen&&child.id%29===0))showcased=child;
  if(child.gen>hiGen){hiGen=child.gen;if(hiGen<=5||hiGen%5===0)addEvent('Ny generation '+hiGen+' har uppstått');}
 }
 function reset(){
  seed=((typeof crypto!=='undefined'&&crypto.getRandomValues)?crypto.getRandomValues(new Uint32Array(1))[0]:(Date.now()^(Math.random()*4294967296)))>>>0;
  rng=seed||0x9E3779B9;clock=0;drawFrames=0;mutations=0;births=0;hiGen=0;lastEvent=0;lastStats=0;maxNodes=0;innovations=0;learningUpdates=0;environmentShifts=0;cycle=null;lastProcessed=0;
+ birthAccumulator=0;lastWall=0;lastUi=0;lastPaint=0;birthRateMeasured=0;birthWindowMs=0;birthWindowCount=0;nextOrganismId=1;morphChanges=0;phenotypeTypes.clear();showcased=null;completedTicks=0;
  u=new Float32Array(N);v=new Float32Array(N);nu=new Float32Array(N);nv=new Float32Array(N);
  resource=new Float32Array(N);signalA=new Float32Array(N);signalB=new Float32Array(N);nsA=new Float32Array(N);nsB=new Float32Array(N);
  for(let y=0;y<GH;y++)for(let x=0;x<GW;x++){const i=y*GW+x;u[i]=1;resource[i]=between(.18,.55);}
  for(let j=0;j<22;j++){const x=between(5,GW-5),y=between(5,GH-5);bump(v,x,y,between(.5,.95),between(2,7)|0);bump(resource,x,y,.4,8);}
  agents=Array.from({length:INITIAL_POP},()=>organism(between(1,GW-1),between(1,GH-1),newGenome(),0,between(.8,1.1)));
+ showcased=agents[0];
  by('evo-seed').textContent='FRÖ: '+seed.toString(16).toUpperCase().padStart(8,'0');
  by('evo-start').textContent='↻ NYTT UNIVERSUM';by('evo-pause').disabled=false;by('evo-pause').textContent='⏸ PAUSA';
  by('evo-state').textContent='UTVECKLING PÅGÅR';by('evo-state').classList.add('live');
- by('evo-tip').textContent='Färger = kemiska fält · prickar = organismer';
+ by('evo-tip').textContent='Kroppsform och färg är ärftliga · alla individer uppdateras';
  by('evo-events').innerHTML='';addEvent('125 organismer skapade · inga dödsregler');
- by('evo-summary').innerHTML='<strong>Alla simuleras individuellt.</strong> Varje organism behåller sitt eget nervnät, minne, energi och position. Ingen arkiveras. Vid stort antal tar en gemensam beräkningscykel längre tid, men omfattar alla.';
- active=true;paused=false;last=0;paint();stats();
+ by('evo-summary').innerHTML='<strong>100 födslar per aktiv sekund (mål).</strong> Födslarna följer riktig tid i stället för beräkningscykeln. Varje individ behåller egen hjärna och kropp. När populationen växer tar en fullständig uppdatering längre tid.';
+ active=true;paused=false;last=0;paint();stats();drawSpecimen();
 }
 function chemistry(){
  // 2D Gray–Scott reaction–diffusion with periodic boundaries; two integration substeps.
@@ -220,6 +255,7 @@ function evolution(){
   const i=cell(a.x,a.y),take=Math.min(resource[i],.014*g[9]);resource[i]-=take;
   const near=Math.max(0,density[patchFor(a.x,a.y)]-1);
   a.energy=bound(a.energy+take*.76-g[4]-.0001*g[6]-.00042*near+.002,0,3.8);
+  a.fitness=a.fitness*.98+take*.02;
   a.age++;
   if(g[7]>0)signalA[i]=bound(signalA[i]+.028*g[7],0,1);
   else signalB[i]=bound(signalB[i]+.028*(-g[7]),0,1);
@@ -228,18 +264,16 @@ function evolution(){
    a.brain.push(brainNode());const state=new Float32Array(a.brain.length);state.set(a.states);a.states=state;
    maxNodes=Math.max(maxNodes,a.brain.length);innovations++;mutations++;
   }
-  if(a.energy>g[5]&&a.age>60&&rand()<.042*Math.exp(-.025*near)){
-   a.energy*=.69;registerChild(a,newborn);
-  }
+  // Natural fitness influences parents chosen for the separate wall-clock birth scheduler.
+  // Individual neural updates remain independent from population birth rate.
   // A cycle is not complete until each real organism has received one update.
   if(((++processed)&127)===0&&now()>=deadline)break;
  }
- by('evo-progress').textContent=cycle.cursor.toLocaleString('sv-SE')+' / '+cycle.total.toLocaleString('sv-SE');
+ // Progress is shown by the UI timer to avoid DOM updates on every CPU slice.
  if(cycle.cursor<cycle.total)return false;
- lastProcessed=cycle.total;
+ lastProcessed=cycle.total;completedTicks++;
  for(const child of newborn)agents.push(child);
- // Guaranteed birth; no limit on total population.
- if(clock%24===0&&agents.length)registerChild(agents[(rand()*agents.length)|0],null,true);
+ // Births are scheduled independently by wall-clock timing in the animation driver.
  // Nonstationary resource patches generate new situations for inherited controllers.
  if(clock%500===0){
   const x=between(10,GW-10),y=between(10,GH-10);bump(resource,x,y,.8,12);bump(v,x,y,.2,5);
@@ -261,24 +295,23 @@ function stats(){
  by('evo-births').textContent=births.toLocaleString('sv-SE')+' / '+mutations.toLocaleString('sv-SE');
  by('evo-structures').textContent=maxNodes+' / '+innovations.toLocaleString('sv-SE');
  by('evo-learning').textContent=learningUpdates.toLocaleString('sv-SE');
+ by('evo-rate').textContent=Math.round(birthRateMeasured).toLocaleString('sv-SE')+' /s';
+ by('evo-morph').textContent=phenotypeTypes.size.toLocaleString('sv-SE');
+ by('evo-mchanges').textContent=morphChanges.toLocaleString('sv-SE');
  by('evo-active').textContent=total.toLocaleString('sv-SE');
  by('evo-progress').textContent=(cycle?cycle.cursor:lastProcessed).toLocaleString('sv-SE')+' / '+(cycle?cycle.total:lastProcessed).toLocaleString('sv-SE');
  by('evo-clock').textContent='TICK '+String(clock).padStart(6,'0');
  if(clock>0&&clock%450===0)addEvent(total.toLocaleString('sv-SE')+' individuellt simulerade · inga dödsfall');
- if(clock>0&&clock%600===0)by('evo-summary').innerHTML='<strong>Observation:</strong> '+total.toLocaleString('sv-SE')+' egna nervnät i samma simulation. Ingen individ försvinner. Vid högre antal blir en hel beräkningscykel långsammare. Största nervnätet: '+maxNodes+' neuroner, inte ett bevis på intelligens.';
+ if(clock>0&&clock%500===0&&!cycle)
+  by('evo-summary').innerHTML='<strong>Observation:</strong> '+total.toLocaleString('sv-SE')+' individuella organismer. Ärvda kroppstyper: '+phenotypeTypes.size+'. Förändringar i kroppsgener: '+morphChanges+'. Nätens utveckling är en möjlighet till komplexare beteenden, inte bevis på intelligens.';
 }
 function paint(){
- // All organisms contribute to the pixel-density map, even if there are more
- // individuals than screen pixels. Rendering density is NOT population aggregation.
- const heat=new Uint32Array(N);
- for(const a of agents)heat[cell(a.x,a.y)]++;
  const cc=rgba;
  for(let i=0;i<N;i++){
-  const B=Math.min(1,v[i]*4.1),A=Math.min(1,signalA[i]*1.55),C=Math.min(1,signalB[i]*1.55),R=resource[i],crowd=Math.min(1,Math.log1p(heat[i])*.15);
-  const q=i<<2;
-  cc[q]=Math.min(255,4+R*10+B*34+A*24+C*185+crowd*75);
-  cc[q+1]=Math.min(255,11+R*24+B*217+A*190+C*55+crowd*95);
-  cc[q+2]=Math.min(255,27+R*44+B*155+A*140+C*155+crowd*150);
+  const B=Math.min(1,v[i]*4.1),A=Math.min(1,signalA[i]*1.55),C=Math.min(1,signalB[i]*1.55),R=resource[i],q=i<<2;
+  cc[q]=Math.min(255,4+R*10+B*34+A*24+C*185);
+  cc[q+1]=Math.min(255,11+R*24+B*217+A*190+C*55);
+  cc[q+2]=Math.min(255,27+R*44+B*155+A*140+C*155);
   cc[q+3]=255;
  }
  oc.putImageData(frame,0,0);
@@ -286,20 +319,90 @@ function paint(){
  display.imageSmoothingEnabled=true;
  display.drawImage(off,0,0,cssW,cssH);
  display.save();display.globalCompositeOperation='lighter';
+ // Every agent gets drawn. No visual or simulation sampling by population count.
  const sx=cssW/GW,sy=cssH/GH;
- // Visual point sampling is permitted; every agent is still uniquely simulated.
- const every=Math.max(1,Math.ceil(agents.length/2300));
- for(let k=0;k<agents.length;k+=every){
-  const a=agents[k],x=a.x*sx,y=a.y*sy;
-  const rr=Math.max(1.1,Math.min(2.6,1.3+Math.max(.1,a.energy)*.4))*Math.min(1.3,cssW/400);
-  display.beginPath();display.arc(x,y,rr*2.35,0,TAU);
-  display.fillStyle=a.g[7]>0?'rgba(50,247,207,.08)':'rgba(244,95,251,.08)';display.fill();
-  display.beginPath();display.arc(x,y,rr,0,TAU);
-  const alpha=bound(.4+a.energy*.25,.4,.95);
-  display.fillStyle=a.g[7]>0?'rgba(148,255,219,'+alpha+')':'rgba(255,155,230,'+alpha+')';
-  display.fill();
+ const scale=Math.min(1.55,Math.max(.10,Math.sqrt(700/agents.length)));
+ const baseRadius=Math.max(.17,2.7*scale);
+ for(let k=0;k<agents.length;k++){
+  const a=agents[k],m=a.morph,x=a.x*sx,y=a.y*sy;
+  const size=baseRadius*(.75+m[3]*.75),shape=m[1]|0;
+  display.fillStyle=a.visual;
+  if(scale<.29){
+   // Smaller dots, not fewer agents; minimum is a subpixel-sized rectangle.
+   display.fillRect(x-size*.5,y-size*.5,size,size);
+   continue;
+  }
+  display.save();
+  display.translate(x,y);display.rotate(a.h);
+  if(shape===0){display.beginPath();display.arc(0,0,size,0,TAU);display.fill();}
+  else if(shape===1){
+   display.beginPath();display.moveTo(size*1.6,0);display.lineTo(-size,-size*.88);
+   display.lineTo(-size*.54,0);display.lineTo(-size,size*.88);display.closePath();display.fill();
+  }else if(shape===2){
+   display.beginPath();display.ellipse(0,0,size*1.6,size*.65,0,0,TAU);display.fill();
+  }else if(shape===3){
+   display.fillRect(-size,-size*.65,size*2,size*1.3);
+  }else if(shape===4){
+   display.beginPath();
+   for(let i=0;i<10;i++){
+    const a1=i*TAU/10,r=(i&1)?size*.67:size*(1.3+m[2]*.7);
+    const xp=Math.cos(a1)*r,yp=Math.sin(a1)*r;
+    if(i===0)display.moveTo(xp,yp);else display.lineTo(xp,yp);
+   }display.closePath();display.fill();
+  }else{
+   display.beginPath();display.moveTo(-size*1.5,-size);
+   display.lineTo(size*1.1,0);display.lineTo(-size*1.5,size);
+   display.lineTo(-size*.3,0);display.closePath();display.fill();
+  }
+  if(scale>.48){
+   display.strokeStyle=a.visual;display.lineWidth=Math.max(.3,scale*.75);
+   if(m[4]>.26){
+    display.beginPath();display.moveTo(-size,0);
+    display.lineTo(-size*(1.4+m[4]*1.8),m[6]*size*1.3);display.stroke();
+   }
+   if(m[5]>.42){
+    display.beginPath();display.moveTo(size*.35,0);
+    display.lineTo(size*(1.2+m[5]),-size*(.8+m[2]));
+    display.moveTo(size*.35,0);display.lineTo(size*(1.2+m[5]),size*(.8+m[2]));
+    display.stroke();
+   }
+  }
+  display.restore();
  }
  display.restore();
+}
+function drawSpecimen(){
+ const c=by('evo-specimen'),d=c.getContext('2d');
+ if(!d)return;
+ const rect=c.getBoundingClientRect(),w=Math.max(1,rect.width),h=Math.max(1,rect.height);
+ const res=Math.min(window.devicePixelRatio||1,1.7);
+ if(c.width!==Math.round(w*res)||c.height!==Math.round(h*res)){
+  c.width=Math.round(w*res);c.height=Math.round(h*res);
+ }
+ d.setTransform(res,0,0,res,0,0);d.clearRect(0,0,w,h);
+ const a=showcased||agents[0];if(!a)return;
+ const m=a.morph,sz=Math.min(w*.13,h*.24),color=a.visual;
+ d.save();d.translate(w*.38,h*.5);d.rotate(-.2);
+ d.shadowColor=color;d.shadowBlur=25;d.fillStyle=color;
+ const shape=m[1]|0;
+ d.beginPath();
+ if(shape===0){d.arc(0,0,sz,0,TAU);}
+ else if(shape===1){d.moveTo(sz*1.6,0);d.lineTo(-sz,-sz*.8);d.lineTo(-sz*.4,0);d.lineTo(-sz,sz*.8);}
+ else if(shape===2){d.ellipse(0,0,sz*1.5,sz*.65,0,0,TAU);}
+ else if(shape===3){d.rect(-sz,-sz*.65,sz*2,sz*1.3);}
+ else if(shape===4){for(let i=0;i<12;i++){const ang=i*TAU/12,r=i%2?sz*.62:sz*(1.15+m[2]*.6);if(i===0)d.moveTo(r,0);else d.lineTo(Math.cos(ang)*r,Math.sin(ang)*r);}}
+ else{d.moveTo(-sz*1.5,-sz);d.lineTo(sz*1.3,0);d.lineTo(-sz*1.5,sz);d.lineTo(-sz*.5,0);}
+ d.closePath();d.fill();d.shadowBlur=0;d.strokeStyle=color;d.lineWidth=2.7;
+ for(let j=0;j<Math.round(m[5]*5);j++){
+  const side=j%2?1:-1;d.beginPath();d.moveTo(sz*.3,side*sz*.3);
+  d.lineTo(sz*(1.2+m[5]),side*sz*(.6+(j/3)*m[2]));d.stroke();
+ }
+ if(m[4]>.2){d.beginPath();d.moveTo(-sz,0);d.lineTo(-sz*(1+m[4]*2),sz*m[6]);d.stroke();}
+ d.restore();
+ d.fillStyle='#bdd7ec';d.font='12px ui-monospace,monospace';d.textAlign='left';
+ d.fillText('GEN '+a.gen,Math.min(w*.68,w-90),h*.44);
+ d.fillText('FORM '+(shape+1)+'/6',Math.min(w*.68,w-90),h*.62);
+ by('evo-specimen-label').textContent='Individ #'+a.id+' · generation '+a.gen+' · '+a.brain.length+' neuroner';
 }
 function resize(){
  const box=canvas.getBoundingClientRect();cssW=Math.max(1,box.width);cssH=Math.max(1,box.height);
@@ -316,15 +419,59 @@ function paintBlank(){
  display.fillStyle='#7795aa';display.font='12px system-ui';display.textAlign='center';
  display.fillText('Världen väntar på sitt första ögonblick',cssW/2,cssH/2);
 }
+function chooseParent(){
+ // Small fitness tournament: foraging performance and energy determine reproductive success.
+ let best=null;
+ for(let j=0;j<6;j++){
+  const a=agents[(rand()*agents.length)|0];
+  if(!best||(a.fitness*.7+a.energy*.1+a.gen*.004)>(best.fitness*.7+best.energy*.1+best.gen*.004))best=a;
+ }
+ return best;
+}
+function wallBirths(delta){
+ birthAccumulator+=delta*TARGET_BIRTHS_PER_SECOND/1000;
+ // Real-time catch-up to keep mean birth rate independent of simulation tick speed.
+ // Limit backlog per frame; if even this fails, the device's CPU is genuinely exhausted.
+ const count=Math.min(80,Math.floor(birthAccumulator));
+ if(count>0){
+  birthAccumulator-=count;
+  for(let i=0;i<count;i++)registerChild(chooseParent(),null,true);
+ }
+ birthWindowMs+=delta;
+ if(birthWindowMs>=1000){
+  birthRateMeasured=birthWindowCount/(birthWindowMs/1000);
+  birthWindowMs=0;birthWindowCount=0;
+ }
+}
+function chooseParent(){
+ let best=null;
+ for(let j=0;j<6;j++){
+  const a=agents[(rand()*agents.length)|0];
+  if(!best||(a.fitness*.7+a.energy*.1+a.gen*.004)>(best.fitness*.7+best.energy*.1+best.gen*.004))best=a;
+ }
+ return best;
+}
+function wallBirths(delta){
+ birthAccumulator+=delta*TARGET_BIRTHS_PER_SECOND/1000;
+ const count=Math.min(80,Math.floor(birthAccumulator));
+ if(count>0){birthAccumulator-=count;for(let i=0;i<count;i++)registerChild(chooseParent(),null,true);}
+ birthWindowMs+=delta;
+ if(birthWindowMs>=1000){birthRateMeasured=birthWindowCount/(birthWindowMs/1000);birthWindowMs=0;birthWindowCount=0;}
+}
 function loop(ts){
  raf=requestAnimationFrame(loop);
- if(!active||paused||document.hidden)return;
- if(last&&ts-last<28)return;last=ts;
+ if(!active||paused||document.hidden){lastWall=0;return;}
+ if(last&&ts-last<16)return;
+ const delta=lastWall?Math.max(0,Math.min(350,ts-lastWall)):16.67;
+ last=ts;lastWall=ts;
  try{
+  // Spawn before CPU-bound simulation; birth cadence is tied to elapsed wall time.
+  wallBirths(delta);
   if(!cycle){clock++;chemistry();}
   const done=evolution();drawFrames++;
-  if(done&&clock-lastStats>=16){stats();lastStats=clock;}
-  if(done||drawFrames%9===0)paint();
+  if(ts-lastUi>=180){stats();lastUi=ts;}
+  if(ts-lastPaint>=170){paint();lastPaint=ts;}
+  if(ts%4100<18)drawSpecimen();
  }catch(err){
   paused=true;by('evo-state').textContent='BERÄKNINGSFEL';by('evo-state').classList.remove('live');
   addEvent('Fel: '+(err.message||'okänt'));by('evo-pause').textContent='▶ ÅTERUPPTA';
@@ -336,6 +483,7 @@ by('evo-start').addEventListener('click',()=>{
 by('evo-pause').addEventListener('click',()=>{
  if(!active)return;paused=!paused;
  by('evo-pause').textContent=paused?'▶ FORTSÄTT':'⏸ PAUSA';
+ lastWall=0;
  by('evo-state').textContent=paused?'PAUSAD':'UTVECKLING PÅGÅR';
  by('evo-state').classList.toggle('live',!paused);
  last=0;
