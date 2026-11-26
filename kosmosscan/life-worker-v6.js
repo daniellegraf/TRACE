@@ -280,7 +280,7 @@ function invent(c){
  addEvent('invention',c.name+' skapade '+inv.name+'.',c.id);
  // Each invention contributes a domain-specific, measurable in-simulation benefit.
  if(effect===3||effect===10)c.research+=1+complexity*.18; // control / coordination
- if(effect===9)c.resources.material+=1.9+complexity*.25; // production
+ if(effect===9)c.resources.material+=2.8+complexity*.45; // production infrastructure pays back
  if(effect===4||effect===5)c.resources.power+=1.4+complexity*.2;
  if(effect===0)c.resources.food+=2.4;
  if(effect===1||effect===11||effect===12)c.resources.ideas+=.5+complexity*.25;
@@ -324,7 +324,7 @@ function societalAction(){
  for(const c of clans){
   const t=c.tech;
   c.resources.food+=.07+c.members*.00016;
-  c.resources.material+=.075+c.members*.00005;
+  c.resources.material+=.72+c.members*.018+c.cities.reduce((sum,id)=>sum+(cities[id-1]?.workshops||0)*.07,0);
   c.resources.power+=.03+c.cities.length*.016;
   const researcher=c.members*.012+c.social*.55+c.resources.ideas*.003+c.cities.length*.12;
   c.research+=researcher*between(.6,1.3);
