@@ -51,7 +51,7 @@ function cloneGenome(p){
  if(rand()<.11){g.form=(g.form+1+((rand()*5)|0))%6;mutations++;appearanceMutations++;}
  // Multicellularity is not granted by a timer; successive heritable genome changes
  // depend on reproduction, parent performance, and stochastic variation.
- const cellGain=.045+(p.cooperation>.5?.025:0)+(p.innovation>.55?.025:0);
+ const cellGain=.15+(p.cooperation>.5?.035:0)+(p.innovation>.55?.025:0);
  if(g.cells<20&&rand()<cellGain){g.cells++;mutations++;appearanceMutations++;}
  if(rand()<.17&&g.brain.length<MAX_NODES){g.brain.push(newNode());mutations++;}
  return g;
@@ -60,7 +60,7 @@ function spawn(parent){
  const g=parent?cloneGenome(parent.g):initialGenome();
  const x=parent?(parent.x+rr(-2.6,2.6)+W)%W:rr(0,W);
  const y=parent?(parent.y+rr(-2.6,2.6)+H)%H:rr(0,H);
- const newCulture=parent&&rand()<clamp(.24+g.social*.24,0,.8)?parent.culture:0;
+ const newCulture=parent&&rand()<clamp(.64+g.social*.22,0,.94)?parent.culture:0;
  const a={id:nextID++,x,y,heading:rr(0,TWO),g,gen:parent?parent.gen+1:0,
  energy:parent?.65:rr(.65,1.2),age:0,mood:0,experience:0,fitness:0,
  culture:newCulture,clan:parent?parent.clan:((rand()*14)|0),
@@ -126,9 +126,11 @@ function startTick(){
 }
 function neighbour(a){
  // Bounded local social search. The cost per organism remains O(1) on average.
- const center=at(a.x+rr(-3,3),a.y+rr(-3,3));
- let j=head[center],i=0;
- while(j!==-1&&i++<6){const n=agents[j];if(n.id!==a.id)return n;j=nextLinks[j];}
+ for(let trial=0;trial<4;trial++){
+  const center=at(a.x+rr(-4,4),a.y+rr(-4,4));
+  let j=head[center],i=0;
+  while(j!==-1&&i++<3){const n=agents[j];if(n.id!==a.id)return n;j=nextLinks[j];}
+ }
  return null;
 }
 function neuralTurn(a,near,food){
@@ -154,7 +156,7 @@ function neuralTurn(a,near,food){
 }
 function culturallyLearn(a,n){
  const diff=n.culture&~a.culture;
- if(diff&&rand()<.013*a.g.social*(.5+a.g.cooperation)){
+ if(diff&&rand()<.09*a.g.social*(.5+a.g.cooperation)){
   const bitPick=diff&-diff;
   a.culture|=bitPick;teaching++;a.experience+=.12;
   if((teaching%400)===0)say('Kulturell kunskap har spridits '+teaching+' gånger');
@@ -179,9 +181,11 @@ function canDiscover(a,k){
  return sites.some(s=>s.level>=3)&&g.brain.length>=12;
 }
 function innovate(a){
- if(rand()>(.003+a.g.innovation*.014+a.experience*.0007))return;
- const k=(rand()*KNOWLEDGE.length)|0;
- if(!canDiscover(a,k))return;
+ if(rand()>(.013+a.g.innovation*.025+a.experience*.001))return;
+ const possible=[];
+ for(let k=0;k<KNOWLEDGE.length;k++)if(canDiscover(a,k))possible.push(k);
+ if(!possible.length)return;
+ const k=possible[(rand()*possible.length)|0];
  a.culture|=bit(k);ideas++;a.experience+=1.2;
  peakCulture=Math.max(peakCulture,countBits(a.culture));
  if((ideas<12||ideas%70===0))say('Upptäckt: '+KNOWLEDGE[k]+' (individ #'+a.id+')');
@@ -192,7 +196,7 @@ function settlement(a,near){
  let candidate=null;
  for(const s of sites)if(Math.hypot(s.x-a.x,s.y-a.y)<7){candidate=s;break;}
  if(!candidate){
-  if(sites.length>=110||rand()>.0012)return;
+  if(sites.length>=110||rand()>.018)return;
   candidate={id:sites.length+1,x:a.x,y:a.y,clan:a.clan,
    level:1,power:0,food:0,knowledge:a.culture,members:0,color:a.g.hue};
   sites.push(candidate);buildings++;say('De första gemensamma skydden byggdes');
@@ -273,11 +277,11 @@ function evaluateStage(){
  }
  avgComplexity=sampled?complexity/sampled:1;avgBrains=sampled?brains/sampled:3;
  let newStage=0;
- if(cells3>sampled*.03)newStage=1;
- if(newStage>=1&&community>sampled*.005&&teaching>=10)newStage=2;
+ if(cells3>sampled*.014)newStage=1;
+ if(newStage>=1&&community>sampled*.003&&teaching>=10)newStage=2;
  if(newStage>=2&&sites.length>=1)newStage=3;
- if(newStage>=3&&sites.some(s=>s.level>=2)&&tech>sampled*.01)newStage=4;
- if(newStage>=4&&sites.filter(s=>s.level>=3).length>=2&&ideas>50)newStage=5;
+ if(newStage>=3&&sites.some(s=>s.level>=2)&&tech>sampled*.004)newStage=4;
+ if(newStage>=4&&sites.filter(s=>s.level>=3).length>=2&&ideas>50&&peakCulture>=8)newStage=5;
  if(newStage>stage){stage=newStage;say(['Encelligt liv','Flercellig utveckling','Delad kultur','Gemensamma bosättningar','Tekniska samhällen','Civilisationsliknande nätverk'][stage]+' har uppstått');}
  cultureKinds=0;
  const x=agents.length;const sampleLimit=Math.min(4000,x);
