@@ -159,12 +159,16 @@ function drawMap(){
   // EVERY real city contributes to a territorial district; only strongest
   // city glyphs are drawn individually to keep the map legible.
   const districts=new Map(),gridX=12,gridY=8;
-  for(const c of sites){
-   const cellX=Math.max(0,Math.min(gridX-1,Math.floor(c.x/WW*gridX)));
-   const cellY=Math.max(0,Math.min(gridY-1,Math.floor(c.y/WH*gridY)));
-   const key=cellX+cellY*gridX;
-   const d=districts.get(key)||{x:cellX,y:cellY,cities:0,homes:0,level:0,hue:c.hue};
-   d.cities++;d.homes+=c.homes||0;d.level=Math.max(d.level,c.level);districts.set(key,d);
+  if(Array.isArray(snapshot.districts)){
+   for(const d of snapshot.districts)if(d.cities>0)districts.set(d.x+d.y*gridX,d);
+  }else{
+   for(const c of sites){
+    const cellX=Math.max(0,Math.min(gridX-1,Math.floor(c.x/WW*gridX)));
+    const cellY=Math.max(0,Math.min(gridY-1,Math.floor(c.y/WH*gridY)));
+    const key=cellX+cellY*gridX;
+    const d=districts.get(key)||{x:cellX,y:cellY,cities:0,homes:0,level:0,hue:c.hue};
+    d.cities++;d.homes+=c.homes||0;d.level=Math.max(d.level,c.level);districts.set(key,d);
+   }
   }
   for(const d of districts.values()){
    const cx=(d.x+.5)*w/gridX,cy=(d.y+.5)*h/gridY;
