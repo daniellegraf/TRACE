@@ -15,7 +15,7 @@ function create(random){
   width:between(.12,.75),sym:R()<.65,repeat:1+((R()*3)|0),on:between(.2,.95),
   regulator:between(-.55,.55),pigment:between(-.5,.5),elastic:between(.05,1)});
  function founder(hue){
-  return {development:[addGene('axis'),addGene('storage')],regulators:[between(.2,.8),between(.2,.8)],
+  return {development:[],regulators:[between(.2,.8),between(.2,.8)],
    pigment:wrap(hue,360),saturation:between(.5,1),bilateral:R()<.5,
    reproduction:R()<.5?'clonal':'facultative',mating:between(.25,.8),
    latency:between(12,36),plasticity:between(.2,.8),brainGrowth:between(.3,.8),
