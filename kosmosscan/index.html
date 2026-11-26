@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="sv"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#030a14"><title>KOSMOSSCAN LIVE — astronomisk kataloganalys</title>
+<html lang="sv"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#030a14"><title>KOSMOSSCAN — Livsalgoritmen V6</title>
 <style>
 :root{color-scheme:dark;--bg:#030a14;--surface:#0b1627;--edge:#20324e;--muted:#91a9c4;--white:#eff6ff;--aqua:#4ce5ce;--gold:#ffc87a;--blue:#6c93ff;--red:#ffbba9}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(ellipse 90vw 50vw at 50% -8%,#123559 0%,transparent 62%),#030a14;color:var(--white);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,Arial,sans-serif;font-size:15px;line-height:1.5}a{color:#8cdcff}.wrap{max-width:1110px;margin:0 auto;padding:0 23px}.top{padding:22px 0;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #18304b}.brand{letter-spacing:.2em;font-weight:900;font-size:16px}.brand b{color:var(--aqua)}.status{color:#b4c8da;font-size:11px;letter-spacing:.04em}.status .green{display:inline-block;width:7px;height:7px;background:#56e1b7;border-radius:50%;box-shadow:0 0 10px #56e1b7;margin-right:6px}.hero{padding:55px 0 23px;text-align:center}.eyebrow{color:#6ef2d3;text-transform:uppercase;letter-spacing:.25em;font-size:11px;font-weight:800}.hero h1{font-weight:880;font-size:clamp(36px,5vw,68px);letter-spacing:-.05em;line-height:1.07;margin:16px 0}.hero h1 em{font-style:normal;background:linear-gradient(90deg,#95aafe,#53ebd3);background-clip:text;color:transparent}.sub{max-width:720px;margin:0 auto;color:#b5c9dc;font-size:clamp(14px,2vw,17px)}.mainbox{margin:24px auto 0;background:linear-gradient(180deg,#0c1d33,#071120);border:1px solid #2b4468;border-radius:22px;overflow:hidden;box-shadow:0 15px 65px #0006}.sky{position:relative;height:clamp(260px,41vw,430px);background:radial-gradient(ellipse at 50% 50%,#071e36 0%,#06111f 48%,#030914 100%);overflow:hidden}#starfield{position:absolute;inset:0;width:100%;height:100%;display:block}.sky:after{content:"";pointer-events:none;position:absolute;inset:0;background:linear-gradient(90deg,#030d19 0%,transparent 22%,transparent 78%,#030d19),linear-gradient(0deg,#081727,transparent 20%,transparent 85%,#081727)}.galaxy{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}.orb{border:1px solid rgba(112,176,246,.21);border-radius:50%;position:absolute;aspect-ratio:1;box-shadow:inset 0 0 28px #3989d20e}.orb.one{width:180px}.orb.two{width:290px;border-style:dashed;animation:rotate 60s linear infinite}.orb.three{width:415px}.orb.four{width:570px;border-color:#6b9def14}.core{width:21px;height:21px;background:#e9ffff;border-radius:50%;box-shadow:0 0 18px #74efff,0 0 65px #3b90ff,0 0 115px #349bff,0 0 155px #4ce5ce54;animation:pulse 3s ease-in-out infinite}.scope{position:absolute;inset:0;pointer-events:none;background:conic-gradient(from 90deg at 50% 50%,transparent 0deg,#3ad8ce04 50deg,#4de8d419 70deg,transparent 80deg);animation:rotate 10s linear infinite;opacity:0}.running .scope{opacity:1}.skyline{position:absolute;inset:15px 18px auto;display:flex;gap:10px;justify-content:space-between;color:#91a9c4;font-family:ui-monospace,Menlo,monospace;font-size:10px;letter-spacing:.06em}.skyline strong{color:#d9eefb}.skybottom{position:absolute;bottom:16px;left:18px;right:18px;z-index:2;display:flex;justify-content:space-between;gap:8px;font:11px ui-monospace,Menlo,monospace;color:#87a3bd}.dot{width:7px;height:7px;border-radius:50%;background:#55eacc;display:inline-block;margin-right:6px;box-shadow:0 0 12px #55eacc}.console{padding:22px 24px 25px}.console h2{margin:0;font-size:17px}.console p{margin:6px 0 0;color:var(--muted);font-size:13px}#go{display:block;border:0;cursor:pointer;width:min(100%,640px);padding:18px 14px;margin:23px auto 8px;background:linear-gradient(115deg,#55d9c8,#81b4f6);border-radius:13px;color:#031523;font-size:clamp(16px,2.4vw,19px);font-weight:850;box-shadow:0 8px 35px #39e0d326;transition:transform .2s,filter .2s}#go:hover{filter:brightness(1.06);transform:translateY(-2px)}#go:disabled{opacity:.65;cursor:progress;transform:none}.tiny{text-align:center;color:#8ea9c1;font-size:11px;margin-top:12px}.tiny strong{color:#cad8e7}.meterarea{display:none;padding:19px 0 0}.meterhead{display:flex;justify-content:space-between;align-items:center;gap:10px;color:#d0e5f5;font-size:12px}.meterhead span:last-child{font-variant-numeric:tabular-nums}.meter{height:7px;background:#1a2d45;border-radius:40px;overflow:hidden;margin:9px 0 0}.bar{height:100%;width:0%;background:linear-gradient(90deg,#3488eb,#63f3cf);transition:width .08s ease}.log{display:none;min-height:75px;max-height:182px;overflow-y:auto;background:#05101d;border:1px solid #23344a;border-radius:12px;margin-top:17px;padding:10px 12px;font:12px/1.8 ui-monospace,SFMono-Regular,Menlo,monospace;color:#a7c9db}.log .time{color:#6984a0;margin-right:7px}.log .high{color:#65eacf}.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;margin:19px 0}.stats[hidden]{display:none}.stat{background:#0a192b;border:1px solid #223a52;border-radius:14px;padding:18px}.stat small{display:block;color:#98b1c6;font-size:11px}.stat strong{display:block;font-size:clamp(25px,3.5vw,37px);line-height:1.3;font-weight:850;letter-spacing:-.04em;font-variant-numeric:tabular-nums}.stat .mark{color:var(--aqua)}.results{display:none;scroll-margin-top:25px;margin:22px 0 55px}.grid{display:grid;grid-template-columns:1.45fr 1fr;gap:16px}.panel{border:1px solid #223d58;background:#091626;border-radius:18px;padding:23px}.panel h3{font-size:21px;letter-spacing:-.025em;margin:0 0 10px}.panel p{color:#b5c8da;margin:8px 0;font-size:14px}.badge{display:inline-block;border:1px solid #315b66;background:#153a41;color:#82f4db;border-radius:50px;padding:5px 11px;font-size:11px;font-weight:800;margin-bottom:11px}.badge.warn{color:#ffdea9;background:#423018;border-color:#654c2c}.yellow{color:var(--gold)}.data-source{font-size:12px;padding:10px 12px;margin:14px 0;border:1px solid #274a63;border-radius:9px;background:#0a2031;color:#d3e7f6}.tablebox{margin:16px 0 0;border:1px solid #263952;border-radius:16px;overflow:hidden;background:#081627}.tablehead{display:flex;justify-content:space-between;align-items:center;padding:20px 20px 13px;gap:10px}.tablehead h3{font-size:18px;margin:0}.chip{border:1px solid #2e5263;background:#0e293c;color:#b8dff3;padding:5px 9px;border-radius:99px;font-size:11px}table{border-collapse:collapse;width:100%}th{text-align:left;font-size:11px;color:#91aec6;font-weight:600;padding:11px 18px;border-bottom:1px solid #263b50;background:#0c2031}td{padding:13px 18px;border-bottom:1px solid #1d3143;font-size:13px;color:#e0eef9}tbody tr:last-child td{border:0}td strong{color:#efffff}td .small{display:block;font-size:11px;color:#7895b1}.rowrank{color:#71e3d0;font-weight:700}.explain{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:15px}.info{border:1px solid #21394f;background:#0b1c2c;padding:18px;border-radius:14px}.info b{display:block;font-size:14px;margin-bottom:4px}.info p{margin:0;font-size:12px;color:#9cb3c9}.foot{margin:30px 0 45px;padding:22px 0 0;border-top:1px solid #24384b;color:#839eb8;font-size:11px}.foot a{color:#a4dbe9}.barlink{margin-top:12px;display:flex;gap:15px;flex-wrap:wrap;font-size:12px}.foot b{color:#bad5e5}@keyframes pulse{50%{transform:scale(1.18);opacity:.8}}@keyframes rotate{to{transform:rotate(360deg)}}@media(max-width:730px){.wrap{padding:0 15px}.top{padding:16px 0}.brand{font-size:13px}.status{font-size:10px}.hero{padding:35px 0 18px}.hero h1{font-size:clamp(34px,10vw,54px)}.hero .sub{font-size:13px}.mainbox{margin-top:15px;border-radius:16px}.sky{height:320px}.orb.one{width:145px}.orb.two{width:240px}.orb.three{width:320px}.orb.four{width:440px}.console{padding:19px 16px}.stats{gap:8px}.stat{padding:12px 10px}.stat small{font-size:10px}.stat strong{font-size:25px}.grid{grid-template-columns:1fr}.panel{padding:18px}.explain{grid-template-columns:1fr}.tablehead{padding:17px 11px}.tablehead h3{font-size:16px}th,td{padding:10px 8px;font-size:11px}th{font-size:10px}.skyline{font-size:9px}.skybottom{font-size:9px}}
 @media(prefers-reduced-motion:reduce){.scope,.orb,.core{animation:none!important}.bar{transition:none}}
@@ -99,6 +99,89 @@
 .life-knowledge-fill{height:100%;width:0;background:linear-gradient(90deg,#2699ba,#75f6c9);transition:width .5s}
 @media(max-width:750px){.life-research{margin:9px 11px;padding:12px}.life-tech{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.life-research-header small{display:none}}
 
+
+/* V6 visual system: quiet cartography, architecture and inspectable cultural history. */
+.society-lab{padding:0;overflow:hidden;border-color:#335c61;background:linear-gradient(160deg,#0a2130,#071521 50%,#06111e)}
+.society-heading{display:flex;align-items:start;justify-content:space-between;gap:15px;padding:26px 25px 16px}
+.society-heading h2{font-size:clamp(26px,4vw,42px);line-height:1.11;margin:10px 0;letter-spacing:-.04em}
+.society-heading p{margin:0;max-width:680px;font-size:13px;color:#afc8cf;line-height:1.65}
+.society-kicker{letter-spacing:.17em;color:#72f2d2;font-size:10px;font-weight:800}
+.society-status{border:1px solid #3d6170;color:#cad9df;border-radius:50px;padding:7px 11px;white-space:nowrap;font-size:10px;font-weight:800}
+.society-status.running{color:#9bffe8;border-color:#4b9b86;background:#0c3735}
+.society-world{position:relative;margin:9px 22px 0;background:#091c29;border:1px solid #365c69;border-radius:17px;overflow:hidden;height:clamp(265px,42vw,450px)}
+#society-canvas{width:100%;height:100%;display:block;touch-action:manipulation;cursor:crosshair}
+.society-maphead{position:absolute;left:12px;right:12px;top:11px;display:flex;justify-content:space-between;gap:6px;pointer-events:none;color:#b9f1df;font:10px ui-monospace,monospace;text-shadow:0 2px 5px #001}
+.society-maphead span{padding:5px 8px;background:#051525c4;border-radius:6px}
+.society-mapfoot{position:absolute;bottom:10px;left:10px;right:10px;pointer-events:none;color:#a5c4ce;font-size:10px;text-shadow:0 2px 5px #000}
+.society-controls{display:flex;gap:10px;flex-wrap:wrap;padding:17px 22px 7px;align-items:center}
+.society-controls button{cursor:pointer;min-height:42px;border-radius:10px;font-size:12px;font-weight:800;padding:9px 14px}
+.society-start{background:linear-gradient(110deg,#71efcc,#92b6f0);border:0;color:#062027}
+.society-pause{background:#153242;color:#deebf2;border:1px solid #3c6574}.society-pause:disabled{opacity:.4}
+.society-viewbuttons{display:flex;gap:3px;margin-left:auto;border:1px solid #31566d;background:#0d2638;padding:3px;border-radius:10px}
+.society-viewbuttons button{min-height:33px;background:transparent;border:0;color:#88adc0}
+.society-viewbuttons button.active{background:#18473f;color:#b6ffe7}
+.society-metrics{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px;margin:13px 22px 8px}
+.society-metrics>div{min-width:0;background:#091e2c;border:1px solid #29485b;border-radius:11px;padding:11px}
+.society-metrics strong{display:block;overflow-wrap:anywhere;color:#b1fae4;font:850 clamp(17px,2.3vw,25px)/1.25 ui-monospace,monospace}
+.society-metrics span{display:block;font-size:10px;color:#9eb9c8;margin-top:4px}
+.society-tickbar{margin:8px 25px 16px;display:flex;gap:9px;flex-wrap:wrap;color:#749db0;font:10px ui-monospace,monospace}
+.society-tickbar b{color:#aed5df}
+.society-panels{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin:0 22px 13px}
+.society-panel{min-width:0;background:#091a2a;border:1px solid #2a485a;border-radius:14px;padding:16px}
+.society-paneltitle{margin-bottom:11px}.society-paneltitle b{font-size:12px;color:#d4f9e9;letter-spacing:.045em}
+.society-paneltitle small{display:block;color:#92afbf;font-size:11px;margin-top:4px;line-height:1.45}
+.society-panel select{width:100%;background:#102c3c;border:1px solid #365c6d;color:#e1f4f6;border-radius:9px;min-height:41px;padding:9px;font-size:12px}
+.society-empty{font-size:12px;color:#819eaf;line-height:1.6;margin:10px 0}
+#society-city-detail{padding:9px 0 0;min-height:170px}
+#society-city-detail h4{margin:4px 0;color:#d7fce8;font-size:20px}
+#society-city-detail>p{font-size:12px;color:#a7c5d3;line-height:1.55}
+.society-detail-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:15px 0}
+.society-detail-grid div{background:#0f2a39;border:1px solid #264b59;border-radius:8px;padding:9px}
+.society-detail-grid small{display:block;color:#90afc1;font-size:10px}
+.society-detail-grid b{display:block;color:#a4fce5;font:800 19px ui-monospace,monospace;margin-top:4px}
+.society-dialect{word-wrap:break-word;font-family:ui-monospace,monospace;font-size:11px!important;color:#9fdac9!important}
+.society-action,.society-actions button{border-radius:9px;background:#225e59;color:#d8ffed;border:1px solid #458376;font-weight:800;font-size:11px;padding:10px 12px;cursor:pointer;min-height:38px}
+#society-city-detail h5{font-size:12px;letter-spacing:.05em;color:#bceadf;margin:18px 0 9px}
+.society-detail-invention{border-top:1px solid #203d50;padding:9px 0}
+.society-detail-invention strong{font-size:12px;color:#c6f3e8;display:block}
+.society-detail-invention span{font-size:11px;color:#a0b8c8;display:block;margin-top:4px}
+.society-message-list{height:285px;overflow:auto;border-radius:10px;border:1px solid #244558;background:#061827;padding:6px}
+.society-msg{background:transparent;border:0;border-bottom:1px solid #203949;width:100%;text-align:left;padding:10px;cursor:pointer;color:#b4d0db}
+.society-msg.selected{background:#163c43;border-radius:7px}
+.society-msg b{font-size:10px;display:block;color:#88f1d2;letter-spacing:.025em}
+.society-msg span{font-size:13px;display:block;margin-top:5px;font-family:ui-monospace,monospace}
+.society-translation{background:#0b2c35;border:1px solid #365968;border-radius:10px;margin-top:12px;padding:13px;min-height:140px}
+.society-translation>b{font-size:11px;color:#95d9ce}
+.society-alien-quote{font:800 19px/1.4 ui-monospace,monospace;word-break:break-word;color:#b2ffdd;padding:10px 0 6px}
+.society-translation p{font-size:12px;color:#d4e6ed;line-height:1.6;margin:5px 0 9px}
+.society-disclaimer{color:#8ca7b8;font-size:10px;line-height:1.5}
+.society-discoveries{max-height:340px;overflow:auto}
+.society-invention{display:block;width:100%;background:#0b2637;border:1px solid #284a58;border-radius:8px;padding:10px;text-align:left;color:#d0edf0;margin:6px 0;cursor:pointer}
+.society-invention b{font-size:12px;display:block;color:#b6f8df}
+.society-invention small{font-size:11px;color:#91b7c8;display:block;line-height:1.55;margin-top:4px}
+.society-actions{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.society-analysis{white-space:pre-wrap;word-break:break-word;min-height:185px;max-height:385px;overflow:auto;background:#061825;border:1px solid #24485a;border-radius:9px;padding:13px;color:#b0cad4;font-size:12px;line-height:1.7}
+.society-history{margin:0 22px 14px}
+#society-log{height:140px;overflow:auto}
+.society-log-entry{display:flex;align-items:start;gap:8px;border-bottom:1px solid #1f3e4f;padding:7px 0;font-size:11px;color:#adcad7}
+.society-log-entry b{color:#73d1bb;font:10px ui-monospace,monospace;white-space:nowrap}
+.society-caveat{border-top:1px solid #234356;background:#061622;padding:17px 22px 21px;color:#93aebd;font-size:11px;line-height:1.65}
+.society-caveat b{color:#d1efdf}
+@media(max-width:780px){
+ .society-heading{padding:20px 13px 13px;display:block}.society-status{display:inline-block;margin-top:11px}
+ .society-world{margin:9px 10px 0;height:325px}
+ .society-maphead{font-size:8px}.society-mapfoot{font-size:9px}
+ .society-controls{padding:12px 10px;gap:7px}.society-start{flex:1 1 100%}.society-pause{flex:0 0 auto}
+ .society-viewbuttons{margin-left:auto}.society-viewbuttons button{padding:7px;font-size:10px}
+ .society-metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin:6px 10px}
+ .society-metrics>div{padding:10px}.society-metrics strong{font-size:21px}
+ .society-tickbar{margin:10px 12px 14px}
+ .society-panels{grid-template-columns:1fr;margin:0 10px 10px;gap:10px}
+ .society-panel{padding:13px}
+ .society-history{margin:0 10px 12px}
+ .society-caveat{padding:13px}
+}
+
 </style></head><body>
 <div class="wrap"><header class="top"><div class="brand">◈ KOSMOS<b>SCAN</b> <span style="color:#8aa3bb;font-weight:400">/ 2.0</span></div><a class="evo-anchor" href="#emergence">✦ THE UNKNOWN ENGINE ↓</a></header>
 <section class="hero"><div class="eyebrow">En knapp. En automatisk undersökning.</div><h1>Finns det någon<br><em>annan intelligens?</em></h1><p class="sub">Jag hämtar astronomiska observationer, granskar registrerade exoplaneter en efter en och letar efter världar som förtjänar en närmare undersökning. Du behöver inte göra något mer än att starta.</p></section>
@@ -106,63 +189,75 @@
 <section class="results" id="results"><div class="grid"><div class="panel"><span class="badge" id="proofbadge">RESULTAT</span><h3 id="resulttitle">Min slutsats</h3><p id="summary"></p><div class="data-source" id="source"></div><p style="font-size:12px">Här är <b>observationer och ett matematiskt urval</b>, inte en livsdetektor. Ingen av dessa planeter är därmed bevisat bebodd.</p></div><div class="panel"><span class="badge warn">HYPOTES TESTAD</span><h3>Kan gammal AI finnas?</h3><p id="ancient">Undersökningen visar vad som går att säga om äldre stjärnsystem.</p><p><b class="yellow">Viktig gräns:</b> Exoplanetarkivet innehåller inte råa radiomätningar, lasersignaler eller prov på artificiellt material. Därför kan det varken bekräfta eller utesluta tidigare AI.</p></div></div><div class="tablebox"><div class="tablehead"><h3>✦ Planeternas observationsprioritet</h3><span class="chip" id="candidatecount"></span></div><div style="overflow-x:auto"><table><thead><tr><th>#</th><th>Planet</th><th>Avstånd</th><th>Radie</th><th>Jämviktstemp.</th><th>Index*</th></tr></thead><tbody id="ranking"></tbody></table></div></div><div class="explain"><div class="info"><b>01 / Vad jag verkligen gör</b><p>Bearbetar katalogens verkliga mätvärden, filtrerar radie och jämviktstemperatur, rangordnar utifrån tydliga prioriteringsregler.</p></div><div class="info"><b>02 / Vad jag inte kan se</b><p>Ytvatten, atmosfär, mikrober, civilisationer eller AI – sådant kan inte avgöras med dessa katalogfält.</p></div><div class="info"><b>03 / Hur urvalet fungerar</b><p>Radie 0,5–1,8 jordradier och jämviktstemperatur 180–310 K. Indexet är en egen observationsprioritering, inte sannolikhet för liv.</p></div></div></section>
 
 
-<section class="evo life-lab" id="emergence">
- <div class="life-head">
-  <div><div class="life-kicker">KOSMOSSCAN / LIFE ENGINE V5 · AUTONOM BIOLOGI OCH KULTUR</div>
-   <h2>Från en cell till en civilisation.</h2>
-   <p>En självutvecklande digital värld där individer får egna kroppar, nervnät, erfarenheter och kulturella traditioner. De kan hitta lösningar, lära av varandra, utveckla verktyg och bilda bosättningar. Vad som faktiskt uppstår beror på simuleringens händelser.</p></div>
-  <span id="life-status" class="life-status">EJ STARTAD</span>
+
+<section id="emergence" class="evo society-lab">
+ <div class="society-heading">
+  <div><div class="society-kicker">KOSMOSSCAN · LIFE ENGINE V6 · OPEN-ENDED CIVILIZATION LAB</div>
+   <h2>Från livsfrö till okända civilisationer.</h2>
+   <p>Individer med egna nervnät lever vidare – men världens utveckling drivs nu främst av samarbete, språk, institutioner, idéer och uppfinningar. Det finns inget färdigskrivet slut.</p>
+  </div><span id="society-status" class="society-status">EJ STARTAD</span>
  </div>
- <div class="life-world">
-  <canvas id="life-stage" aria-label="Värld med individuellt simulerade organismer i biologisk och kulturell evolution"></canvas>
-  <div class="life-overlay"><span>✦ ORGANISMER</span><span>BERÄKNINGAR I BAKGRUNDSTRÅD</span></div>
-  <div class="life-worldnote">Tryck på världen för att tillföra näring.</div>
+ <div class="society-world">
+  <canvas id="society-canvas" aria-label="Interaktiv karta över en digital värld med bosättningar, vägar och civilisationer"></canvas>
+  <div class="society-maphead"><span>LIVE · VÄRLDENS SAMHÄLLEN</span><span id="society-step">STEG 0</span></div>
+  <div class="society-mapfoot">Tryck på en stad för att granska den · tryck på marken för att tillföra näring</div>
  </div>
- <div class="life-actions">
-  <button id="life-start" type="button" class="life-start">✦ SKAPA OCH VÄCK LIV</button>
-  <button id="life-pause" type="button" class="life-pause" disabled>⏸ PAUSA</button>
-  <span>Inga förutbestämda civilisationer · ny slump varje gång</span>
+ <div class="society-controls">
+  <button type="button" class="society-start" id="society-start">✦ VÄCK ETT NYTT LIVSFRÖ</button>
+  <button type="button" class="society-pause" id="society-pause" disabled>⏸ PAUSA</button>
+  <div class="society-viewbuttons"><button id="society-map-view" class="active" type="button">🏛 Samhällen</button><button id="society-life-view" type="button">🧬 Organismer</button></div>
  </div>
- <div class="life-stagearea">
-  <div class="life-stagehead"><div>
-    <small>UPPNÅDD UTVECKLINGSNIVÅ</small>
-    <h3 id="life-era">URSPRUNG · Encelligt liv</h3>
-    <p id="life-era-desc">Enkla autonoma celler förbrukar energi och navigerar.</p>
-   </div><div class="life-progressfact"><strong id="life-tick">0</strong><span>avslutade ekosystemsteg</span></div></div>
-  <div class="life-timeline">
-   <div id="life-stage-0" class="life-step done current"><b>01</b><span>Encelligt</span><small class="stage-state">UPPNÅTT</small></div>
-   <div id="life-stage-1" class="life-step"><b>02</b><span>Flercellighet</span><small class="stage-state">INTE UPPNÅTT</small></div>
-   <div id="life-stage-2" class="life-step"><b>03</b><span>Kultur</span><small class="stage-state">INTE UPPNÅTT</small></div>
-   <div id="life-stage-3" class="life-step"><b>04</b><span>Bosättningar</span><small class="stage-state">INTE UPPNÅTT</small></div>
-   <div id="life-stage-4" class="life-step"><b>05</b><span>Tekniska samhällen</span><small class="stage-state">INTE UPPNÅTT</small></div>
-   <div id="life-stage-5" class="life-step"><b>06</b><span>Civilisation</span><small class="stage-state">INTE UPPNÅTT</small></div>
+ <div class="society-metrics">
+  <div><strong id="society-cities">0</strong><span>Bosättningar</span></div>
+  <div><strong id="society-inventions">0</strong><span>Uppfinningar</span></div>
+  <div><strong id="society-messages-total">0</strong><span>Meddelanden</span></div>
+  <div><strong id="society-space">0</strong><span>Rymdfarkoster</span></div>
+  <div><strong id="society-teaching">0</strong><span>Kunskapsöverföringar</span></div>
+  <div><strong id="society-pop">0</strong><span>Organismer</span></div>
+  <div><strong id="society-rate">0/s</strong><span>Födslar / sekund</span></div>
+  <div><strong id="society-gen">0</strong><span>Högsta generation</span></div>
+  <div><strong id="society-cells">1</strong><span>Flest celler</span></div>
+  <div><strong id="society-updates">0/s</strong><span>Individuella steg/s</span></div>
+ </div>
+ <div class="society-tickbar"><span>Individuella biologiska uppdateringar</span><b id="society-processing">0 / 0</b><span>· Varje individ finns kvar</span></div>
+ <div class="society-panels">
+  <div class="society-panel society-city">
+   <div class="society-paneltitle"><div><b>🏛 SAMHÄLLEN</b><small>Granska städer, bibliotek, teknik och institutioner</small></div></div>
+   <select id="society-city-select" aria-label="Välj bosättning"><option value="">Välj en bosättning…</option></select>
+   <div id="society-city-detail"><p class="society-empty">Väntar på att den första bosättningen ska grundas.</p></div>
+  </div>
+  <div class="society-panel society-language">
+   <div class="society-paneltitle"><div><b>💬 NYA SPRÅK & MEDDELANDEN</b><small>Konstruerade symbolsystem som förändras genom kultur</small></div></div>
+   <select id="society-message-filter" aria-label="Filtrera meddelanden">
+     <option value="alla">Alla meddelanden</option>
+     <option value="uppfinning">Uppfinningar</option>
+     <option value="upptäckt">Upptäckter</option>
+     <option value="samtal">Samtal</option>
+     <option value="språk">Språkförändringar</option>
+     <option value="handel">Utbyte</option>
+     <option value="grundande">Grundade städer</option>
+     <option value="rymdfart">Rymdfart</option>
+   </select>
+   <div id="society-messages" class="society-message-list"><p class="society-empty">Inga meddelanden ännu.</p></div>
+   <div id="society-translation" class="society-translation"><p class="society-empty">Klicka på ett meddelande för att se betydelse och sammanhang.</p></div>
   </div>
  </div>
- <div class="life-research">
-  <div class="life-research-header"><div><b>🌍 KULTURELL EVOLUTION</b><p>Färdigheter uppfinns av individer och sprids genom möten, undervisning och arv. Staplarna visar ungefärlig andel som kan varje färdighet.</p></div><small>10 kunskapsområden</small></div>
-  <div id="life-tech" class="life-tech"></div>
+ <div class="society-panels society-bottom">
+  <div class="society-panel">
+    <div class="society-paneltitle"><div><b>⚙️ VAD HAR DE UPPFUNNIT?</b><small>Varje teknik kombinerar byggstenar och effekter från världens utveckling</small></div></div>
+    <div id="society-discoveries" class="society-discoveries"><p class="society-empty">Väntar på de första uppfinningarna.</p></div>
+  </div>
+  <div class="society-panel">
+    <div class="society-paneltitle"><div><b>🔬 ANALYSERA VÄRLDEN</b><small>Undersök det som faktiskt finns registrerat</small></div></div>
+    <div class="society-actions"><button id="society-global-analysis" type="button">✦ Skapa analys</button><button id="society-copy" type="button">Kopiera analys</button></div>
+    <div id="society-analysis" class="society-analysis">När simuleringen har utvecklat ett samhälle kan du välja staden och analysera dess kultur, språk, uppfinningar och byggnader.</div>
+  </div>
  </div>
- <div class="life-metrics">
-  <div class="life-metric"><b id="life-pop">0</b><span>Individuellt simulerade</span></div>
-  <div class="life-metric"><b id="life-rate">—</b><span>Födslar/s · mål 100</span></div>
-  <div class="life-metric"><b id="life-gen">0</b><span>Generationer</span></div>
-  <div class="life-metric"><b id="life-cells">1</b><span>Max celler i kroppen</span></div>
-  <div class="life-metric"><b id="life-brain">3</b><span>Max neuroner</span></div>
-  <div class="life-metric"><b id="life-species">0</b><span>Ärftliga utseenden</span></div>
-  <div class="life-metric"><b id="life-culture">0</b><span>Delade lärdomar</span></div>
-  <div class="life-metric"><b id="life-innovations">0</b><span>Upptäckter</span></div>
-  <div class="life-metric"><b id="life-sites">0</b><span>Bosättningar</span></div>
-  <div class="life-metric"><b id="life-mutants">0</b><span>Kroppsmutationer</span></div>
-  <div class="life-metric"><b id="life-updates">0 /s</b><span>Individuella uppdateringar/s</span></div>
-  <div class="life-metric"><b id="life-work">0 / 0</b><span>Uppdaterade detta steg</span></div>
+ <div class="society-panel society-history">
+   <div class="society-paneltitle"><div><b>⏳ VÄRLDENS HISTORIA</b><small>Faktiska förändringar som registrerats av simuleringen</small></div></div>
+   <div id="society-log"><div class="society-log-entry">Världen väntar på sitt första livsfrö.</div></div>
  </div>
- <div class="life-complexity" id="life-complexity">Ø 1,0 celler · Ø 3,0 neuroner</div>
- <div class="life-gallerypanel">
-  <div class="life-galleryhead"><b>🧬 EVOLUTION UNDER MIKROSKOPET</b><span>Jämför individuella kroppar i olika generationer.</span></div>
-  <canvas id="life-gallery" aria-label="Fyra detaljerade kroppar med olika biologiska och kulturella egenskaper"></canvas>
- </div>
- <div class="life-logpanel"><b>HÄNDELSER I VÄRLDEN</b><div id="life-log" role="log" aria-live="off"><div class="life-logitem">Väntar på att den första organismen ska födas.</div></div></div>
- <div class="life-conditions"><b>VAD ÄR VERKLIGT HÄR?</b> Livsalgoritmen är en konstgjord simulering, inte ett experiment som bevisar att liv eller civilisation måste uppstå som på jorden. Nya nivåer markeras bara om organismerna uppfyller konkreta biologiska och sociala villkor. Alla har egna tillstånd och uppdateras under varje fullständigt simuleringssteg. Födslar följer verklig tid och beror inte på när ett sådant steg blir klart. Med en obegränsat växande population går det inte att garantera konstant beräkningshastighet eller minnesanvändning på en telefon.</div>
+ <div class="society-caveat"><b>OM EXPERIMENTET:</b> Detta är inte en biologiskt fullständig modell av jorden eller en verklig generell AI. Symbolspråk, institutioner och tekniska idéer uppstår ur programmerade regler med mutation, slump, samarbete och rekombination. En möjlig rymdfarkost kräver flera samverkande uppfinningar – den är inte förutbestämd. Individerna beräknas var för sig; kartan visar ett glest urval för läsbarhet. Låg födelsetakt minskar belastningen, men obegränsad population kan aldrig garanteras vara laggfri på en telefon.</div>
 </section>
 <footer class="foot"><b>ÄRLIG VETENSKAPLIG BEGRÄNSNING</b> · Ingen webbsida kan skanna hela universum direkt. Detta är en automatiserad sökning genom ett litet, observerat urval av universum: kända exoplaneter. Grafiken är dekorativ och representerar inte stjärnornas verkliga positioner. Resultatet visar inga oupptäckta radiosignaler.<div class="barlink"><a href="https://exoplanetarchive.ipac.caltech.edu/docs/TAP/usingTAP.html" target="_blank" rel="noopener">NASA Exoplanet Archive / API ↗</a><a href="https://github.com/Paosososo/beyond-earth" target="_blank" rel="noopener">Katalogspegel (3 nov 2026) ↗</a><a href="https://seti.berkeley.edu/opendata" target="_blank" rel="noopener">SETI rådata ↗</a></div></footer></div>
 <script>
@@ -206,5 +301,5 @@ function draw(time){if(!W||!H||!starVisible||time-lastStarDraw<55){requestAnimat
 addEventListener('resize',resize,{passive:true});resize();requestAnimationFrame(draw);
 
 </script>
-<script src="./life-ui.js" defer></script>
+<script src="./life-ui-v6.js" defer></script>
 </body></html>
