@@ -153,10 +153,39 @@ function drawMap(){
    ctx.beginPath();ctx.arc(p.x,p.y,10+Math.sin(Date.now()/300+birth.id)*3,0,Math.PI*2);ctx.stroke();
   }
  }
- const ranked=[...sites].sort((a,b)=>b.level-a.level);
- const titles=new Set(ranked.slice(0,mode==='life'?2:(w<600?5:10)).map(a=>a.id));
+ const ranked=[...sites].sort((a,b)=>(b.level*10+b.homes*.03)-(a.level*10+a.homes*.03));
+ let renderSites=sites;
+ if(mode==='society'&&sites.length>68){
+  // EVERY real city contributes to a territorial district; only strongest
+  // city glyphs are drawn individually to keep the map legible.
+  const districts=new Map(),gridX=12,gridY=8;
+  for(const c of sites){
+   const cellX=Math.max(0,Math.min(gridX-1,Math.floor(c.x/WW*gridX)));
+   const cellY=Math.max(0,Math.min(gridY-1,Math.floor(c.y/WH*gridY)));
+   const key=cellX+cellY*gridX;
+   const d=districts.get(key)||{x:cellX,y:cellY,cities:0,homes:0,level:0,hue:c.hue};
+   d.cities++;d.homes+=c.homes||0;d.level=Math.max(d.level,c.level);districts.set(key,d);
+  }
+  for(const d of districts.values()){
+   const cx=(d.x+.5)*w/gridX,cy=(d.y+.5)*h/gridY;
+   const rx=Math.min(w/gridX*.48,4+Math.sqrt(d.homes)*1.35);
+   const ry=Math.min(h/gridY*.48,4+Math.sqrt(d.homes)*.85);
+   ctx.save();ctx.fillStyle='hsla('+d.hue+',55%,55%,.15)';
+   ctx.strokeStyle='hsla('+d.hue+',65%,69%,.3)';ctx.lineWidth=.8;
+   ctx.beginPath();ctx.ellipse(cx,cy,rx,ry,0,0,TAU);ctx.fill();ctx.stroke();ctx.restore();
+   if(d.cities>=5){
+    ctx.fillStyle='rgba(196,252,231,.7)';ctx.font='9px ui-monospace,monospace';ctx.textAlign='center';
+    ctx.fillText(d.cities+' BYAR',cx,cy+3);
+   }
+  }
+  renderSites=ranked.slice(0,w<600?24:55);
+  if(selected&&!renderSites.some(c=>c.id===selected)){
+   const chosen=sites.find(c=>c.id===selected);if(chosen)renderSites.push(chosen);
+  }
+ }
+ const titles=new Set(renderSites.slice(0,mode==='life'?2:(w<600?4:9)).map(a=>a.id));
  if(selected)titles.add(selected);
- for(const city of sites){
+ for(const city of renderSites){
   const place=cityShape(city,w,h);
   if(place&&titles.has(city.id)){
    const name=city.name.length>16?city.name.slice(0,15)+'…':city.name;
