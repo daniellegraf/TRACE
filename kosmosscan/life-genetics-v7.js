@@ -113,28 +113,32 @@ function create(random){
   return diff/(m||1);
  }
  function evaluateForage(adapt,seedValue){
-  // A paired, controlled proxy task testing improvement in action selection:
-  // training agent updates a directional bias after reward, control does not.
-  let x=0,trained=0,control=0,delta=0;
-  let state=seedValue|0;
-  const random=()=>{state^=state<<13;state^=state>>>17;state^=state<<5;return(state>>>0)/4294967296;};
-  const target=2+(random()*6)|0,rounds=20,episodes=6;
-  function trial(learning){
-   let policy=0,successes=0;
-   for(let e=0;e<episodes;e++){
-    let p=0;
-    for(let turn=0;turn<rounds;turn++){
-     const choose=learning?(random()<.18?random()*2-1:Math.tanh(policy)):(random()*2-1);
-     p+=choose>=0?1:-1;
-     const reward=(Math.abs(target-p)<2)?1:0;
-     successes+=reward;
-     if(learning)policy=clamp(policy+adapt*(reward-(Math.abs(target-p)>Math.abs(target-(p-1))?.015:-.015)), -2,2);
-    }
-   }
-   return successes/(rounds*episodes);
+  // Controlled two-choice resource cue task. Two policies face the SAME
+  // evaluation trials: one was trained using reward feedback, the other
+  // chooses randomly. No direct access to the correct action when learning.
+  let state=(seedValue||1)|0;
+  function r(){state^=state<<13;state^=state>>>17;state^=state<<5;return(state>>>0)/4294967296;}
+  const Q=[[0,0],[0,0]],rate=clamp(adapt,.05,.9);
+  for(let t=0;t<160;t++){
+   const target=r()<.5?0:1;
+   const sensed=r()<.78?target:1-target; // fallible scent measurement
+   const action=r()<.25?(r()<.5?0:1):(Q[sensed][1]>Q[sensed][0]?1:0);
+   const reward=action===target?1:0; // feedback arrives AFTER action
+   Q[sensed][action]+=rate*(reward-Q[sensed][action]);
   }
-  trained=trial(true);control=trial(false);
-  return {trained:+trained.toFixed(3),control:+control.toFixed(3),improvement:+(trained-control).toFixed(3),seed:seedValue};
+  let trained=0,control=0;
+  const n=240;
+  for(let i=0;i<n;i++){
+   const target=r()<.5?0:1,sensed=r()<.78?target:1-target;
+   const learnedAction=Q[sensed][1]>Q[sensed][0]?1:0;
+   const randomAction=r()<.5?0:1;
+   trained+=learnedAction===target?1:0;
+   control+=randomAction===target?1:0;
+  }
+  trained/=n;control/=n;
+  return{trained:+trained.toFixed(3),control:+control.toFixed(3),
+   improvement:+(trained-control).toFixed(3),seed:seedValue,
+   task:'reward-driven cue classification',trials:n};
  }
  return{founder,child,phenotype,distance,evaluateForage};
 }
