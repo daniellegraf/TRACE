@@ -506,6 +506,40 @@ function advanceFlight(){
   f.y=mod(f.y+Math.sin(f.angle)*.28,H);
  }
 }
+function culturalFission(){
+ // A new identity can form from an existing community. Individuals remain alive.
+ const candidates=clans.filter(c=>c.members>=55&&c.cities.length>=1&&c.bioReadiness>4);
+ if(!candidates.length)return false;
+ const parent=pick(candidates),index=clans.length;
+ const group=createClan(index);group.parentCulture=parent.id;
+ group.name=lexeme().slice(0,1).toUpperCase()+lexeme()+'-'+index;
+ group.hue=mod(parent.hue+between(22,110),360);
+ group.x=mod(parent.x+between(-24,24),W);group.y=mod(parent.y+between(-20,20),H);
+ group.language=parent.language.map(word=>rand()<.3?lexeme():word);
+ group.grammar=(parent.grammar+1+((rand()*5)|0))%6;
+ group.tech=new Float32Array(parent.tech);
+ group.knowledge=parent.knowledge;group.bioReadiness=parent.bioReadiness*.78;
+ group.social=parent.social*.8;
+ group.resources={food:Math.max(4,parent.resources.food*.09),
+  material:Math.max(5,parent.resources.material*.12),
+  power:Math.max(2,parent.resources.power*.09),
+  ideas:parent.resources.ideas*.1};
+ const desired=Math.min(65,Math.max(15,Math.floor(parent.members*.1)));
+ let migrated=0;
+ for(let k=0;k<agents.length&&migrated<desired;k++){
+  const i=(k*19+index*67)%agents.length,a=agents[i];
+  if(a.clan!==parent.id)continue;
+  a.clan=index;migrated++;a.x=mod(a.x+between(-1.5,1.5),W);
+  a.y=mod(a.y+between(-1.5,1.5),H);
+ }
+ if(migrated<7)return false;
+ group.members=migrated;parent.members-=migrated;clans.push(group);
+ parent.resources.material=Math.max(0,parent.resources.material-group.resources.material);
+ parent.resources.food=Math.max(0,parent.resources.food-group.resources.food);
+ culturesFounded++;
+ addEvent('culture',group.name+' bröt sig ut ur '+parent.name+' med '+migrated+' individer.',group.id);
+ return true;
+}
 function societalAction(){
  // Wall-clock social evolution proceeds independently of full organism biology ticks.
  for(const c of clans){
@@ -550,6 +584,8 @@ function societalAction(){
   }
   attemptSpace(c);
  }
+ // Cultural branching can create new languages and social structures.
+ if(cultureEnabled&&rand()<.0045) culturalFission();
  // Inter-clan cultural exchange, diplomacy and borrowing.
  if(rand()<.4){
   const a=pick(clans),b=pick(clans);if(a!==b&&a.cities.length&&b.cities.length){
@@ -568,6 +604,7 @@ function metrics(){
   updates:updatesPerSecond,progress:cycle?cycle.index:agents.length,progressTotal:cycle?cycle.total:agents.length,
   cities:cities.length,buildings,inventions:inventions.length,messages:sentences,teaching,transmissions,socialSpeed,spaceDiscoveries:extraPlanetary,
   launchCount:flights.length,achievements:skillsFound,cultures:clans.filter(c=>c.knowledge).length,
+ totalClans:clans.length,culturesFounded,architectureEvents,bodyEvents,totalHomes:cities.reduce((x,c)=>x+(c.homes||0),0),
  biologicalCultureReadiness:clans.reduce((sum,c)=>sum+clamp(c.bioReadiness/14,0,1),0)/clans.length,
  reproductionTarget:18*rateFactor,sexualBirths,clonalBirths,lineageBranches,
  geneticParts:maxGeneticParts,bodyComplexity,environmentChanges,signalsShared,signalSuccess,failedPrototypes,
@@ -647,11 +684,12 @@ function saveSnapshot(){
   maxCells,maxBrain,maxGen,maxGeneticParts,bodyComplexity,
   sexualBirths,clonalBirths,lineageBranches,signalsShared,signalSuccess,
   rewardImprovement,learningTrials,lastBenchmark,benchmarks,environmentChanges,
-  extraPlanetary,biologicalCycles,saves,failedPrototypes,failedExperiments
+  extraPlanetary,biologicalCycles,saves,failedPrototypes,failedExperiments,
+ camera,birthMarks,culturesFounded,architectureEvents,bodyEvents
  };
 }
 function restoreSnapshot(s){
- if(!s||s.version!==V7_VERSION||!Array.isArray(s.agents)||!Array.isArray(s.clans))
+ if(!s||(s.version!==V7_VERSION&&s.version!=='7.0.0')||!Array.isArray(s.agents)||!Array.isArray(s.clans))
   throw Error('Ogiltig sparfil eller fel version av livsmotorn.');
  const names=['seed','rng','id','step','clock','agents','clans','cities','messages','inventions',
   'milestones','flights','ancestry','nutrition','signal','terrain','temperature','water',
@@ -682,6 +720,8 @@ function restoreSnapshot(s){
  lastBenchmark=s.lastBenchmark;benchmarks=s.benchmarks;
  environmentChanges=s.environmentChanges;extraPlanetary=s.extraPlanetary;
  biologicalCycles=s.biologicalCycles;saves=s.saves;
+ camera=s.camera||{x:140,y:65,zoom:4};birthMarks=s.birthMarks||[];
+ culturesFounded=s.culturesFounded||0;architectureEvents=s.architectureEvents||0;bodyEvents=s.bodyEvents||0;
  failedPrototypes=s.failedPrototypes||0;failedExperiments=s.failedExperiments||[];
  last=0;lastFrame=0;lastStats=0;lastRateAt=0;updateWindow=0;
  if(!nextAgent||nextAgent.length<agents.length)nextAgent=new Int32Array(Math.max(512,agents.length));
@@ -763,6 +803,10 @@ onmessage=event=>{
   }catch(e){postMessage({type:'error',message:'Återställning misslyckades: '+e.message});}
  }else if(m.type==='integrity'){
   postMessage({type:'integrity',result:integrity()});
+ }else if(m.type==='camera'){
+  const v=m.view||{};
+  camera={x:clamp(+v.x||0,0,W),y:clamp(+v.y||0,0,H),zoom:clamp(+v.zoom||4,1,14)};
+  render();
  }else if(m.type==='inspectOrganism'){
   const a=agents[(+m.id||1)-1];
   postMessage({type:'organismDetail',id:m.id,agent:a?
