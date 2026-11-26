@@ -20,7 +20,7 @@ let ideas=0,teaching=0,buildings=0,cultureKinds=0,sharedResources=0,phenotypes=n
 let birthBalance=0,lastTime=0,lastFrame=0,lastReport=0,lastRateTime=0,birthRateCount=0,observedRate=0;
 let tickCursor=0,tickTotal=0,tickRunning=false;
 let paused=true,alive=false,stage=0,events=[],maxObservedCells=1,peakCulture=0;
-let lastMilestone=0,renderMode='individual',avgComplexity=0,avgBrains=0;
+let lastMilestone=0,renderMode='individual',avgComplexity=0,avgBrains=0,techAdoption=Array(10).fill(0);
 let timeBudget=7;
 const now=()=>performance.now();
 function rand(){let t=randomState|0;t^=t<<13;t^=t>>>17;t^=t<<5;randomState=t|0;return(t>>>0)/4294967296;}
@@ -80,7 +80,7 @@ function prepare(){
  head.fill(-1);nextLinks=new Int32Array(0);tickCursor=0;tickTotal=0;tickRunning=false;
  ticks=0;births=0;genMax=0;highestBrain=0;mutations=0;appearanceMutations=0;
  ideas=0;teaching=0;buildings=0;cultureKinds=0;sharedResources=0;phenotypes.clear();
- events=[];stage=0;maxObservedCells=1;peakCulture=0;lastMilestone=0;
+ events=[];stage=0;maxObservedCells=1;peakCulture=0;lastMilestone=0;techAdoption=Array(10).fill(0);
  birthBalance=0;lastTime=0;lastFrame=0;lastReport=0;lastRateTime=0;birthRateCount=0;observedRate=0;
  for(let i=0;i<NC;i++)nutrients[i]=rr(.30,.85);
  for(let i=0;i<125;i++)spawn(null);
@@ -266,16 +266,19 @@ function evolveChunk(){
 }
 function evaluateStage(){
  let sampled=0,cells3=0,cultured=0,community=0,tech=0,socialSum=0,complexity=0,brains=0;
+ const adopted=new Uint32Array(10);
  const stride=Math.max(1,Math.floor(agents.length/900));
  for(let i=0;i<agents.length;i+=stride){
   const a=agents[i];sampled++;
   if(a.g.cells>=3)cells3++;
   if(a.culture)cultured++;
+  for(let k=0;k<10;k++)if(has(a.culture,k))adopted[k]++;
   if(countBits(a.culture)>=3)community++;
   if(has(a.culture,4))tech++;
   socialSum+=a.links;complexity+=a.g.cells;brains+=a.g.brain.length;
  }
  avgComplexity=sampled?complexity/sampled:1;avgBrains=sampled?brains/sampled:3;
+ techAdoption=Array.from(adopted,v=>sampled?Math.round(v*100/sampled):0);
  let newStage=0;
  if(cells3>sampled*.014)newStage=1;
  if(newStage>=1&&community>sampled*.003&&teaching>=10)newStage=2;
@@ -295,7 +298,7 @@ function snapshot(){
   mutants:mutations,appearanceMutations,phenotypes:phenotypes.size,sites:sites.length,
   buildings,ideas,teaching,sharedResources,stage,ticks,cycleProgress:tickRunning?tickCursor:tickTotal,
   cycleTotal:tickRunning?tickTotal:tickTotal,meanCells:avgComplexity,meanBrain:avgBrains,
-  peakCells:maxObservedCells,knowledge:peakCulture,cultures:cultureKinds,youngestId:nextID-1};
+  peakCells:maxObservedCells,knowledge:peakCulture,cultures:cultureKinds,techAdoption,youngestId:nextID-1};
  const sitesData=sites.map(s=>[s.x,s.y,s.level,s.color,s.members]).slice(0,110);
  const examples=[];
  for(let k=0;k<4;k++){
