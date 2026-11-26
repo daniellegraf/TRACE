@@ -4,13 +4,14 @@
    generated from causal combinations. NOT a model of real biological history.
 */
 'use strict';
-importScripts('./life-genetics-v7.js');
-const G7=V7Genetics.create(rand);
+importScripts('./life-genetics-v7.js','./life-technology-v7.js');
+const G7=V7Genetics.create(rand),T7=V7Technology.create(rand);
 const V7_VERSION='7.0.0';
 let rateFactor=1,biologyFactor=1,mutationEnabled=true,learningEnabled=true,cultureEnabled=true;
 let biologicalCycles=0,sexualBirths=0,clonalBirths=0,lineageBranches=0,bodyComplexity=1;
 let maxGeneticParts=0,rewardImprovement=0,learningTrials=0,lastBenchmark=null,signalsShared=0,signalSuccess=0;
 let ancestry=[],saves=0,environmentChanges=0,benchmarks={trained:0,control:0,improvement:0};
+let failedPrototypes=0,failedExperiments=[];
 let temperature,water,sunlight;
 let dynamicCycle=0;
 
@@ -119,6 +120,7 @@ function setup(newSeed){
  sexualBirths=0;clonalBirths=0;lineageBranches=0;bodyComplexity=1;maxGeneticParts=0;
  rewardImprovement=0;learningTrials=0;lastBenchmark=null;signalsShared=0;signalSuccess=0;
  ancestry=[];saves=0;environmentChanges=0;benchmarks={trained:0,control:0,improvement:0};biologicalCycles=0;dynamicCycle=0;
+ failedPrototypes=0;failedExperiments=[];
  nextAgent=new Int32Array(512);occupancy.fill(-1);nutrition.fill(0);signal.fill(0);
  teaching=0;skillsFound=0;transmissions=0;sentences=0;innovations=0;buildings=0;roadCount=0;
  maxCells=1;maxBrain=3;maxGen=0;individualUpdates=0;updatesPerSecond=0;updateWindow=0;
@@ -397,12 +399,25 @@ function invent(c){
  const complexity=1+Math.floor(Math.log2(c.inventions.length+1))+(parents.length?1:0);
  const experimentCost=1.1+complexity*.18;
  if(c.resources.material<experimentCost||c.resources.power<.7+complexity*.08)return;
- const inv={id:inventions.length+1,key:fingerprint,clan:c.id,tick:step,
+ // Spend prototype resources before measuring function. Failures do NOT become
+ // successful inventions, but the scientific record preserves them.
+ const scored=T7.prototype(a,b,effect,
+   (c.tech[8]+c.tech[9]+c.tech[11]+c.tech[15])/4,complexity,parents);
+ c.resources.material-=experimentCost;
+ c.resources.power-=.7+complexity*.08;
+ if(!scored.success){
+  failedPrototypes++;
+  c.research+=.18+scored.score*.3;
+  failedExperiments.unshift({tick:step,clan:c.id,parts:[COMPONENTS[a],COMPONENTS[b]],
+   effect:EFFECTS[effect],complexity,result:scored});
+  if(failedExperiments.length>180)failedExperiments.pop();
+  return;
+ }
+ const inv={id:inventions.length+1,key:fingerprint,clan:c.id,tick:step,test:scored,
   name:compoundName(c,a,b,effect)+(parents.length?' · '+lexeme():''),parts:[COMPONENTS[a],COMPONENTS[b]],effect:EFFECTS[effect],
   complexity,parents,uses:0,detail:'Kombination av '+COMPONENTS[a]+' och '+COMPONENTS[b]+' för '+EFFECTS[effect]+'.',
   type:effect===8?'framdrift':effect===10?'koordination':'uppfinning'};
  inventions.push(inv);c.inventions.push(inv.id);c.inventionKeys.add(fingerprint);innovations++;
- c.resources.material-=experimentCost;c.resources.power-=.7+complexity*.08;
  const location=cities.find(city=>city.clan===c.id);
  if(location){location.inventions.push(inv.id);if(location.inventions.length>36)location.inventions.shift();}
  speech(c,'uppfinning',c.name+' skapade '+inv.name+' genom att kombinera '+inv.parts.join(' och ')+'.',
@@ -508,7 +523,7 @@ function metrics(){
   cities:cities.length,buildings,inventions:inventions.length,messages:sentences,teaching,transmissions,socialSpeed,spaceDiscoveries:extraPlanetary,
   launchCount:flights.length,achievements:skillsFound,cultures:clans.filter(c=>c.knowledge).length,
  reproductionTarget:18*rateFactor,sexualBirths,clonalBirths,lineageBranches,
- geneticParts:maxGeneticParts,bodyComplexity,environmentChanges,signalsShared,signalSuccess,
+ geneticParts:maxGeneticParts,bodyComplexity,environmentChanges,signalsShared,signalSuccess,failedPrototypes,
  biologyFactor,rateFactor,cultureEnabled,learningEnabled,mutationEnabled,
  benchmark:benchmarks,biologicalCycles};
 }
@@ -570,7 +585,7 @@ function saveSnapshot(){
   maxCells,maxBrain,maxGen,maxGeneticParts,bodyComplexity,
   sexualBirths,clonalBirths,lineageBranches,signalsShared,signalSuccess,
   rewardImprovement,learningTrials,lastBenchmark,benchmarks,environmentChanges,
-  extraPlanetary,biologicalCycles,saves
+  extraPlanetary,biologicalCycles,saves,failedPrototypes,failedExperiments
  };
 }
 function restoreSnapshot(s){
@@ -605,6 +620,7 @@ function restoreSnapshot(s){
  lastBenchmark=s.lastBenchmark;benchmarks=s.benchmarks;
  environmentChanges=s.environmentChanges;extraPlanetary=s.extraPlanetary;
  biologicalCycles=s.biologicalCycles;saves=s.saves;
+ failedPrototypes=s.failedPrototypes||0;failedExperiments=s.failedExperiments||[];
  last=0;lastFrame=0;lastStats=0;lastRateAt=0;updateWindow=0;
  if(!nextAgent||nextAgent.length<agents.length)nextAgent=new Int32Array(Math.max(512,agents.length));
  if(!(temperature instanceof Float32Array))temperature=new Float32Array(temperature);
@@ -703,7 +719,7 @@ onmessage=event=>{
     words:c.language,grammar:c.grammar,tech:Array.from(c.tech),resources:{...c.resources},
     inventions:c.inventions,settlements:c.cities,launches:c.launches})),
    cities:cities.map(siteSummary),inventions:inventions.slice(-4500),
-   messages:messages.slice(),history:milestones.slice(),spacecraft:flights.slice()};
+   messages:messages.slice(),history:milestones.slice(),spacecraft:flights.slice(),failedExperiments:failedExperiments.slice()};
   postMessage({type:'journal',data:journal});
  }else if(m.type==='inspect'){
   postMessage({type:'detail',request:m.request,city:details(+m.id)});
