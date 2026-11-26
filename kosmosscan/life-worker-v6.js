@@ -202,8 +202,8 @@ function gainSkill(c,k){
  t[k]=Math.min(1,t[k]+.06+rand()*.06);
  if(t[k]>=threshold){
   c.knowledge|=bit(k);skillsFound++;c.discovery++;
-  const lex=WORDS[(k+2)%WORDS.length];
-  speech(c,'upptäckt',c.name+' utvecklade '+DOMAINS[k].toLowerCase()+' genom arbete och delning av idéer.',[0,20,lex,1],{tech:k});
+  const conceptToken=(k+2)%WORDS.length;
+  speech(c,'upptäckt',c.name+' utvecklade '+DOMAINS[k].toLowerCase()+' genom arbete och delning av idéer.',[0,20,conceptToken,1],{tech:k});
   addEvent('skill',c.name+' utvecklade kunskap inom '+DOMAINS[k]+'.',c.id);
  }
  return true;
