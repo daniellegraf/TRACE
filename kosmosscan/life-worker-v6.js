@@ -450,6 +450,17 @@ onmessage=event=>{
  }else if(m.type==='setSpeed'){
   socialSpeed=m.fast?4:1;
   postMessage({type:'speed',value:socialSpeed});
+ }else if(m.type==='export'){
+  // Export research evidence and causal parent IDs, not the entire unlimited agent heap.
+  const journal={format:'KOSMOSSCAN-LIFE-V6-RESEARCH-JOURNAL',seed,generatedAt:new Date().toISOString(),
+   interpretation:'A rule-based artificial-life simulation, not an observation of real extraterrestrial intelligence.',
+   metrics:metrics(),
+   clans:clans.map(c=>({id:c.id,name:c.name,population:c.members,
+    words:c.language,grammar:c.grammar,tech:Array.from(c.tech),resources:{...c.resources},
+    inventions:c.inventions,settlements:c.cities,launches:c.launches})),
+   cities:cities.map(siteSummary),inventions:inventions.slice(-4500),
+   messages:messages.slice(),history:milestones.slice(),spacecraft:flights.slice()};
+  postMessage({type:'journal',data:journal});
  }else if(m.type==='inspect'){
   postMessage({type:'detail',request:m.request,city:details(+m.id)});
  }else if(m.type==='addFood'){
