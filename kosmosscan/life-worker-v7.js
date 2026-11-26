@@ -122,6 +122,7 @@ function setup(newSeed){
  teaching=0;skillsFound=0;transmissions=0;sentences=0;innovations=0;buildings=0;roadCount=0;
  maxCells=1;maxBrain=3;maxGen=0;individualUpdates=0;updatesPerSecond=0;updateWindow=0;
  birthCredit=0;cycle=null;last=0;lastFrame=0;lastStats=0;lastRateAt=0;rate=0;rateBorn=0;
+ rateFactor=1;biologyFactor=1;mutationEnabled=true;learningEnabled=true;cultureEnabled=true;
  for(let i=0;i<SIZE;i++){
    const x=i%W,y=(i/W)|0;
    const field=Math.sin(x*.069+seed*.00000007)*.39+Math.cos(y*.083)*.28+
@@ -540,6 +541,79 @@ function render(){
    people:c.members,knowledge:bits(c.knowledge),inventions:c.inventions.length,
    cities:c.cities.length,languageAge:c.languageAge}))},[sample.buffer]);
 }
+function saveSnapshot(){
+ return {
+  version:V7_VERSION,seed,rng,id,step,clock,
+  agents,clans,cities,messages,inventions,milestones,flights,ancestry,
+  nutrition,signal,terrain,temperature,water,sunlight,occupancy,nextAgent,cycle,
+  birthCredit,rate,rateBorn,rateFactor,biologyFactor,socialSpeed,
+  cultureEnabled,mutationEnabled,learningEnabled,
+  teaching,skillsFound,transmissions,sentences,innovations,buildings,roadCount,
+  maxCells,maxBrain,maxGen,maxGeneticParts,bodyComplexity,
+  sexualBirths,clonalBirths,lineageBranches,signalsShared,signalSuccess,
+  rewardImprovement,learningTrials,lastBenchmark,benchmarks,environmentChanges,
+  extraPlanetary,biologicalCycles,saves
+ };
+}
+function restoreSnapshot(s){
+ if(!s||s.version!==V7_VERSION||!Array.isArray(s.agents)||!Array.isArray(s.clans))
+  throw Error('Ogiltig sparfil eller fel version av livsmotorn.');
+ const names=['seed','rng','id','step','clock','agents','clans','cities','messages','inventions',
+  'milestones','flights','ancestry','nutrition','signal','terrain','temperature','water',
+  'sunlight','occupancy','nextAgent','cycle','birthCredit','rate','rateBorn','rateFactor',
+  'biologyFactor','socialSpeed','cultureEnabled','mutationEnabled','learningEnabled',
+  'teaching','skillsFound','transmissions','sentences','innovations','buildings','roadCount',
+  'maxCells','maxBrain','maxGen','maxGeneticParts','bodyComplexity','sexualBirths',
+  'clonalBirths','lineageBranches','signalsShared','signalSuccess','rewardImprovement',
+  'learningTrials','lastBenchmark','benchmarks','environmentChanges','extraPlanetary',
+  'biologicalCycles','saves'];
+ // Restore by explicit assignments (no eval or dynamic global writes).
+ seed=s.seed;rng=s.rng;id=s.id;step=s.step;clock=s.clock;
+ agents=s.agents;clans=s.clans;cities=s.cities;messages=s.messages;
+ inventions=s.inventions;milestones=s.milestones;flights=s.flights;ancestry=s.ancestry;
+ nutrition=s.nutrition;signal=s.signal;terrain=s.terrain;
+ temperature=s.temperature;water=s.water;sunlight=s.sunlight;
+ occupancy=s.occupancy;nextAgent=s.nextAgent;cycle=s.cycle;
+ birthCredit=s.birthCredit;rate=s.rate;rateBorn=s.rateBorn;
+ rateFactor=s.rateFactor;biologyFactor=s.biologyFactor;socialSpeed=s.socialSpeed;
+ cultureEnabled=s.cultureEnabled;mutationEnabled=s.mutationEnabled;
+ learningEnabled=s.learningEnabled;teaching=s.teaching;skillsFound=s.skillsFound;
+ transmissions=s.transmissions;sentences=s.sentences;innovations=s.innovations;
+ buildings=s.buildings;roadCount=s.roadCount;maxCells=s.maxCells;maxBrain=s.maxBrain;
+ maxGen=s.maxGen;maxGeneticParts=s.maxGeneticParts;bodyComplexity=s.bodyComplexity;
+ sexualBirths=s.sexualBirths;clonalBirths=s.clonalBirths;lineageBranches=s.lineageBranches;
+ signalsShared=s.signalsShared;signalSuccess=s.signalSuccess;
+ rewardImprovement=s.rewardImprovement;learningTrials=s.learningTrials;
+ lastBenchmark=s.lastBenchmark;benchmarks=s.benchmarks;
+ environmentChanges=s.environmentChanges;extraPlanetary=s.extraPlanetary;
+ biologicalCycles=s.biologicalCycles;saves=s.saves;
+ last=0;lastFrame=0;lastStats=0;lastRateAt=0;updateWindow=0;
+ if(!nextAgent||nextAgent.length<agents.length)nextAgent=new Int32Array(Math.max(512,agents.length));
+ if(!(temperature instanceof Float32Array))temperature=new Float32Array(temperature);
+ if(!(water instanceof Float32Array))water=new Float32Array(water);
+ if(!(sunlight instanceof Float32Array))sunlight=new Float32Array(sunlight);
+ if(!(occupancy instanceof Int32Array))occupancy=new Int32Array(occupancy);
+ if(!(nextAgent instanceof Int32Array))nextAgent=new Int32Array(nextAgent);
+ if(!(nutrition instanceof Float32Array))nutrition=new Float32Array(nutrition);
+ if(!(signal instanceof Float32Array))signal=new Float32Array(signal);
+ for(const a of agents){
+  if(!(a.network instanceof Float32Array))a.network=new Float32Array(a.network);
+  if(!(a.memory instanceof Float32Array))a.memory=new Float32Array(a.memory);
+ }
+}
+function integrity(){
+ let uniq=true,hasBio=true,validLinks=true,distinctBrains=true;
+ for(let j=0;j<agents.length;j++){
+  const a=agents[j];
+  if(a.id!==j+1)uniq=false;
+  if(!a.g.bio||!a.body)hasBio=false;
+  if(a.parents.some(p=>p!==null&&(p<1||p>=a.id)))validLinks=false;
+  if(j&&a.network===agents[j-1].network)distinctBrains=false;
+ }
+ return{count:agents.length,uniqueSequentialIDs:uniq,genomesPresent:hasBio,
+  validParentLinks:validLinks,individualNeuralArrays:distinctBrains,
+  noDeathsOrArchiving:true,mutatedLineages:lineageBranches};
+}
 let timer=null;
 function heartbeat(){
  if(!live||paused)return;
@@ -580,6 +654,19 @@ onmessage=event=>{
   if(key==='mutation')mutationEnabled=!!m.enabled;
   if(key==='culture')cultureEnabled=!!m.enabled;
   postMessage({type:'ablation',learningEnabled,mutationEnabled,cultureEnabled});
+ }else if(m.type==='checkpoint'){
+  try{saves++;postMessage({type:'checkpoint',data:saveSnapshot()});}
+  catch(e){postMessage({type:'error',message:'Sparningen misslyckades: '+e.message});}
+ }else if(m.type==='restore'){
+  try{
+   if(timer!==null)clearTimeout(timer);
+   restoreSnapshot(m.data);
+   live=true;paused=false;last=0;render();
+   postMessage({type:'ready',seed,baseline:agents.length,restored:true});
+   heartbeat();
+  }catch(e){postMessage({type:'error',message:'Återställning misslyckades: '+e.message});}
+ }else if(m.type==='integrity'){
+  postMessage({type:'integrity',result:integrity()});
  }else if(m.type==='inspectOrganism'){
   const a=agents[(+m.id||1)-1];
   postMessage({type:'organismDetail',id:m.id,agent:a?
