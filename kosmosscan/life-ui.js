@@ -8,6 +8,8 @@
 const $=id=>document.getElementById(id);
 const stage=$('life-stage');if(!stage)return;
 const stageCtx=stage.getContext('2d',{alpha:false});
+const densityCanvas=document.createElement('canvas');densityCanvas.width=168;densityCanvas.height=100;
+const densityCtx=densityCanvas.getContext('2d');const densityImage=densityCtx.createImageData(168,100);
 const portrait=$('life-gallery'),portraitCtx=portrait.getContext('2d');
 const STAGES=[
  ['URSPRUNG','Encelligt liv','Enkla autonoma celler förbrukar energi och navigerar.'],
@@ -168,8 +170,7 @@ function drawWorld(){
    }
   }
  }else if(state.density){
-  const data=state.density,image=document.createElement('canvas');image.width=168;image.height=100;
-  const cc=image.getContext('2d'),pixels=cc.createImageData(168,100);
+  const data=state.density,pixels=densityImage;
   for(let i=0;i<168*100;i++){
    const p=i*3,k=i*4,num=data[p],clr=palette[data[p+1]],brightness=data[p+2]/255;
    pixels.data[k]=num?Math.min(255,clr[0]*(.35+brightness)):0;
@@ -177,8 +178,8 @@ function drawWorld(){
    pixels.data[k+2]=num?Math.min(255,clr[2]*(.35+brightness)):0;
    pixels.data[k+3]=num?255:0;
   }
-  cc.putImageData(pixels,0,0);
-  ctx.imageSmoothingEnabled=false;ctx.drawImage(image,0,0,w,h);ctx.imageSmoothingEnabled=true;
+  densityCtx.putImageData(pixels,0,0);
+  ctx.imageSmoothingEnabled=false;ctx.drawImage(densityCanvas,0,0,w,h);ctx.imageSmoothingEnabled=true;
  }
  ctx.font='11px ui-monospace,monospace';ctx.textAlign='left';
  ctx.fillStyle='#b8f7e8';ctx.fillText('INDIVIDER: '+nfmt(m.pop),13,21);
