@@ -218,6 +218,17 @@ function openWorker(){
   else if(m.type==='detail'&&m.request===requestID){cityDetail=m.city;renderDetail();}
   else if(m.type==='error'){running=false;status('BERÄKNINGSFEL',false);log(m.message);}
   else if(m.type==='paused'){running=false;status('PAUSAD',false);}
+  else if(m.type==='journal'){
+   try{
+    const json=JSON.stringify(m.data,null,2);
+    const blob=new Blob([json],{type:'application/json;charset=utf-8'});
+    const uri=URL.createObjectURL(blob),a=document.createElement('a');
+    a.href=uri;a.download='KOSMOSSCAN_forskningsjournal_'+(m.data.seed||'world')+'.json';
+    a.style.display='none';document.body.appendChild(a);a.click();
+    setTimeout(()=>{a.remove();URL.revokeObjectURL(uri);},1600);
+    log('Forskningsjournalen har genererats med uppfinningarnas föräldra-ID och händelser.');
+   }catch(error){log('Kunde inte spara forskningsjournalen: '+error.message);}
+  }
   else if(m.type==='speed'){fastResearch=m.value===4;$('society-fast').textContent=fastResearch?'⚡ FORSKNING ×4 AKTIV':'⚡ SNABBARE FORSKNING ×4';$('society-fast').classList.toggle('active',fastResearch);}
  };
 }
@@ -254,6 +265,10 @@ $('society-global-analysis').addEventListener('click',()=>{
   if(!m)report('Starta simuleringen först.');
   else report('GLOBAL ANALYS\n\n'+fmt(m.count)+' organismer, '+fmt(m.cities)+' städer, '+fmt(m.inventions)+' uppfinningar och '+fmt(m.messages)+' symbolmeddelanden. När en stad har grundats kan du välja den och läsa en mer detaljerad analys.');
  }
+});
+$('society-export').addEventListener('click',()=>{
+ if(!worker||!active){report('Starta livsfröet innan du exporterar.');return;}
+ worker.postMessage({type:'export'});
 });
 $('society-copy').addEventListener('click',async()=>{
  try{await navigator.clipboard.writeText($('society-analysis').textContent);$('society-copy').textContent='KOPIERAT';}
