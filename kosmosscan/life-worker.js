@@ -21,7 +21,7 @@ let birthBalance=0,lastTime=0,lastFrame=0,lastReport=0,lastRateTime=0,birthRateC
 let tickCursor=0,tickTotal=0,tickRunning=false;
 let paused=true,alive=false,stage=0,events=[],maxObservedCells=1,peakCulture=0;
 let lastMilestone=0,renderMode='individual',avgComplexity=0,avgBrains=0,techAdoption=Array(10).fill(0);
-let timeBudget=7;
+let timeBudget=7,updatesWindow=0,updatesPerSecond=0;
 const now=()=>performance.now();
 function rand(){let t=randomState|0;t^=t<<13;t^=t>>>17;t^=t<<5;randomState=t|0;return(t>>>0)/4294967296;}
 function rr(a,b){return a+(b-a)*rand();}
@@ -81,7 +81,7 @@ function prepare(){
  ticks=0;births=0;genMax=0;highestBrain=0;mutations=0;appearanceMutations=0;
  ideas=0;teaching=0;buildings=0;cultureKinds=0;sharedResources=0;phenotypes.clear();
  events=[];stage=0;maxObservedCells=1;peakCulture=0;lastMilestone=0;techAdoption=Array(10).fill(0);
- birthBalance=0;lastTime=0;lastFrame=0;lastReport=0;lastRateTime=0;birthRateCount=0;observedRate=0;
+ birthBalance=0;lastTime=0;lastFrame=0;lastReport=0;lastRateTime=0;birthRateCount=0;observedRate=0;updatesWindow=0;updatesPerSecond=0;
  for(let i=0;i<NC;i++)nutrients[i]=rr(.30,.85);
  for(let i=0;i<125;i++)spawn(null);
  say('Livets början: 125 enkla, encelliga digitala organismer');
@@ -256,7 +256,7 @@ function evolveChunk(){
  if(!tickRunning)startTick();
  const deadline=now()+timeBudget;let operations=0;
  while(tickCursor<tickTotal){
-  updateOrganism(agents[tickCursor++]);operations++;
+  updateOrganism(agents[tickCursor++]);operations++;updatesWindow++;
   if((operations&63)===0&&now()>=deadline)break;
  }
  if(tickCursor===tickTotal){
@@ -298,7 +298,7 @@ function snapshot(){
   mutants:mutations,appearanceMutations,phenotypes:phenotypes.size,sites:sites.length,
   buildings,ideas,teaching,sharedResources,stage,ticks,cycleProgress:tickRunning?tickCursor:tickTotal,
   cycleTotal:tickRunning?tickTotal:tickTotal,meanCells:avgComplexity,meanBrain:avgBrains,
-  peakCells:maxObservedCells,knowledge:peakCulture,cultures:cultureKinds,techAdoption,youngestId:nextID-1};
+  peakCells:maxObservedCells,knowledge:peakCulture,cultures:cultureKinds,techAdoption,individualUpdatesPerSecond:updatesPerSecond,youngestId:nextID-1};
  const sitesData=sites.map(s=>[s.x,s.y,s.level,s.color,s.members]).slice(0,110);
  const examples=[];
  for(let k=0;k<4;k++){
@@ -343,7 +343,8 @@ function heartbeat(){
  if(lastRateTime===0)lastRateTime=current;
  if(current-lastRateTime>=1000){
   observedRate=Math.round(birthRateCount/((current-lastRateTime)/1000));
-  birthRateCount=0;lastRateTime=current;
+  updatesPerSecond=Math.round(updatesWindow/((current-lastRateTime)/1000));
+  updatesWindow=0;birthRateCount=0;lastRateTime=current;
  }
  try{evolveChunk();}
  catch(e){paused=true;postMessage({type:'error',error:'Fel i livsmotorn: '+e.message});return;}
