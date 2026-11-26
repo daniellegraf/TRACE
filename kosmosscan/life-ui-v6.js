@@ -7,7 +7,7 @@ const ctx=canvas.getContext('2d',{alpha:false});
 if(!ctx){$('society-status').textContent='GRAFIKFEL';return;}
 const WW=180,WH=112,DOMAINS=['Signaler','Samarbete','Verktyg','Skydd','Odling','Symboler','Handel','Organisation','Material','Energi','Optik','Beräkning','Astronomi','Navigation','Automation','Framdrift'];
 let worker=null,active=false,running=false,snapshot=null,selected=null,cityDetail=null,messageSelected=null,mode='society';
-let languageFilter='alla',lastInfo=0,lastInspect=0,lastEvent='',requestID=0,paintQueued=false,worldSeed=1;
+let languageFilter='alla',lastInfo=0,lastInspect=0,lastEvent='',requestID=0,paintQueued=false,worldSeed=1,fastResearch=false;
 const topocanvas=document.createElement('canvas');topocanvas.width=WW;topocanvas.height=WH;
 const topctx=topocanvas.getContext('2d');
 const fmt=v=>Math.round(+v||0).toLocaleString('sv-SE');
@@ -218,16 +218,18 @@ function openWorker(){
   else if(m.type==='detail'&&m.request===requestID){cityDetail=m.city;renderDetail();}
   else if(m.type==='error'){running=false;status('BERÄKNINGSFEL',false);log(m.message);}
   else if(m.type==='paused'){running=false;status('PAUSAD',false);}
+  else if(m.type==='speed'){fastResearch=m.value===4;$('society-fast').textContent=fastResearch?'⚡ FORSKNING ×4 AKTIV':'⚡ SNABBARE FORSKNING ×4';$('society-fast').classList.toggle('active',fastResearch);}
  };
 }
 function start(){
  try{
-  openWorker();active=true;running=true;snapshot=null;selected=null;cityDetail=null;lastInfo=0;lastInspect=0;lastEvent='';messageSelected=null;requestID=0;
+  openWorker();active=true;running=true;fastResearch=false;snapshot=null;selected=null;cityDetail=null;lastInfo=0;lastInspect=0;lastEvent='';messageSelected=null;requestID=0;
   empty($('society-log'));empty($('society-messages'));empty($('society-translation'));empty($('society-discoveries'));
   while($('society-city-select').options.length>1)$('society-city-select').remove(1);
   report('Välj en bosättning och tryck på Analysera samhället. Här kan du studera språk, teknik och historiska upptäckter.');
   $('society-start').textContent='↻ NYTT LIVSFRÖ';
   $('society-pause').disabled=false;$('society-pause').textContent='⏸ PAUSA';
+  $('society-fast').disabled=false;$('society-fast').textContent='⚡ SNABBARE FORSKNING ×4';$('society-fast').classList.remove('active');
   status('VÄCKER LIV…',true);worker.postMessage({type:'start'});renderMap();renderDetail();
  }catch(e){running=false;status('KUNDE INTE STARTA',false);log(e.message);}
 }
@@ -236,6 +238,10 @@ $('society-pause').addEventListener('click',()=>{
  if(!active||!worker)return;
  running=!running;worker.postMessage({type:running?'resume':'pause'});
  $('society-pause').textContent=running?'⏸ PAUSA':'▶ FORTSÄTT';status(running?'SAMHÄLLEN VÄXER':'PAUSAD',running);
+});
+$('society-fast').addEventListener('click',()=>{
+ if(!worker||!active)return;
+ worker.postMessage({type:'setSpeed',fast:!fastResearch});
 });
 $('society-map-view').addEventListener('click',()=>{mode='society';$('society-map-view').classList.add('active');$('society-life-view').classList.remove('active');drawMap();});
 $('society-life-view').addEventListener('click',()=>{mode='life';$('society-life-view').classList.add('active');$('society-map-view').classList.remove('active');drawMap();});
