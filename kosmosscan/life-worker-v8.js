@@ -525,14 +525,19 @@ function culturalFission(){
   power:Math.max(2,parent.resources.power*.09),
   ideas:parent.resources.ideas*.1};
  const desired=Math.min(65,Math.max(15,Math.floor(parent.members*.1)));
- let migrated=0;
+ let migrated=0;const moved=[];
+ const start=(index*137)%agents.length;
  for(let k=0;k<agents.length&&migrated<desired;k++){
-  const i=(k*19+index*67)%agents.length,a=agents[i];
+  const a=agents[(start+k)%agents.length];
   if(a.clan!==parent.id)continue;
-  a.clan=index;migrated++;a.x=mod(a.x+between(-1.5,1.5),W);
-  a.y=mod(a.y+between(-1.5,1.5),H);
+  moved.push(a);a.clan=index;migrated++;
  }
- if(migrated<7)return false;
+ if(migrated<7){
+  // An aborted split must NOT leave organisms pointing to a nonexistent clan.
+  for(const a of moved)a.clan=parent.id;
+  return false;
+ }
+ for(const a of moved){a.x=mod(a.x+between(-1.5,1.5),W);a.y=mod(a.y+between(-1.5,1.5),H);}
  group.members=migrated;parent.members-=migrated;clans.push(group);
  parent.resources.material=Math.max(0,parent.resources.material-group.resources.material);
  parent.resources.food=Math.max(0,parent.resources.food-group.resources.food);
