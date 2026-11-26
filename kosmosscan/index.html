@@ -116,7 +116,9 @@
 .society-controls{display:flex;gap:10px;flex-wrap:wrap;padding:17px 22px 7px;align-items:center}
 .society-controls button{cursor:pointer;min-height:42px;border-radius:10px;font-size:12px;font-weight:800;padding:9px 14px}
 .society-start{background:linear-gradient(110deg,#71efcc,#92b6f0);border:0;color:#062027}
-.society-pause{background:#153242;color:#deebf2;border:1px solid #3c6574}.society-pause:disabled{opacity:.4}
+.society-pause{background:#153242;color:#deebf2;border:1px solid #3c6574}.society-pause:disabled,.society-fast:disabled{opacity:.4}
+.society-fast{background:#1a3242;border:1px solid #4c6876;color:#d2e7ef}
+.society-fast.active{background:#493e24;border-color:#95845b;color:#ffe3ab}
 .society-viewbuttons{display:flex;gap:3px;margin-left:auto;border:1px solid #31566d;background:#0d2638;padding:3px;border-radius:10px}
 .society-viewbuttons button{min-height:33px;background:transparent;border:0;color:#88adc0}
 .society-viewbuttons button.active{background:#18473f;color:#b6ffe7}
@@ -205,6 +207,7 @@
  <div class="society-controls">
   <button type="button" class="society-start" id="society-start">✦ VÄCK ETT NYTT LIVSFRÖ</button>
   <button type="button" class="society-pause" id="society-pause" disabled>⏸ PAUSA</button>
+  <button type="button" class="society-fast" id="society-fast" disabled>⚡ SNABBARE FORSKNING ×4</button>
   <div class="society-viewbuttons"><button id="society-map-view" class="active" type="button">🏛 Samhällen</button><button id="society-life-view" type="button">🧬 Organismer</button></div>
  </div>
  <div class="society-metrics">
@@ -257,7 +260,7 @@
    <div class="society-paneltitle"><div><b>⏳ VÄRLDENS HISTORIA</b><small>Faktiska förändringar som registrerats av simuleringen</small></div></div>
    <div id="society-log"><div class="society-log-entry">Världen väntar på sitt första livsfrö.</div></div>
  </div>
- <div class="society-caveat"><b>OM EXPERIMENTET:</b> Detta är inte en biologiskt fullständig modell av jorden eller en verklig generell AI. Symbolspråk, institutioner och tekniska idéer uppstår ur programmerade regler med mutation, slump, samarbete och rekombination. En möjlig rymdfarkost kräver flera samverkande uppfinningar – den är inte förutbestämd. Individerna beräknas var för sig; kartan visar ett glest urval för läsbarhet. Låg födelsetakt minskar belastningen, men obegränsad population kan aldrig garanteras vara laggfri på en telefon.</div>
+ <div class="society-caveat"><b>OM EXPERIMENTET:</b> Detta är inte en biologiskt fullständig modell av jorden eller en verklig generell AI. Symbolspråk, institutioner och tekniska idéer uppstår ur programmerade regler med mutation, slump, samarbete och rekombination. En möjlig rymdfarkost kräver flera samverkande uppfinningar – den är inte förutbestämd. Snabbare forskning ökar takten i samhällens arbete, utan att hoppa över individuella biologiska uppdateringar. Individerna beräknas var för sig; kartan visar ett glest urval för läsbarhet. Låg födelsetakt minskar belastningen, men obegränsad population kan aldrig garanteras vara laggfri på en telefon.</div>
 </section>
 <footer class="foot"><b>ÄRLIG VETENSKAPLIG BEGRÄNSNING</b> · Ingen webbsida kan skanna hela universum direkt. Detta är en automatiserad sökning genom ett litet, observerat urval av universum: kända exoplaneter. Grafiken är dekorativ och representerar inte stjärnornas verkliga positioner. Resultatet visar inga oupptäckta radiosignaler.<div class="barlink"><a href="https://exoplanetarchive.ipac.caltech.edu/docs/TAP/usingTAP.html" target="_blank" rel="noopener">NASA Exoplanet Archive / API ↗</a><a href="https://github.com/Paosososo/beyond-earth" target="_blank" rel="noopener">Katalogspegel (3 nov 2026) ↗</a><a href="https://seti.berkeley.edu/opendata" target="_blank" rel="noopener">SETI rådata ↗</a></div></footer></div>
 <script>
