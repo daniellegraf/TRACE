@@ -630,30 +630,59 @@ function details(id){
   history:milestones.filter(m=>m.clan===c.id).slice(0,12)};
 }
 function render(){
- // Individual simulation persists; UI intentionally shows civilization map with a
- // fixed small representative agent sample. This is NOT a full individual pixel plot.
- const sampleCount=Math.min(agents.length,950),sample=new Uint8Array(sampleCount*4);
+ // FULL population is processed by the worker. The camera receives only
+ // organisms currently inside its region, as real developmental morphologies.
+ const visible=[],cap=128,viewW=W/camera.zoom,viewH=H/camera.zoom;
+ const left=camera.x-viewW*.5,right=camera.x+viewW*.5;
+ const top=camera.y-viewH*.5,bottom=camera.y+viewH*.5;
+ let inView=0,newestVisible=null;
+ for(let i=0;i<agents.length;i++){
+  const a=agents[i];
+  if(a.x<left||a.x>right||a.y<top||a.y>bottom)continue;
+  inView++;
+  if(i===agents.length-1)newestVisible=a;
+  if(visible.length<cap)visible.push(a);
+  else{
+   const replacementIndex=Math.floor(rand()*inView);
+   if(replacementIndex<cap)visible[replacementIndex]=a;
+  }
+ }
+ if(newestVisible&&!visible.includes(newestVisible)&&visible.length)visible[visible.length-1]=newestVisible;
+ const creatures=visible.map(a=>{
+  const morph=G7.phenotype(a.g.bio,a.maturity);
+  return{id:a.id,x:a.x,y:a.y,heading:a.angle,gen:a.gen,clan:a.clan,
+   color:morph.color,segments:morph.segments,eyes:morph.eyes,
+   limbs:morph.appendages,energy:a.energy,geneticParts:morph.geneticComplexity,
+   maturity:a.maturity,nodes:morph.nodes.slice(0,60)};
+ });
+ const sampleCount=Math.min(agents.length,640),sample=new Uint8Array(sampleCount*4);
  for(let k=0;k<sampleCount;k++){
   const index=Math.min(agents.length-1,Math.floor((k+.5)*agents.length/sampleCount));
-  const a=agents[index],o=k*4;sample[o]=(a.x/W*255)|0;sample[o+1]=(a.y/H*255)|0;
-  sample[o+2]=a.clan;sample[o+3]=a.g.form;
+  const a=agents[index],o=k*4;
+  sample[o]=clamp((a.x/W*255)|0,0,255);
+  sample[o+1]=clamp((a.y/H*255)|0,0,255);
+  sample[o+2]=a.clan%255;sample[o+3]=a.g.form||0;
  }
- const summaries=cities.map(siteSummary).slice(0,80);
+ const summaries=cities.length<600?cities.map(siteSummary):
+  cities.filter((_,i)=>i%Math.ceil(cities.length/600)===0).map(siteSummary);
  const paths=[];
- for(let i=0;i<summaries.length;i++)for(let j=i+1;j<summaries.length;j++){
-  const a=summaries[i],b=summaries[j],dx=a.x-b.x,dy=a.y-b.y;
-  if(dx*dx+dy*dy<420&&a.level+b.level>=4&&paths.length<140)paths.push([a.id,b.id]);
+ // Bounded visual road derivation. Social geography is never capped.
+ for(let i=0;i<summaries.length&&i<350;i++){
+  let linked=0;
+  for(let j=i+1;j<summaries.length&&j<350;j++){
+   const a=summaries[i],b=summaries[j];
+   const dx=a.x-b.x,dy=a.y-b.y;
+   if(dx*dx+dy*dy<270&&a.level+b.level>=4){
+    paths.push([a.id,b.id]);linked++;
+    if(linked>=3)break;
+   }
+  }
  }
- const craft=flights.map(f=>({x:f.x,y:f.y,id:f.id,name:f.name,progress:f.progress,clan:f.clan})).slice(-20);
- // Reconstruct TRUE ancestor chain by permanent individual IDs, not by
- // sampling unrelated population quartiles and calling them descendants.
+ const craft=flights.slice(-24).map(f=>({x:f.x,y:f.y,id:f.id,
+  name:f.name,progress:f.progress,clan:f.clan}));
  const newest=agents.at(-1),chain=[];
  let cursor=newest,guard=0;
- while(cursor&&guard++<512){
-  chain.push(cursor);
-  const parentID=cursor.parents?.[0];
-  cursor=parentID?agents[parentID-1]:null;
- }
+ while(cursor&&guard++<512){chain.push(cursor);cursor=cursor.parents?.[0]?agents[cursor.parents[0]-1]:null;}
  chain.reverse();
  const pickIDs=[0,Math.floor((chain.length-1)/3),Math.floor((chain.length-1)*2/3),chain.length-1];
  const seen=new Set();
@@ -663,15 +692,20 @@ function render(){
   return{id:a.id,gen:a.gen,clan:a.clan,parents:a.parents,lineage:a.lineage,
    role:index===0?'URSPRUNG':index===picks.length-1?'NUVARANDE':index===1?'FÖRFADER':'MELLANLED',
    eyes:morph.eyes,appendages:morph.appendages,segments:morph.segments,
-   nodes:morph.nodes.slice(0,85),body:morph.functions,
-   color:morph.color,genes:a.g.bio.development.length,
-   brain:a.g.brain.length,learning:+a.learning.success.toFixed(3)};
+   nodes:morph.nodes.slice(0,85),body:morph.functions,color:morph.color,
+   genes:a.g.bio.development.length,brain:a.g.brain.length,
+   learning:+a.learning.success.toFixed(3)};
  });
- postMessage({type:'frame',metrics:metrics(),sample,sites:summaries,paths,craft,
+ // Small birth history, no need to transmit or paint the full individual list.
+ birthMarks=birthMarks.filter(b=>clock-b.at<4200);
+ postMessage({type:'frame',metrics:{...metrics(),inView,displayed:creatures.length,
+   births:sexualBirths+clonalBirths},camera:{...camera},
+  creatures,births:birthMarks.slice(-25),sample,sites:summaries,paths,craft,
   messages:messages.slice(0,35),discoveries:inventions.slice(-28).reverse(),specimens,
-  events:milestones.slice(0,12),clans:clans.map(c=>({id:c.id,name:c.name,hue:c.hue,
+  events:milestones.slice(0,14),clans:clans.map(c=>({id:c.id,name:c.name,hue:c.hue,
    people:c.members,knowledge:bits(c.knowledge),inventions:c.inventions.length,
-   cities:c.cities.length,languageAge:c.languageAge}))},[sample.buffer]);
+   cities:c.cities.length,languageAge:c.languageAge,parentCulture:c.parentCulture}))},
+  [sample.buffer]);
 }
 function saveSnapshot(){
  return {
