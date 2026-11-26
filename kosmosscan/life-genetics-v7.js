@@ -27,6 +27,7 @@ function create(random){
   p[key]=clamp(p[key]+between(-amp,amp),key==='angle'?-3.14:key==='pigment'?-1:key==='regulator'?-1:0,
    key==='angle'?3.14:key==='pigment'?1:key==='regulator'?1:2);
   if(R()<.08)p.sym=!p.sym;
+  if(R()<.14)p.kind=TYPES[(R()*TYPES.length)|0];
   if(R()<.09)p.repeat=clamp(p.repeat+(R()<.5?-1:1),1,6);
   return p;
  }
@@ -39,9 +40,9 @@ function create(random){
    if(!source)continue;
    if(R()<.04&&genes.length>2)continue; // deletion
    genes.push(R()<.28?modifyGene(source):{...source});
-   if(genes.length<34&&R()<.09)genes.push(modifyGene(source)); // duplication
+   if(genes.length<34&&R()<.15)genes.push(modifyGene(source)); // duplication
   }
-  if(R()<.13&&genes.length<34)genes.push(addGene(TYPES[(R()*TYPES.length)|0]));
+  if(R()<.34&&genes.length<34)genes.push(addGene(TYPES[(R()*TYPES.length)|0]));
   if(!genes.length)genes.push(addGene('axis'));
   if(!genes.some(g=>g.kind==='axis'))genes.unshift(addGene('axis'));
   const regs=x.regulators.map((p,i)=>clamp((R()<.5?p:y.regulators[i]??p)+(R()<.19?between(-.18,.18):0),0,1.5));
