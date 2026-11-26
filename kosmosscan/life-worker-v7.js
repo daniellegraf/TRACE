@@ -223,6 +223,15 @@ function individualTick(a){
  const l=nutrition[pos(a.x+Math.cos(angleL)*sensorReach,a.y+Math.sin(angleL)*sensorReach)];
  const r=nutrition[pos(a.x+Math.cos(angleR)*sensorReach,a.y+Math.sin(angleR)*sensorReach)];
  a.angle+=(r-l)*.44+thought*.22+between(-.13,.13);
+ // Received location information influences real navigation. A signal's
+ // usefulness is measured by later resource collection, not by its text.
+ if(cultureEnabled&&a.intent&&step-a.spoken<10){
+  const tx=a.intent%W,ty=(a.intent/W)|0;
+  const dx=tx-a.x,dy=ty-a.y;
+  const desired=Math.atan2(dy,dx);
+  const difference=Math.atan2(Math.sin(desired-a.angle),Math.cos(desired-a.angle));
+  a.angle+=difference*.36*a.g.speech;
+ }
  const mv=(.26+a.g.speed*.58)*clamp(a.body.motor,.25,1.8)/(1+a.body.armor*.11);
  a.x=mod(a.x+Math.cos(a.angle)*mv,W);a.y=mod(a.y+Math.sin(a.angle)*mv,H);
  const k=pos(a.x,a.y),take=Math.min(nutrition[k],(.0045+a.body.forage*.002)*niche);
@@ -255,10 +264,14 @@ function individualTick(a){
   const high=nutrition[cell]>.3;
   if(high){
    n.intent=cell;n.spoken=step;signalsShared++;c.signalAttempts++;
+   if(signalsShared<20||signalsShared%100===0){
+    speech(c,'resursignal','En individ skickade en resursposition som påverkar en annan organisms navigering.',
+      [0,2,3,14,5],{speaker:a.id,listener:n.id,position:cell});
+   }
    c.signals.set(token,(c.signals.get(token)||0)+1);
   }
  }
- if(a.intent&&step-a.spoken<7&&pos(a.x,a.y)===a.intent&&take>.0015){
+ if(a.intent&&step-a.spoken<10&&Math.abs((a.intent%W)-a.x)<2&&Math.abs(((a.intent/W)|0)-a.y)<2&&take>.0015){
   signalSuccess++;c.signalRewards++;a.intent=0;a.xp+=.16;
  }
  if(a.role===0)c.resources.food+=take*.22;
