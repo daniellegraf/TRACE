@@ -103,7 +103,7 @@ function drawMap(){
 const TAU=Math.PI*2;
 function stats(){
  if(!snapshot)return;const m=snapshot.metrics;
- const items={'society-pop':fmt(m.count),'society-rate':fmt(m.rate)+'/s',
+ const items={'society-pop':fmt(m.count),'society-rate':(+m.rate||0).toLocaleString('sv-SE',{maximumFractionDigits:1})+'/s',
  'society-cities':fmt(m.cities),'society-inventions':fmt(m.inventions),
  'society-messages-total':fmt(m.messages),'society-space':fmt(m.launchCount),
  'society-gen':fmt(m.gen),'society-cells':fmt(m.cells),
