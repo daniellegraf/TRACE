@@ -184,6 +184,45 @@
  .society-caveat{padding:13px}
 }
 
+
+/* V7 microscope and scientific instrumentation */
+.v7-header{margin:15px 22px 0;padding:20px 20px 13px;border:1px solid #356c69;border-radius:14px 14px 0 0;background:#0d2d33}
+.v7-header h3{font-size:clamp(20px,3vw,28px);line-height:1.2;margin:10px 0 7px;color:#e7fff6}
+.v7-header p{color:#a4c9d2;font-size:12px;line-height:1.65;max-width:800px;margin:0}
+.v7-controls{margin:0 22px;padding:15px;border:1px solid #356c69;border-top:0;display:flex;flex-wrap:wrap;align-items:end;gap:10px;background:#0a2330}
+.v7-controls label{display:flex;flex-direction:column;gap:5px;font-size:11px;color:#9acac6;flex:1 1 190px}
+.v7-controls select,.v7-controls button{border:1px solid #456d78;color:#d1f1ea;background:#143544;border-radius:9px;min-height:42px;padding:9px;font-size:12px;font-weight:650}
+.v7-controls button{cursor:pointer;flex:1 1 155px}
+.v7-experiment-bar{margin:0 22px;padding:10px 15px;border:1px solid #356c69;border-top:0;border-radius:0 0 12px 12px;color:#9fc2ca;font-size:11px;background:#071a29}
+.v7-benchcards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:13px 22px}
+.v7-benchcards>div{min-width:0;background:#102837;border:1px solid #2b4e61;border-radius:10px;padding:12px}
+.v7-benchcards b{display:block;color:#b8ffe8;font:800 clamp(17px,2.3vw,24px)/1.22 ui-monospace,monospace}
+.v7-benchcards span{font-size:10px;line-height:1.4;color:#90adbb;display:block;margin-top:4px}
+.v7-microscope,.v7-science{margin:0 22px 13px;border:1px solid #345767;border-radius:13px;padding:17px;background:radial-gradient(circle at 60% 0%,#12373e,#071b2b 65%)}
+.v7-section-title{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.v7-section-title b,.v7-science b{color:#dbfff1;font-size:12px;letter-spacing:.055em}
+.v7-section-title small{display:block;font-size:11px;color:#98bac6;margin-top:5px;line-height:1.5}
+#v7-specimen-label{font:10px ui-monospace,monospace;color:#b3f5d9;white-space:nowrap}
+#v7-micro-canvas{display:block;width:100%;height:235px;margin-top:12px;border-radius:11px;border:1px solid #3a5967;background:#061524}
+.v7-specimen-buttons{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px}
+.v7-specimen-buttons button{background:#153a47;color:#bceee0;border:1px solid #326776;border-radius:8px;cursor:pointer;padding:8px 10px;font-size:11px}
+.v7-specimen-buttons button.selected{background:#267465;color:#e5fff3}
+.v7-organism-info{padding:11px 13px;margin-top:10px;border-radius:8px;background:#0a2732;border:1px solid #284b58;color:#b3d0cf;font:11px/1.65 ui-monospace,monospace;overflow-wrap:anywhere}
+.v7-science p{font-size:11px;color:#9fc1cf;line-height:1.55;max-width:900px;margin:8px 0}
+.v7-togglewrap{display:flex;flex-wrap:wrap;gap:13px;padding:7px 0}
+.v7-togglewrap label{font-size:12px;color:#b7d5d5;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.v7-science-result{white-space:pre-wrap;background:#071a28;border:1px solid #2d5360;border-radius:9px;margin:10px 0;padding:12px;color:#c1e6d9;font:12px/1.6 ui-monospace,monospace}
+#v7-audit{padding:11px 12px;border:1px solid #4c8879;border-radius:8px;background:#15473f;color:#e3fff0;cursor:pointer;font-weight:750;font-size:11px}
+#v7-audit-result{font:11px/1.6 ui-monospace,monospace;color:#a6d5c6;margin-top:8px}
+@media(max-width:780px){
+ .v7-header,.v7-microscope,.v7-science{margin:11px 10px;padding:13px}
+ .v7-controls{margin:0 10px;padding:11px}
+ .v7-experiment-bar{margin:0 10px}
+ .v7-benchcards{margin:10px;grid-template-columns:repeat(2,minmax(0,1fr))}
+ .v7-section-title{align-items:flex-start;flex-wrap:wrap}
+ #v7-micro-canvas{height:210px}
+}
+
 </style></head><body>
 <div class="wrap"><header class="top"><div class="brand">◈ KOSMOS<b>SCAN</b> <span style="color:#8aa3bb;font-weight:400">/ 2.0</span></div><a class="evo-anchor" href="#emergence">✦ THE UNKNOWN ENGINE ↓</a></header>
 <section class="hero"><div class="eyebrow">En knapp. En automatisk undersökning.</div><h1>Finns det någon<br><em>annan intelligens?</em></h1><p class="sub">Jag hämtar astronomiska observationer, granskar registrerade exoplaneter en efter en och letar efter världar som förtjänar en närmare undersökning. Du behöver inte göra något mer än att starta.</p></section>
@@ -194,8 +233,8 @@
 
 <section id="emergence" class="evo society-lab">
  <div class="society-heading">
-  <div><div class="society-kicker">KOSMOSSCAN · LIFE ENGINE V6 · OPEN-ENDED CIVILIZATION LAB</div>
-   <h2>Från livsfrö till okända civilisationer.</h2>
+  <div><div class="society-kicker">KOSMOSSCAN · LIFE ENGINE V7 · GENETICS, INTELLIGENCE & CULTURE</div>
+   <h2>Från encelligt liv till okända civilisationer.</h2>
    <p>Individer med egna nervnät lever vidare – men världens utveckling drivs nu främst av samarbete, språk, institutioner, idéer och uppfinningar. Det finns inget färdigskrivet slut.</p>
   </div><span id="society-status" class="society-status">EJ STARTAD</span>
  </div>
@@ -260,7 +299,47 @@
    <div class="society-paneltitle"><div><b>⏳ VÄRLDENS HISTORIA</b><small>Faktiska förändringar som registrerats av simuleringen</small></div></div>
    <div id="society-log"><div class="society-log-entry">Världen väntar på sitt första livsfrö.</div></div>
  </div>
- <div class="society-caveat"><b>OM EXPERIMENTET:</b> Detta är inte en biologiskt fullständig modell av jorden eller en verklig generell AI. Symbolspråk, institutioner och tekniska idéer uppstår ur programmerade regler med mutation, slump, samarbete och rekombination. En möjlig rymdfarkost kräver flera samverkande uppfinningar – den är inte förutbestämd. Snabbare forskning ökar takten i samhällens arbete, utan att hoppa över individuella biologiska uppdateringar. Individerna beräknas var för sig; kartan visar ett glest urval för läsbarhet. Låg födelsetakt minskar belastningen, men obegränsad population kan aldrig garanteras vara laggfri på en telefon.</div>
+
+ <div class="v7-header">
+  <div class="society-kicker">THE LIVING EVOLUTION ENGINE · VERSION 7</div>
+  <h3>🧬 Evolution under mikroskopet</h3>
+  <p>Varje organism utvecklas från sitt eget genom. Mutationer kan kopiera, inaktivera eller förändra gener som styr hur kroppen växer. Klicka på en organism för att granska dess riktiga ärvda utvecklingsstruktur.</p>
+ </div>
+ <div class="v7-controls">
+  <label>Reproduktion <select id="v7-repro"><option value="0.5">Lugn · 9/s</option><option value="1" selected>Evolution · 18/s</option><option value="1.5">Snabb · 27/s</option><option value="2">Extrem · 36/s</option></select></label>
+  <label>Biologisk beräkning <select id="v7-biology"><option value="1" selected>Normal · ×1</option><option value="2">Accelererad · ×2</option><option value="3">Hög belastning · ×3</option></select></label>
+  <button id="v7-save" type="button"> <span>💾</span> SPARA VÄRLD</button>
+  <button id="v7-restore" type="button"> <span>↻</span> FORTSÄTT SPARAD VÄRLD</button>
+ </div>
+ <div class="v7-experiment-bar" id="v7-save-status">Sparade världar lagras lokalt i webbläsaren. Byt inte webbadress om du vill återställa samma lokala värld.</div>
+ <div class="v7-benchcards">
+  <div><b id="v7-body">1</b><span>Kroppskomplexitet</span></div>
+  <div><b id="v7-genes">0</b><span>Max utvecklingsgener</span></div>
+  <div><b id="v7-lineages">0</b><span>Evolutionära förgreningar</span></div>
+  <div><b id="v7-sexual">0</b><span>Sexuell reproduktion</span></div>
+  <div><b id="v7-asexual">0</b><span>Asexuell reproduktion</span></div>
+  <div><b id="v7-learning">—</b><span>Inlärningsprov: skillnad</span></div>
+  <div><b id="v7-signals">0</b><span>Kommunikativa handlingar</span></div>
+  <div><b id="v7-signal-success">0</b><span>Bekräftade resursfynd</span></div>
+ </div>
+ <div class="v7-microscope">
+  <div class="v7-section-title"><div><b>🔬 DIGITALT MIKROSKOP</b><small>Encelligt ursprung, ättlingar och senare evolutionära grenar. Former ritas från faktiska utvecklingsgener.</small></div><span id="v7-specimen-label">Ingen organism vald</span></div>
+  <canvas id="v7-micro-canvas" aria-label="Mikroskop med organismers genetiskt genererade kroppssegment, sensorer och extremiteter"></canvas>
+  <div id="v7-specimen-buttons" class="v7-specimen-buttons"></div>
+  <div id="v7-organism-info" class="v7-organism-info">Starta en värld för att studera organismers arv och nervsystem.</div>
+ </div>
+ <div class="v7-science">
+  <div><b>🧠 DISCOVERY LAB · KONTROLLERAD ANALYS</b><p>Jämför en förenklad tränad födosöksstrategi mot en slumpstrategi i ett test med samma miljöförutsättningar. Resultatet kan vara positivt, negativt eller noll – det är inte ett bevis för generell intelligens.</p></div>
+  <div class="v7-togglewrap">
+   <label><input type="checkbox" id="v7-use-learning" checked/> Inlärning</label>
+   <label><input type="checkbox" id="v7-use-mutation" checked/> Mutation</label>
+   <label><input type="checkbox" id="v7-use-culture" checked/> Kultur</label>
+  </div>
+  <div id="v7-science-result">Väntar på genomförda biologiska testcykler…</div>
+  <button id="v7-audit" type="button">⚙ Granska individer och släktskap</button>
+  <div id="v7-audit-result"></div>
+ </div>
+ <div class="society-caveat"><b>OM EXPERIMENTET:</b> Detta är inte en biologiskt fullständig modell av jorden eller en verklig generell AI. Symbolspråk, institutioner och tekniska idéer uppstår ur programmerade regler med mutation, slump, samarbete och rekombination. En möjlig rymdfarkost kräver flera samverkande uppfinningar – den är inte förutbestämd. Snabbare forskning ökar takten i samhällens arbete, utan att hoppa över individuella biologiska uppdateringar. Individerna beräknas var för sig; kartan visar ett glest urval för läsbarhet. V7 börjar med encelliga individer och eftersträvar cirka 18 födslar per verklig sekund i standardläget. Det är ett riktvärde som kan sjunka när hårdvaran inte orkar med. Obegränsad population kan aldrig garanteras vara laggfri på en telefon.</div>
 </section>
 <footer class="foot"><b>ÄRLIG VETENSKAPLIG BEGRÄNSNING</b> · Ingen webbsida kan skanna hela universum direkt. Detta är en automatiserad sökning genom ett litet, observerat urval av universum: kända exoplaneter. Grafiken är dekorativ och representerar inte stjärnornas verkliga positioner. Resultatet visar inga oupptäckta radiosignaler.<div class="barlink"><a href="https://exoplanetarchive.ipac.caltech.edu/docs/TAP/usingTAP.html" target="_blank" rel="noopener">NASA Exoplanet Archive / API ↗</a><a href="https://github.com/Paosososo/beyond-earth" target="_blank" rel="noopener">Katalogspegel (3 nov 2026) ↗</a><a href="https://seti.berkeley.edu/opendata" target="_blank" rel="noopener">SETI rådata ↗</a></div></footer></div>
 <script>
@@ -304,5 +383,6 @@ function draw(time){if(!W||!H||!starVisible||time-lastStarDraw<55){requestAnimat
 addEventListener('resize',resize,{passive:true});resize();requestAnimationFrame(draw);
 
 </script>
-<script src="./life-ui-v6.js" defer></script>
+<script src="./life-ui-v7-base.js" defer></script>
+<script src="./life-ui-v7.js" defer></script>
 </body></html>
