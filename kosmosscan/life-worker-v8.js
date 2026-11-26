@@ -361,7 +361,7 @@ function foundingSite(c){
   const x=mod((anchor?.x??c.x)+between(-29,29),W);
   const y=mod((anchor?.y??c.y)+between(-23,23),H);
   if(nutrition[pos(x,y)]+.3*water[pos(x,y)]<.23)continue;
-  if(cities.some(t=>Math.hypot(t.x-x,t.y-y)<5.0))continue;
+  if(cities.some(t=>Math.hypot(t.x-x,t.y-y)<7.2))continue;
   return{x,y};
  }
  return null;
@@ -572,7 +572,7 @@ function societalAction(){
     gainSkill(c,k);
    }
   }
-  if(readiness>.24&&c.tech[3]>.16&&c.tech[1]>.16&&rand()<(.09/Math.sqrt(1+.16*c.cities.length)))foundCity(c);
+  if(readiness>.24&&c.tech[3]>.16&&c.tech[1]>.16&&rand()<(.010/(1+.13*c.cities.length)))foundCity(c);
   if(readiness>.24&&c.cities.length&&rand()<(.22+.02*Math.log2(1+c.cities.length)))developCity(c);
   if(readiness>.24&&c.cities.length&&rand()<.05/(1+c.inventions.length/55))invent(c);
   if(readiness>.2&&c.cities.length&&rand()<.032&&c.tech[5]>.16){
