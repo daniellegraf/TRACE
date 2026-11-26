@@ -559,10 +559,23 @@ function render(){
   if(dx*dx+dy*dy<420&&a.level+b.level>=4&&paths.length<140)paths.push([a.id,b.id]);
  }
  const craft=flights.map(f=>({x:f.x,y:f.y,id:f.id,name:f.name,progress:f.progress,clan:f.clan})).slice(-20);
- const picks=[agents[0],agents[Math.floor(agents.length*.25)],agents[Math.floor(agents.length*.75)],agents.at(-1)];
- const specimens=picks.filter(Boolean).map(a=>{
+ // Reconstruct TRUE ancestor chain by permanent individual IDs, not by
+ // sampling unrelated population quartiles and calling them descendants.
+ const newest=agents.at(-1),chain=[];
+ let cursor=newest,guard=0;
+ while(cursor&&guard++<512){
+  chain.push(cursor);
+  const parentID=cursor.parents?.[0];
+  cursor=parentID?agents[parentID-1]:null;
+ }
+ chain.reverse();
+ const pickIDs=[0,Math.floor((chain.length-1)/3),Math.floor((chain.length-1)*2/3),chain.length-1];
+ const seen=new Set();
+ const picks=pickIDs.map(i=>chain[i]).filter(a=>a&&!seen.has(a.id)&&seen.add(a.id));
+ const specimens=picks.map((a,index)=>{
   const morph=G7.phenotype(a.g.bio,a.maturity);
   return{id:a.id,gen:a.gen,clan:a.clan,parents:a.parents,lineage:a.lineage,
+   role:index===0?'URSPRUNG':index===picks.length-1?'NUVARANDE':index===1?'FÖRFADER':'MELLANLED',
    eyes:morph.eyes,appendages:morph.appendages,segments:morph.segments,
    nodes:morph.nodes.slice(0,85),body:morph.functions,
    color:morph.color,genes:a.g.bio.development.length,
@@ -706,7 +719,14 @@ onmessage=event=>{
   postMessage({type:'organismDetail',id:m.id,agent:a?
     {id:a.id,gen:a.gen,clan:a.clan,parents:a.parents,lineage:a.lineage,
      genome:a.g.bio,body:G7.phenotype(a.g.bio,a.maturity),memory:Array.from(a.memory),
-     brain:a.g.brain,fitness:a.fitness,learning:a.learning}:null});
+     brain:a.g.brain,fitness:a.fitness,learning:a.learning,
+     lineagePath:(function(){const path=[];let current=a,safety=0;
+      while(current&&safety++<128){
+       path.push({id:current.id,gen:current.gen,genes:current.g.bio.development.length});
+       current=current.parents[0]?agents[current.parents[0]-1]:null;
+      }
+      return path.reverse();
+     })()}:null});
  }else if(m.type==='setSpeed'){
   socialSpeed=m.fast?4:1;
   postMessage({type:'speed',value:socialSpeed});
