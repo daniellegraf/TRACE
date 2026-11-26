@@ -39,7 +39,7 @@ function createClan(i){
  members:0,language:lex,dialect,grammar:0,knowledge:0,tech:new Float32Array(DOMAINS.length),
  inventions:[],cities:[],resources:{food:40,material:12,power:4,ideas:0},
  research:0,social:.2,trust:.2,languageAge:0,space:0,launches:0,discovery:0,lastMessage:0,
- innovationSeed:rand(),worldview:(rand()*4)|0,era:0};
+ innovationSeed:rand(),worldview:(rand()*4)|0,era:0,inventionKeys:new Set()};
 }
 function grammar(clan,words){
  const w=words.map(k=>clan.language[clamp(k|0,0,WORDS.length-1)]);
@@ -245,7 +245,7 @@ function compoundName(c,k1,k2,effect){
  return (a.slice(0,Math.min(4,a.length))+b.slice(0,Math.min(5,b.length))+'-'+e).toLowerCase();
 }
 function invent(c){
- if(!c.cities.length||c.inventions.length>=180||c.resources.material<2.8||c.resources.power<1.0)return;
+ if(!c.cities.length||c.resources.material<2.8||c.resources.power<1.0)return;
  const known=[];
  // Technical building blocks arise from both material knowledge and cultural techniques.
  for(let i=0;i<COMPONENTS.length;i++){
@@ -260,18 +260,21 @@ function invent(c){
  if(effect===12&&c.tech[11]<.20)return;
  if(effect===11&&c.tech[10]<.20)return;
  if(effect===7&&c.tech[13]<.2)return;
- const fingerprint=[Math.min(a,b),Math.max(a,b),effect].join(':');
- if(c.inventions.some(id=>inventions[id-1]?.key===fingerprint))return;
- const parents=c.inventions.length>2&&rand()<.5?
+ const parents=c.inventions.length>2&&rand()<.62?
    [pick(c.inventions),pick(c.inventions)]:[];
+ // Distinct lineages create genuinely new synthesis candidates even after
+ // every basic two-part combination has been tried. Hash lookups stay O(1).
+ const depth=Math.floor(Math.log2(c.inventions.length+2));
+ const fingerprint=[Math.min(a,b),Math.max(a,b),effect,depth,...parents].join(':');
+ if(c.inventionKeys.has(fingerprint))return;
  const complexity=1+Math.floor(Math.log2(c.inventions.length+1))+(parents.length?1:0);
  const experimentCost=1.1+complexity*.18;
  if(c.resources.material<experimentCost||c.resources.power<.7+complexity*.08)return;
  const inv={id:inventions.length+1,key:fingerprint,clan:c.id,tick:step,
-  name:compoundName(c,a,b,effect),parts:[COMPONENTS[a],COMPONENTS[b]],effect:EFFECTS[effect],
+  name:compoundName(c,a,b,effect)+(parents.length?' · '+lexeme():''),parts:[COMPONENTS[a],COMPONENTS[b]],effect:EFFECTS[effect],
   complexity,parents,uses:0,detail:'Kombination av '+COMPONENTS[a]+' och '+COMPONENTS[b]+' för '+EFFECTS[effect]+'.',
   type:effect===8?'framdrift':effect===10?'koordination':'uppfinning'};
- inventions.push(inv);c.inventions.push(inv.id);innovations++;
+ inventions.push(inv);c.inventions.push(inv.id);c.inventionKeys.add(fingerprint);innovations++;
  c.resources.material-=experimentCost;c.resources.power-=.7+complexity*.08;
  const location=cities.find(city=>city.clan===c.id);
  if(location){location.inventions.push(inv.id);if(location.inventions.length>36)location.inventions.shift();}
@@ -344,7 +347,7 @@ function societalAction(){
   }
   if(c.tech[3]>.16&&c.tech[1]>.16&&rand()<.12)foundCity(c);
   if(c.cities.length&&rand()<.21)developCity(c);
-  if(c.cities.length&&rand()<.09+(c.cities.length*.012))invent(c);
+  if(c.cities.length&&rand()<.05/(1+c.inventions.length/55))invent(c);
   if(c.cities.length&&rand()<.032&&c.tech[5]>.16){
    c.grammar=(c.grammar+1+((rand()*5)|0))%6;c.languageAge++;
    speech(c,'språk','Språket i '+c.name+' förändrades genom nya grammatiska former.',[0,22,11,17]);
