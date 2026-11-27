@@ -265,7 +265,8 @@ function inspect(){if(!worker||!selected)return;lastInspect=Date.now();worker.po
 function selectCity(id){
  selected=+id||null;cityDetail=null;
  if(selected){$('society-city-select').value=String(selected);inspect();
-  worker?.postMessage({type:'watchCity',id:selected});}
+  worker?.postMessage({type:'watchCity',id:selected});
+  if(typeof CustomEvent!=='undefined')window.dispatchEvent(new CustomEvent('kosmosv9:selectcity',{detail:{id:selected}}));}
  else renderDetail();
  drawMap();
 }
