@@ -151,7 +151,7 @@ function create(random){
   options.sort((a,b)=>b.score-a.score);
   const concept=options[0].concept;
   if(!city.projects)city.projects=[];
-  if(city.projects.length>6)return;
+  if(city.projects.filter(q=>q.status==='active').length>5)return;
   const current=city.projects.find(q=>q.status==='active'&&q.kind===concept.kind);
   if(current&&R()<.9)return;
   const costs=concept.cost*(.8+R()*.4);
@@ -228,12 +228,12 @@ function create(random){
  function teach(a,c,city,w){
   const p=agent(a);if(!city)return;
   const other=w.agents[Math.floor(R()*w.agents.length)];if(!other||other===a||other.clan!==a.clan)return;
-  const q=agent(other);const skillIdx=(a.id+Math.floor(R()*DOMAINS.length))%DOMAINS.length;
+  const q=agent(other);const skillIdx=p.skill.indexOf(Math.max(...p.skill));
   const source=p.skill[skillIdx],target=q.skill[skillIdx];
   if(source<=target+.03)return;
   const diff=source-target;
   q.skill[skillIdx]+=diff*.2;q.teaching++;p.teaching++;link(a,other);
-  if(R()<.04){
+  if(R()<.25){
    log(w,'teaching',a,city,p.name+' lärde '+q.name+' om '+DOMAINS[skillIdx].toLowerCase()+'.',
     {teacher:a.id,learner:other.id,domain:skillIdx});
   }
@@ -256,11 +256,11 @@ function exploration(a,c,city,w){
   const quality=(p.drive.exploration+p.drive.research)*.5;
   const reward=w.nutrition[j]*quality;
   c.resources.food+=reward*.25;c.resources.material+=reward*.21;
-  if(R()<.1*quality){p.discoveries++;discoveries++;
+  if(reward>.055&&R()<.085*quality){p.discoveries++;discoveries++;
    const insight=['näringsmönster','vattenflöde','mineralstruktur','rytmiska signaler','temperaturvariation',
    'optisk variation','ekologisk kretsgång'];
    const label=choose(insight);
-   c.research+=.4;
+   c.research+=.4;c.resources.ideas+=.08;
    log(w,'insight',a,city,p.name+' dokumenterade '+label+'.',
     {field:label,resource:reward});
   }
@@ -271,7 +271,7 @@ function exploration(a,c,city,w){
   const ongoing=city.projects.filter(x=>x.status==='active');
   if(!ongoing.length)return;
   const concern=choose(ongoing);
-  if(R()<.4*p.drive.creation){
+  if(R()<.62*p.drive.creation){
    concern.work+=.12;cooperations++;
    log(w,'agreement',a,city,p.name+' samordnade två grupper kring '+concern.title+'.');
   }else{
@@ -325,7 +325,7 @@ function exploration(a,c,city,w){
     case 'design':brainstorm(a,c,city,w);break;
     case 'work':if(city)labor(a,c,city,w);break;
     case 'teach':teach(a,c,city,w);break;
-    case 'debate':if(R()<.08)disagreement(a,c,city,w);break;
+    case 'debate':if(R()<.28)disagreement(a,c,city,w);break;
    }
    if(c.tech[0]>=.16&&R()<.002&&city)log(w,'communication',a,city,p.name+' föreslog en ny signal för lokal samordning.');
   }
