@@ -190,13 +190,13 @@ function worldScene(){
 function actions(){
  const c=state,m=frame?.metrics,tot=m?.social||{};
  $text('v9-city-name',c?.name||'Inget samhälle ännu');
- $text('v9-city-age',c?'SAMHÄLLE · NIVÅ '+c.level:'BIOLOGISK UTVECKLING');
+ $text('v9-city-age',c?(c.era||'SAMHÄLLE')+' · NIVÅ '+c.level:'BIOLOGISK UTVECKLING');
  $text('v9-society-status',c?'UTVECKLING I REALTID':'BIOLOGI '+Math.round((m?.biologicalCultureReadiness||0)*100)+'%');
  $text('v9-citizens',human(c?.people||0));
- $text('v9-built',human(tot.constructed||0));
+ $text('v9-built',human(c?.assetsTotal||0));
  $text('v9-active-projects',human(c?.active?.length||0));
  $text('v9-decisions',human(tot.decisions||0));
- $text('v9-knowledge',human((tot.researchSuccesses||0)+(tot.ideas||0)));
+ $text('v9-knowledge',human(tot.researchSuccesses||0));
 }
 function projectPanel(){
  const root=$('v9-project-feed');clear(root);
