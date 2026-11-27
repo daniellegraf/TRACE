@@ -323,6 +323,10 @@ canvas.addEventListener('pointerdown',event=>{
    '\nDeltagare: '+found.data.workers+
    '\nTillkom i steg '+found.data.created);
 });
+window.addEventListener('kosmosv9:selectcity',event=>{
+ watchCity=+(event.detail?.id||0);selectedPerson=0;
+ $('v9-society-select').value=String(watchCity);
+});
 window.addEventListener('kosmosv7:message',event=>{
  const msg=event.detail||{};
  if(msg.type==='frame')onFrame(msg);
