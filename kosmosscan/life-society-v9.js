@@ -257,7 +257,14 @@ function create(random){
  }
  function teach(a,c,city,w){
   const p=agent(a);if(!city)return;
-  const other=w.agents[Math.floor(R()*w.agents.length)];if(!other||other===a||other.clan!==a.clan)return;
+  const roster=c.socialRoster||[];
+  let other=null;
+  for(let j=0;j<6;j++){
+   const id=roster.length?choose(roster):0;
+   const candidate=id?w.agents[id-1]:w.agents[Math.floor(R()*w.agents.length)];
+   if(candidate&&candidate!==a&&candidate.clan===a.clan){other=candidate;break;}
+  }
+  if(!other)return;
   const q=agent(other);const skillIdx=p.skill.indexOf(Math.max(...p.skill));
   const source=p.skill[skillIdx],target=q.skill[skillIdx];
   if(source<=target+.03)return;
@@ -302,18 +309,24 @@ function exploration(a,c,city,w){
   if(!ongoing.length)return;
   const concern=choose(ongoing);
   if(R()<.62*p.drive.creation){
-   concern.work+=.12;cooperations++;
+   concern.work+=.12;cooperations++;c.dissent=Math.max(0,(c.dissent||0)-.12);
    log(w,'agreement',a,city,p.name+' samordnade två grupper kring '+concern.title+'.');
   }else{
-   disagreements++;p.failures++;
+   disagreements++;p.failures++;c.dissent=(c.dissent||0)+1;
+   if(c.dissent>9&&c.members>90&&typeof w.fission==='function'&&R()<.13){
+    if(w.fission(c,a))c.dissent=0;
+   }
    log(w,'disagreement',a,city,p.name+' motsatte sig prioriteringen av '+concern.title+'.',
     {project:concern.id,reason:choose(['resursbrist','miljöpåverkan','alternativ forskning','social konflikt'])});
   }
  }
  function maybeFound(a,c,w){
-  if(c.cities.length||c.bioReadiness<4||c.tech[1]<.16||c.tech[3]<.16)return null;
+  if(c.bioReadiness<4||c.tech[1]<.16||c.tech[3]<.16)return null;
   if(c.resources.material<6)return null;
-  if(R()<.17){
+  const pressure=c.members/Math.max(1,c.cities.length);
+  const expansion=c.cities.length>0;
+  if(expansion&&pressure<110)return null;
+  if(R()<(expansion?.008:.17)){
    const city=w.foundCity(c);
    if(city){const v=city===true?w.cities.at(-1):city;const p=agent(a);
     p.homeCity=v.id;log(w,'founding',a,v,p.name+' organiserade grundandet av '+v.name+'.');
@@ -330,11 +343,19 @@ function exploration(a,c,city,w){
    {name:'design',score:p.drive.invention*.65+p.drive.creation*.2+.12},
    {name:'work',score:p.drive.creation*.8+p.drive.cooperation*.15+((city?.projects||[]).some(x=>x.status==='active')?.34:0)},
    {name:'teach',score:p.drive.cooperation*.85+.1},
-   {name:'debate',score:p.drive.cooperation*.22+p.drive.invention*.15+.1}
+   {name:'debate',score:p.drive.cooperation*.22+p.drive.invention*.15+
+      ((city?.projects||[]).some(z=>z.status==='active')?.27:0)+
+      (resources.material<8?.35:0)+(p.beliefs===1?.1:0)}
   ];
   // Work is not automatic: tradeoffs, temperament, accumulated experience and
   // ecology determine the action selected by a specific individual.
-  for(const x of scores){x.score+=R()*.5;}
+  for(const x of scores){
+    x.score+=R()*.43;
+    if(x.name===p.lastChoice)x.score+=.16; // ongoing plans persist
+    if(x.name==='teach'&&p.social.size>1)x.score+=.12;
+    if(x.name==='work'&&p.lastProject&&city?.projects?.some(q=>q.id===p.lastProject&&q.status==='active'))x.score+=.25;
+    if(x.name==='study'&&p.memory.some(e=>e.type==='breakthrough'))x.score+=.12;
+  }
   if(!city){for(const x of scores)if(x.name==='work'||x.name==='design')x.score=0;}
   scores.sort((a,b)=>b.score-a.score);
   return scores[0].name;
@@ -346,8 +367,12 @@ function exploration(a,c,city,w){
    const a=w.agents[Math.floor(R()*n)];if(!a||a.age<14)continue;
    const c=w.clans[a.clan];if(!c)continue;
    const p=agent(a);
-   let city=findCity(a,w);if(!city)city=maybeFound(a,c,w);
-   const action=chooseAction(a,c,city);p.goal=action;decisions++;
+   if(!c.socialRoster)c.socialRoster=[];
+   if(!c.socialRoster.includes(a.id)){c.socialRoster.push(a.id);if(c.socialRoster.length>80)c.socialRoster.shift();}
+   let city=findCity(a,w);
+   if(!city)city=maybeFound(a,c,w);
+   else if(p.drive.exploration>.58&&R()<.028)city=maybeFound(a,c,w)||city;
+   const action=chooseAction(a,c,city);p.goal=action;p.lastChoice=action;decisions++;
    switch(action){
     case 'study':study(a,c,city,w);break;
     case 'explore':exploration(a,c,city,w);break;
