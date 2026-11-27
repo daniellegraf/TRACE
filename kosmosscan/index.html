@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="sv"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#030a14"><title>KOSMOSSCAN V9 — The Living Civilizations</title>
+<html lang="sv"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#030a14"><title>KOSMOSSCAN V9.1 — Fluid Living World</title>
 <style>
 :root{color-scheme:dark;--bg:#030a14;--surface:#0b1627;--edge:#20324e;--muted:#91a9c4;--white:#eff6ff;--aqua:#4ce5ce;--gold:#ffc87a;--blue:#6c93ff;--red:#ffbba9}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(ellipse 90vw 50vw at 50% -8%,#123559 0%,transparent 62%),#030a14;color:var(--white);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,Arial,sans-serif;font-size:15px;line-height:1.5}a{color:#8cdcff}.wrap{max-width:1110px;margin:0 auto;padding:0 23px}.top{padding:22px 0;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #18304b}.brand{letter-spacing:.2em;font-weight:900;font-size:16px}.brand b{color:var(--aqua)}.status{color:#b4c8da;font-size:11px;letter-spacing:.04em}.status .green{display:inline-block;width:7px;height:7px;background:#56e1b7;border-radius:50%;box-shadow:0 0 10px #56e1b7;margin-right:6px}.hero{padding:55px 0 23px;text-align:center}.eyebrow{color:#6ef2d3;text-transform:uppercase;letter-spacing:.25em;font-size:11px;font-weight:800}.hero h1{font-weight:880;font-size:clamp(36px,5vw,68px);letter-spacing:-.05em;line-height:1.07;margin:16px 0}.hero h1 em{font-style:normal;background:linear-gradient(90deg,#95aafe,#53ebd3);background-clip:text;color:transparent}.sub{max-width:720px;margin:0 auto;color:#b5c9dc;font-size:clamp(14px,2vw,17px)}.mainbox{margin:24px auto 0;background:linear-gradient(180deg,#0c1d33,#071120);border:1px solid #2b4468;border-radius:22px;overflow:hidden;box-shadow:0 15px 65px #0006}.sky{position:relative;height:clamp(260px,41vw,430px);background:radial-gradient(ellipse at 50% 50%,#071e36 0%,#06111f 48%,#030914 100%);overflow:hidden}#starfield{position:absolute;inset:0;width:100%;height:100%;display:block}.sky:after{content:"";pointer-events:none;position:absolute;inset:0;background:linear-gradient(90deg,#030d19 0%,transparent 22%,transparent 78%,#030d19),linear-gradient(0deg,#081727,transparent 20%,transparent 85%,#081727)}.galaxy{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}.orb{border:1px solid rgba(112,176,246,.21);border-radius:50%;position:absolute;aspect-ratio:1;box-shadow:inset 0 0 28px #3989d20e}.orb.one{width:180px}.orb.two{width:290px;border-style:dashed;animation:rotate 60s linear infinite}.orb.three{width:415px}.orb.four{width:570px;border-color:#6b9def14}.core{width:21px;height:21px;background:#e9ffff;border-radius:50%;box-shadow:0 0 18px #74efff,0 0 65px #3b90ff,0 0 115px #349bff,0 0 155px #4ce5ce54;animation:pulse 3s ease-in-out infinite}.scope{position:absolute;inset:0;pointer-events:none;background:conic-gradient(from 90deg at 50% 50%,transparent 0deg,#3ad8ce04 50deg,#4de8d419 70deg,transparent 80deg);animation:rotate 10s linear infinite;opacity:0}.running .scope{opacity:1}.skyline{position:absolute;inset:15px 18px auto;display:flex;gap:10px;justify-content:space-between;color:#91a9c4;font-family:ui-monospace,Menlo,monospace;font-size:10px;letter-spacing:.06em}.skyline strong{color:#d9eefb}.skybottom{position:absolute;bottom:16px;left:18px;right:18px;z-index:2;display:flex;justify-content:space-between;gap:8px;font:11px ui-monospace,Menlo,monospace;color:#87a3bd}.dot{width:7px;height:7px;border-radius:50%;background:#55eacc;display:inline-block;margin-right:6px;box-shadow:0 0 12px #55eacc}.console{padding:22px 24px 25px}.console h2{margin:0;font-size:17px}.console p{margin:6px 0 0;color:var(--muted);font-size:13px}#go{display:block;border:0;cursor:pointer;width:min(100%,640px);padding:18px 14px;margin:23px auto 8px;background:linear-gradient(115deg,#55d9c8,#81b4f6);border-radius:13px;color:#031523;font-size:clamp(16px,2.4vw,19px);font-weight:850;box-shadow:0 8px 35px #39e0d326;transition:transform .2s,filter .2s}#go:hover{filter:brightness(1.06);transform:translateY(-2px)}#go:disabled{opacity:.65;cursor:progress;transform:none}.tiny{text-align:center;color:#8ea9c1;font-size:11px;margin-top:12px}.tiny strong{color:#cad8e7}.meterarea{display:none;padding:19px 0 0}.meterhead{display:flex;justify-content:space-between;align-items:center;gap:10px;color:#d0e5f5;font-size:12px}.meterhead span:last-child{font-variant-numeric:tabular-nums}.meter{height:7px;background:#1a2d45;border-radius:40px;overflow:hidden;margin:9px 0 0}.bar{height:100%;width:0%;background:linear-gradient(90deg,#3488eb,#63f3cf);transition:width .08s ease}.log{display:none;min-height:75px;max-height:182px;overflow-y:auto;background:#05101d;border:1px solid #23344a;border-radius:12px;margin-top:17px;padding:10px 12px;font:12px/1.8 ui-monospace,SFMono-Regular,Menlo,monospace;color:#a7c9db}.log .time{color:#6984a0;margin-right:7px}.log .high{color:#65eacf}.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;margin:19px 0}.stats[hidden]{display:none}.stat{background:#0a192b;border:1px solid #223a52;border-radius:14px;padding:18px}.stat small{display:block;color:#98b1c6;font-size:11px}.stat strong{display:block;font-size:clamp(25px,3.5vw,37px);line-height:1.3;font-weight:850;letter-spacing:-.04em;font-variant-numeric:tabular-nums}.stat .mark{color:var(--aqua)}.results{display:none;scroll-margin-top:25px;margin:22px 0 55px}.grid{display:grid;grid-template-columns:1.45fr 1fr;gap:16px}.panel{border:1px solid #223d58;background:#091626;border-radius:18px;padding:23px}.panel h3{font-size:21px;letter-spacing:-.025em;margin:0 0 10px}.panel p{color:#b5c8da;margin:8px 0;font-size:14px}.badge{display:inline-block;border:1px solid #315b66;background:#153a41;color:#82f4db;border-radius:50px;padding:5px 11px;font-size:11px;font-weight:800;margin-bottom:11px}.badge.warn{color:#ffdea9;background:#423018;border-color:#654c2c}.yellow{color:var(--gold)}.data-source{font-size:12px;padding:10px 12px;margin:14px 0;border:1px solid #274a63;border-radius:9px;background:#0a2031;color:#d3e7f6}.tablebox{margin:16px 0 0;border:1px solid #263952;border-radius:16px;overflow:hidden;background:#081627}.tablehead{display:flex;justify-content:space-between;align-items:center;padding:20px 20px 13px;gap:10px}.tablehead h3{font-size:18px;margin:0}.chip{border:1px solid #2e5263;background:#0e293c;color:#b8dff3;padding:5px 9px;border-radius:99px;font-size:11px}table{border-collapse:collapse;width:100%}th{text-align:left;font-size:11px;color:#91aec6;font-weight:600;padding:11px 18px;border-bottom:1px solid #263b50;background:#0c2031}td{padding:13px 18px;border-bottom:1px solid #1d3143;font-size:13px;color:#e0eef9}tbody tr:last-child td{border:0}td strong{color:#efffff}td .small{display:block;font-size:11px;color:#7895b1}.rowrank{color:#71e3d0;font-weight:700}.explain{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:15px}.info{border:1px solid #21394f;background:#0b1c2c;padding:18px;border-radius:14px}.info b{display:block;font-size:14px;margin-bottom:4px}.info p{margin:0;font-size:12px;color:#9cb3c9}.foot{margin:30px 0 45px;padding:22px 0 0;border-top:1px solid #24384b;color:#839eb8;font-size:11px}.foot a{color:#a4dbe9}.barlink{margin-top:12px;display:flex;gap:15px;flex-wrap:wrap;font-size:12px}.foot b{color:#bad5e5}@keyframes pulse{50%{transform:scale(1.18);opacity:.8}}@keyframes rotate{to{transform:rotate(360deg)}}@media(max-width:730px){.wrap{padding:0 15px}.top{padding:16px 0}.brand{font-size:13px}.status{font-size:10px}.hero{padding:35px 0 18px}.hero h1{font-size:clamp(34px,10vw,54px)}.hero .sub{font-size:13px}.mainbox{margin-top:15px;border-radius:16px}.sky{height:320px}.orb.one{width:145px}.orb.two{width:240px}.orb.three{width:320px}.orb.four{width:440px}.console{padding:19px 16px}.stats{gap:8px}.stat{padding:12px 10px}.stat small{font-size:10px}.stat strong{font-size:25px}.grid{grid-template-columns:1fr}.panel{padding:18px}.explain{grid-template-columns:1fr}.tablehead{padding:17px 11px}.tablehead h3{font-size:16px}th,td{padding:10px 8px;font-size:11px}th{font-size:10px}.skyline{font-size:9px}.skybottom{font-size:9px}}
 @media(prefers-reduced-motion:reduce){.scope,.orb,.core{animation:none!important}.bar{transition:none}}
@@ -308,6 +308,10 @@
  .v9-metric-strip{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
 
+.v10-scene-zoom{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-left:auto}
+.v10-scene-zoom button{border:1px solid #46746e;border-radius:8px;background:#0d3440;color:#ccffeb;padding:8px 10px;min-height:36px;cursor:pointer;font:700 11px system-ui}
+.v10-scene-zoom button:hover{background:#15505a}
+@media(max-width:650px){.v10-scene-zoom{flex:1 1 100%}.v10-scene-zoom button{flex:1}}
 </style></head><body>
 <div class="wrap"><header class="top"><div class="brand">◈ KOSMOS<b>SCAN</b> <span style="color:#8aa3bb;font-weight:400">/ 2.0</span></div><a class="evo-anchor" href="#emergence">✦ THE UNKNOWN ENGINE ↓</a></header>
 <section class="hero"><div class="eyebrow">En knapp. En automatisk undersökning.</div><h1>Finns det någon<br><em>annan intelligens?</em></h1><p class="sub">Jag hämtar astronomiska observationer, granskar registrerade exoplaneter en efter en och letar efter världar som förtjänar en närmare undersökning. Du behöver inte göra något mer än att starta.</p></section>
@@ -326,7 +330,7 @@
  <div class="society-world">
   <canvas id="society-canvas" aria-label="Interaktiv karta över en digital värld med bosättningar, vägar och civilisationer"></canvas>
   <div class="society-maphead"><span>LIVE · VÄRLDENS SAMHÄLLEN</span><span id="society-step">STEG 0</span></div>
-  <div class="society-mapfoot">Dra för att flytta kameran · zooma för att se anatomin · tryck på en organism för att undersöka dess genom</div>
+  <div class="society-mapfoot">Vid ×1.0 blir en växande population till en detaljerad översikt · zooma in för att följa enskilda organismer</div>
  </div>
  <div class="society-controls">
   <button type="button" class="society-start" id="society-start">✦ VÄCK ETT NYTT LIVSFRÖ</button>
@@ -339,8 +343,8 @@
   <div class="v9-scene-head">
    <div>
     <div class="v9-kicker">LIVE · AGENT-DRIVEN CIVILIZATION</div>
-    <h3>🏛 Inuti civilisationen</h3>
-    <p>Det du ser här är en schematisk närbild av <b>registrerade byggnader, pågående arbeten och verkliga individuella handlingar i simuleringen</b>. Inga hus skapas för att en timer passerar.</p>
+    <h3>🏛 Inuti civilisationen — utforska staden</h3>
+    <p>Det du ser här är en schematisk närbild av <b>registrerade byggnader, pågående arbeten och verkliga individuella handlingar i simuleringen</b>. Flytta och zooma i den schematiska stadsbilden. Husen motsvarar registrerade konstruktioner; inga skapas för att en timer passerar.</p>
    </div>
    <span id="v9-society-status" class="v9-active">VÄNTAR PÅ FÖRSTA SAMHÄLLET</span>
   </div>
@@ -348,12 +352,13 @@
    <select id="v9-society-select" aria-label="Välj ett digitalt samhälle"><option value="">Följ mest utvecklade samhälle</option></select>
    <button id="v9-society-follow" type="button">◎ Följ mest aktivt</button>
    <button id="v9-society-next" type="button">Nästa stad <span aria-hidden="true">→</span></button>
+    <div class="v10-scene-zoom"><button id="v10-city-zoom-in" type="button">＋ DETALJER</button><button id="v10-city-zoom-out" type="button">－ ÖVERSIKT</button><button id="v10-city-reset" type="button">◎ CENTRERA</button></div>
   </div>
   <div class="v9-scene-grid">
    <div class="v9-scene-main">
     <div class="v9-world-label"><span id="v9-city-name">Inget samhälle ännu</span><span id="v9-city-age">LIVET UTVECKLAS</span></div>
     <canvas id="v9-scene-canvas" aria-label="Schematisk levande stadsbild med individuella organismer, byggnader och samarbetsprojekt"></canvas>
-    <div class="v9-scene-legend">▣ Faktiska konstruktioner <span>◉ Individer som har agerat</span><span>─ Vägar och byggnadsarbete</span></div>
+    <div class="v9-scene-legend">▣ Faktiska konstruktioner <span>◉ Individer som har agerat</span><span>─ Schematiska kopplingar</span></div>
     <div class="v9-metric-strip">
      <div><strong id="v9-citizens">0</strong><span>Individer i kulturen</span></div>
      <div><strong id="v9-built">0</strong><span>Slutförda konstruktioner</span></div>
@@ -382,7 +387,7 @@
   </div>
  </section>
  <div class="v8-navigation">
-  <div class="v8-population-card"><span>LEVENDE INDIVIDER · EXAKT ANTAL</span><b id="v8-population">0</b><small>VISAS <strong id="v8-in-view">0 av 0</strong> · <strong id="v8-zoom">4.0×</strong></small></div>
+  <div class="v8-population-card"><span>LEVENDE INDIVIDER · EXAKT ANTAL</span><b id="v8-population">0</b><small>I KAMERAN <strong id="v8-in-view">0 av 0</strong> · <strong id="v8-zoom">4.0×</strong></small></div>
   <div class="v8-population-card"><span>FÖDDA UNDER DENNA VÄRLD</span><b id="v8-born">0</b><small>Du ser nya födslar som ljusringar runt individerna</small></div>
   <div class="v8-population-card"><span>VERKLIGT BYGGDA HEM</span><b id="v8-homes">0</b><small><strong id="v8-districts">0</strong> samhällen kan fortsätta växa</small></div>
   <div class="v8-nav-actions"><button id="v8-zoom-in" type="button" aria-label="Zooma in">+ ZOOMA</button><button id="v8-zoom-out" type="button" aria-label="Zooma ut">− ZOOMA</button><button id="v8-follow" type="button">◎ FÖLJ NYFÖDD</button><span id="v8-selected">Tryck på en individ för mikroskopanalys</span></div>
@@ -440,7 +445,7 @@
  </div>
 
  <div class="v7-header">
-  <div class="society-kicker">THE LIVING CIVILIZATIONS · VERSION 9</div>
+  <div class="society-kicker">THE LIVING CIVILIZATIONS · VERSION 9.1</div>
   <h3>🧬 Evolution under mikroskopet</h3>
   <p>Varje organism utvecklas från sitt eget genom. Mutationer kan kopiera, inaktivera eller förändra gener som styr hur kroppen växer. Klicka på en organism för att granska dess riktiga ärvda utvecklingsstruktur.</p>
  </div>
@@ -526,5 +531,6 @@ addEventListener('resize',resize,{passive:true});resize();requestAnimationFrame(
 </script>
 <script src="./life-ui-v9-base.js" defer></script>
 <script src="./life-ui-v9-society.js" defer></script>
+<script src="./life-ui-v10-fluid.js" defer></script>
 <script src="./life-ui-v7.js" defer></script>
 </body></html>
