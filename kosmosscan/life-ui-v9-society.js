@@ -127,10 +127,18 @@ function worldScene(){
  for(let gx=0;gx<w;gx+=34)line(gx,0,gx,h,'rgba(53,114,107,.11)',.55);
  const city=state;
  if(!city){
-  circle(w*.5,h*.44,Math.min(w,h)*.15,'rgba(41,127,111,.1)','rgba(112,222,184,.33)');
-  label('Först behöver organismer utveckla kunskap och samarbeta.',w*.5,h*.45,'#b4e3d6','12px system-ui');
-  label('Samhällen växer inte automatiskt från en timer.',w*.5,h*.45+23,'#88aeb6','11px system-ui');
-  label('Se individernas biologiska utveckling i världsvyn ovan.',w*.5,h*.45+44,'#86b8ba','10px system-ui');
+  const organisms=(frame?.creatures||[]).slice(0,30);
+  label('LIVET FÖRE DE FÖRSTA SAMHÄLLENA',w*.5,h*.14,'#b4e3d6','bold 13px system-ui');
+  label('Dessa kroppar och nervsystem kommer från simulerade individer.',w*.5,h*.20,'#88b9b4','11px system-ui');
+  for(let i=0;i<organisms.length;i++){
+   const a=organisms[i],col=i%10,row=(i/10)|0;
+   const px=w*(.09+col*.092),py=h*(.35+row*.18);
+   drawIndividual({anatomy:a.nodes,color:a.color},px,py,clamp(w/85,4.5,9));
+   if(col%2===0||w>650)label('#'+a.id+' · g'+a.gen,px,py+17,'#9bd4c8','9px ui-monospace,monospace');
+   drawn.push({kind:'person',data:a,x:px,y:py});
+  }
+  const readiness=Math.round(clamp((frame?.metrics?.biologicalCultureReadiness||0)*100,0,100));
+  label('Biologiska förutsättningar för samarbete: '+readiness+'%',w*.5,h*.93,'#b6ffda','11px ui-monospace,monospace');
   return;
  }
  const cx=w*.5,cy=h*.43;
@@ -183,7 +191,7 @@ function actions(){
  const c=state,m=frame?.metrics,tot=m?.social||{};
  $text('v9-city-name',c?.name||'Inget samhälle ännu');
  $text('v9-city-age',c?'SAMHÄLLE · NIVÅ '+c.level:'BIOLOGISK UTVECKLING');
- $text('v9-society-status',c?'UTVECKLING I REALTID':'INVÄNTAR SAMARBETE');
+ $text('v9-society-status',c?'UTVECKLING I REALTID':'BIOLOGI '+Math.round((m?.biologicalCultureReadiness||0)*100)+'%');
  $text('v9-citizens',human(c?.people||0));
  $text('v9-built',human(tot.constructed||0));
  $text('v9-active-projects',human(c?.active?.length||0));
