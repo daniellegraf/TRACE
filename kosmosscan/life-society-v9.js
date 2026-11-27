@@ -440,7 +440,7 @@ function exploration(a,c,city,w){
   return{id:city.id,name:city.name,level:city.level,era,clan:city.clan,
    x:city.x,y:city.y,hue:c.hue,clanName:c.name,people:c.members,
    resources:{...c.resources},tech:Array.from(c.tech).map(v=>+v.toFixed(3)),
-   assets:(city.assets||[]).slice(-80),assetsTotal:(city.assets||[]).length,
+   assets:(city.assets||[]).slice(-220),assetsTotal:(city.assets||[]).length,
    active:active.slice(0,8),recent:(city.activity||[]).slice(0,24),
    citizens:agents,homes:city.homes||0,farms:city.farms||0,
    workshops:city.workshops||0,library:city.library||0,power:city.power||0,
