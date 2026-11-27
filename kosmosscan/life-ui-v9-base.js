@@ -439,6 +439,14 @@ function changeZoom(delta){
 }
 $('v8-zoom-in').addEventListener('click',()=>changeZoom(1.45));
 $('v8-zoom-out').addEventListener('click',()=>changeZoom(1/1.45));
+$('v10-explore-city').addEventListener('click',()=>{
+ if(!snapshot?.sites?.length){report('Inget samhälle har grundats ännu.');return;}
+ const city=selected||[...snapshot.sites].sort((a,b)=>(b.level||0)-(a.level||0))[0]?.id;
+ if(city)selectCity(city);
+ document.getElementById('v9-scene-canvas')?.scrollIntoView({
+  behavior:window.matchMedia?.('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'center'
+ });
+});
 $('v8-follow').addEventListener('click',()=>{
  if(!snapshot)return;
  const recent=(snapshot.births||[]).at(-1),latest=recent||(snapshot.creatures||[]).at(-1);
