@@ -171,13 +171,25 @@ function create(random){
    const unlocked=c.tech[concept.tech]>=.16 ||
     concept.kind==='commons'&&c.tech[1]>=.13;
    if(!unlocked)continue;
-   const score=(needs[concept.needs]||.2)*(R()*.4+.68)+p.drive.creation*.4+
-    p.drive.invention*.25+(concept.tech===p.favored?.19:0);
+   // Saturating infrastructure must not monopolize future construction.
+   // An absent capability gets a strong priority, while additional copies
+   // yield diminishing simulated benefit. This is local to each settlement.
+   if(!city.assetCounts){
+    city.assetCounts={};
+    for(const asset of city.assets||[])city.assetCounts[asset.kind]=(city.assetCounts[asset.kind]||0)+1;
+   }
+   const existing=city.assetCounts[concept.kind]||0;
+   const shortage=(needs[concept.needs]||.2);
+   const novelty=1/(1+existing*.85);
+   const readiness=.75+.2*Math.min(1,c.tech[concept.tech]);
+   const score=(shortage*(.7+R()*.35)+p.drive.creation*.36+
+     p.drive.invention*.18+(concept.tech===p.favored?.18:0))*novelty*readiness;
    options.push({concept,score});
   }
   if(!options.length)return;
   options.sort((a,b)=>b.score-a.score);
-  const concept=options[0].concept;
+  const candidate=options.find(o=>!(city.projects||[]).some(q=>q.status==='active'&&q.kind===o.concept.kind));
+  const concept=(candidate||options[0]).concept;
   if(!city.projects)city.projects=[];
   if(city.projects.filter(q=>q.status==='active').length>5)return;
   const current=city.projects.find(q=>q.status==='active'&&q.kind===concept.kind);
@@ -238,6 +250,8 @@ function create(random){
     function:project.need};
    if(!city.assets)city.assets=[];
    city.assets.push(asset);
+   if(!city.assetCounts)city.assetCounts={};
+   city.assetCounts[project.kind]=(city.assetCounts[project.kind]||0)+1;
    // Resource feedback depends on what was built, not on a random city timer.
    if(project.kind==='farm'||project.kind==='commons')c.resources.food+=4;
    if(project.kind==='workshop'||project.kind==='factory')c.resources.material+=2.4;
@@ -351,7 +365,8 @@ function exploration(a,c,city,w){
  function chooseAction(a,c,city){
   const p=agent(a),resources=c.resources,energy=a.energy||.6;
   const scores=[
-   {name:'study',score:p.drive.research*.8+(city?.library||0)*.008+.17},
+   {name:'study',score:p.drive.research*.8+(city?.library||0)*.008+.17+
+       (c.tech.filter(v=>v>=.16).length<12?.35:.08)},
    {name:'explore',score:p.drive.exploration*.8+Math.max(0,.5-energy)*.4+.2},
    {name:'harvest',score:.32+Math.max(0,14-resources.material)*.075+p.drive.exploration*.2},
    {name:'design',score:p.drive.invention*.65+p.drive.creation*.2+.12},
