@@ -117,6 +117,9 @@ function create(random){
    log(w,'discovery',a,city,p.name+' utvecklade kunskap om '+knowledge+'.',
     {domain:k,level:+c.tech[k].toFixed(3)});
    if(worldCanLog(w))w.addEvent('skill',p.name+' i '+c.name+' upptäckte '+knowledge,c.id);
+   if(city&&R()<.15&&typeof w.invent==='function')w.invent(c,a);
+  }else if(city&&c.tech[8]>.16&&R()<.012){
+   if(typeof w.invent==='function')w.invent(c,a);
   }else if(R()<.004){
    log(w,'study',a,city,p.name+' undersöker '+DOMAINS[k].toLowerCase()+'.',{domain:k});
   }
@@ -281,7 +284,7 @@ function create(random){
    {name:'study',score:p.drive.research*.8+(city?.library||0)*.008+.17},
    {name:'explore',score:p.drive.exploration*.8+Math.max(0,.5-energy)*.4+.2},
    {name:'design',score:p.drive.invention*.65+p.drive.creation*.2+.12},
-   {name:'work',score:p.drive.creation*.8+p.drive.cooperation*.15+(city?.projects||[]).some(x=>x.status==='active')?.34:0},
+   {name:'work',score:p.drive.creation*.8+p.drive.cooperation*.15+((city?.projects||[]).some(x=>x.status==='active')?.34:0)},
    {name:'teach',score:p.drive.cooperation*.85+.1},
    {name:'debate',score:p.drive.cooperation*.22+p.drive.invention*.15+.1}
   ];
