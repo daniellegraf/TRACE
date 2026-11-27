@@ -106,7 +106,10 @@ function create(random){
   const other=choose(paths);
   const k=R()<.65?base:other;
   const curiosity=p.drive.research,quality=(p.aptitude[k]+p.skill[k]+(a.g?.brain.length||3)*.009)*curiosity;
-  const effort=.0035+quality*.014;
+  // Constructed learning institutions measurably improve subsequent study.
+  const education=1+Math.min(1.2,(city?.library||0)*.014+(city?.archives||0)*.008);
+  const observation=(k===12||k===10)?1+Math.min(1,(city?.observatories||0)*.03):1;
+  const effort=(.0035+quality*.014)*education*observation;
   const before=c.tech[k];c.tech[k]=clamp(before+effort,0,1);
   p.skill[k]=clamp(p.skill[k]+.003+quality*.004,0,1);
   p.experience+=.02;personalKnowledge++;
@@ -241,6 +244,14 @@ function create(random){
    if(project.kind==='power')c.resources.power+=3.1;
    if(project.kind==='academy'||project.kind==='archive'||project.kind==='observatory')c.resources.ideas+=2;
    if(project.kind==='transport')c.resources.material+=1.5;
+   // Derived inventions have repeatable effects, beyond a decorative name.
+   if(project.sourceEffect==='lärande')c.research+=.7;
+   if(project.sourceEffect==='produktion')c.resources.material+=.7;
+   if(project.sourceEffect==='energi')c.resources.power+=.8;
+   if(project.sourceEffect==='information')c.resources.ideas+=.5;
+   if(project.sourceEffect==='hållbarhet')city.ecology=(city.ecology||0)+.15;
+   if(project.sourceEffect==='samordning')c.social=clamp(c.social+.02,0,1);
+   if(project.sourceEffect==='transport')city.roads=(city.roads||0)+1;
    const oldLevel=city.level;
    city.level=Math.max(1,1+Math.floor(Math.log2(1+city.assets.length/4)));
    if(city.level>oldLevel&&worldCanLog(w))w.addEvent('city',city.name+' har utvecklat nya funktioner: nivå '+city.level,c.id);
@@ -269,7 +280,7 @@ function create(random){
   const source=p.skill[skillIdx],target=q.skill[skillIdx];
   if(source<=target+.03)return;
   const diff=source-target;
-  q.skill[skillIdx]+=diff*.2;q.teaching++;p.teaching++;link(a,other);
+  q.skill[skillIdx]+=diff*.2*(1+Math.min(1,(city.archives||0)*.035));q.teaching++;p.teaching++;link(a,other);
   if(R()<.25){
    log(w,'teaching',a,city,p.name+' lärde '+q.name+' om '+DOMAINS[skillIdx].toLowerCase()+'.',
     {teacher:a.id,learner:other.id,domain:skillIdx});
@@ -279,8 +290,10 @@ function create(random){
   const p=agent(a),j=w.pos(a.x,a.y);
   const fertility=w.nutrition[j],moisture=w.water[j],stone=w.terrain[j]>=2;
   const efficiency=.35+p.drive.exploration*.7+p.skill[8]*.32;
-  const collected=(stone?.57:.31)*efficiency*(.8+moisture*.35);
-  const food= Math.max(0,fertility*.18*efficiency);
+  const factories=Math.min(1.6,(city?.factories||0)*.06+(city?.workshops||0)*.018);
+  const farms=Math.min(1.8,(city?.farms||0)*.037+(city?.gardens||0)*.021);
+  const collected=(stone?.57:.31)*efficiency*(.8+moisture*.35)*(1+factories);
+  const food= Math.max(0,fertility*.18*efficiency*(1+farms));
   c.resources.material+=collected;
   c.resources.food+=food;
   w.nutrition[j]=clamp(fertility-food*.018,0,1);
@@ -293,6 +306,7 @@ function exploration(a,c,city,w){
   const quality=(p.drive.exploration+p.drive.research)*.5;
   const reward=w.nutrition[j]*quality;
   c.resources.food+=reward*.25;c.resources.material+=reward*.21;
+  if(city?.observatories&&R()<.05)c.resources.ideas+=Math.min(1,city.observatories*.018);
   if(reward>.055&&R()<.085*quality){p.discoveries++;discoveries++;
    const insight=['näringsmönster','vattenflöde','mineralstruktur','rytmiska signaler','temperaturvariation',
    'optisk variation','ekologisk kretsgång'];
