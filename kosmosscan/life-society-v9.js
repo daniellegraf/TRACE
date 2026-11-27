@@ -355,7 +355,7 @@ function exploration(a,c,city,w){
   const expansion=c.cities.length>0;
   if(expansion&&pressure<110)return null;
   if(R()<(expansion?.008:.17)){
-   const city=w.foundCity(c);
+   const city=w.foundCity(c,a);
    if(city){const v=city===true?w.cities.at(-1):city;const p=agent(a);
     p.homeCity=v.id;log(w,'founding',a,v,p.name+' organiserade grundandet av '+v.name+'.');
     return v}
@@ -430,7 +430,14 @@ function exploration(a,c,city,w){
    for(const id of ids){const a=w.agents[id-1];if(a&&a.clan===c.id)agents.push(citizen(a));}
   }
   const active=(city.projects||[]).filter(p=>p.status==='active');
-  return{id:city.id,name:city.name,level:city.level,clan:city.clan,
+  // This is a descriptive classification based on existing capabilities,
+  // not a hidden unlock or automatic progression timer.
+  let era='Tidigt samhälle';
+  if((city.councils||0)>0&&(city.exchange||city.markets||0)>0)era='Organiserad handelsstad';
+  if((city.library||0)>0&&(city.observatories||0)>0)era='Vetenskapligt samhälle';
+  if((city.factories||0)>0&&(city.power||0)>0)era='Industriell kultur';
+  if((city.shipyards||0)>0&&c.tech[15]>.3)era='Experimentell farkostkultur';
+  return{id:city.id,name:city.name,level:city.level,era,clan:city.clan,
    x:city.x,y:city.y,hue:c.hue,clanName:c.name,people:c.members,
    resources:{...c.resources},tech:Array.from(c.tech).map(v=>+v.toFixed(3)),
    assets:(city.assets||[]).slice(-80),assetsTotal:(city.assets||[]).length,
