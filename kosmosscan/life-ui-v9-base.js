@@ -145,7 +145,7 @@ function drawMap(){
  if(mode==='life'){
   // A high-fidelity lens: every rendered creature has its own developmental
   // anatomy. The HUD states precisely how many individuals are outside view.
-  for(const o of snapshot.creatures||[])drawCreature(o,w,h);
+  if(!window.KosmosV10Overlay)for(const o of snapshot.creatures||[])drawCreature(o,w,h);
   for(const birth of snapshot.births||[]){
    const p=coords(birth.x,birth.y,w,h);
    if(p.x<0||p.y<0||p.x>w||p.y>h)continue;
@@ -207,7 +207,7 @@ function drawMap(){
  ctx.fillStyle='#c4fff0';ctx.font='bold 13px ui-monospace,monospace';ctx.textAlign='left';
  ctx.fillText('LEVANDE '+fmt(m.count)+'   +'+fmt(m.births||0)+' FÖDDA',12,20);
  ctx.font='11px ui-monospace,monospace';ctx.fillStyle='#9cd2c8';
- ctx.fillText(mode==='life'?'SYNLIGA I LINSEN '+fmt(m.inView)+' · ZOOM '+lifeCam.zoom.toFixed(1)+'×':
+ ctx.fillText(mode==='life'?'I OMRÅDET '+fmt(m.inView)+' · ZOOM '+lifeCam.zoom.toFixed(1)+'×':
   'BOSÄTTNINGAR '+fmt(m.cities)+' · HEM '+fmt(m.totalHomes||0),12,36);
 }
 function stats(){
@@ -370,6 +370,7 @@ function openWorker(){
   else if(m.type==='speed'){fastResearch=m.value===4;$('society-fast').textContent=fastResearch?'⚡ FORSKNING ×4 AKTIV':'⚡ SNABBARE FORSKNING ×4';$('society-fast').classList.toggle('active',fastResearch);}
  };
 }
+window.KosmosV10Camera=()=>({mode,zoom:lifeCam.zoom,x:lifeCam.x,y:lifeCam.y});
 window.KosmosV7Bridge={
  send(payload){if(worker)worker.postMessage(payload);},
  getWorker(){return worker;},
@@ -395,7 +396,7 @@ function start(){
   $('society-start').textContent='↻ NYTT LIVSFRÖ';
   $('society-pause').disabled=false;$('society-pause').textContent='⏸ PAUSA';
   $('society-fast').disabled=false;$('society-fast').textContent='⚡ SNABBARE FORSKNING ×4';$('society-fast').classList.remove('active');
-  status('VÄCKER LIV…',true);worker.postMessage({type:'start'});renderMap();renderDetail();
+  status('VÄCKER LIV…',true);worker.postMessage({type:'start'});drawMap();renderDetail();
  }catch(e){running=false;status('KUNDE INTE STARTA',false);log(e.message);}
 }
 $('society-start').addEventListener('click',start);
