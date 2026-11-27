@@ -368,13 +368,20 @@ function foundingSite(c){
  }
  return null;
 }
-function foundCity(c){
+function foundCity(c,founder=null){
  if(c.tech[1]<.16||c.tech[3]<.16||c.resources.material<6)return false;
  const location=foundingSite(c);if(!location)return false;
  const city={id:cities.length+1,clan:c.id,name:cityName(c),x:location.x,y:location.y,
   level:1,structures:1,homes:2,farms:0,observatories:0,shipyards:0,library:0,
   workshops:0,power:0,roads:0,wealth:2,stored:0,land:1,style:c.architectureStyle,
-  projects:[],project:0,inventions:[],messages:[],population:0,founded:step,sky:0};
+  projects:[],project:0,inventions:[],messages:[],population:0,founded:step,sky:0,
+  assets:[{id:-1000000-(cities.length+1)*2,kind:'dwelling',
+    title:'Första skyddet',x:-.15,y:0,author:founder?.id||null,
+    workers:founder?1:0,function:'shelter',created:step},
+   {id:-1000001-(cities.length+1)*2,kind:'commons',
+    title:'Första mötesplatsen',x:.16,y:0,author:founder?.id||null,
+    workers:founder?1:0,function:'cooperation',created:step}],
+  assetCounts:{dwelling:1,commons:1}};
  c.cities.push(city.id);cities.push(city);c.resources.material-=5;
  buildings+=3;architectureEvents++;
  speech(c,'grundande',c.name+' grundade '+city.name+' med två hem.',[0,3,4,5],{city:city.id});
