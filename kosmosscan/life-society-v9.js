@@ -238,7 +238,20 @@ function create(random){
     {teacher:a.id,learner:other.id,domain:skillIdx});
   }
  }
- function exploration(a,c,city,w){
+ function harvesting(a,c,city,w){
+  const p=agent(a),j=w.pos(a.x,a.y);
+  const fertility=w.nutrition[j],moisture=w.water[j],stone=w.terrain[j]>=2;
+  const efficiency=.35+p.drive.exploration*.7+p.skill[8]*.32;
+  const collected=(stone?.57:.31)*efficiency*(.8+moisture*.35);
+  const food= Math.max(0,fertility*.18*efficiency);
+  c.resources.material+=collected;
+  c.resources.food+=food;
+  w.nutrition[j]=clamp(fertility-food*.018,0,1);
+  p.contributions++;p.experience+=.01;
+  if(R()<.007)log(w,'harvest',a,city,p.name+' samlade '+(stone?'mineraler':'växtfibrer')+' till samhällets förråd.',
+    {material:+collected.toFixed(3),food:+food.toFixed(3)});
+}
+function exploration(a,c,city,w){
   const p=agent(a),j=w.pos(a.x,a.y);
   const quality=(p.drive.exploration+p.drive.research)*.5;
   const reward=w.nutrition[j]*quality;
@@ -283,6 +296,7 @@ function create(random){
   const scores=[
    {name:'study',score:p.drive.research*.8+(city?.library||0)*.008+.17},
    {name:'explore',score:p.drive.exploration*.8+Math.max(0,.5-energy)*.4+.2},
+   {name:'harvest',score:.32+Math.max(0,14-resources.material)*.075+p.drive.exploration*.2},
    {name:'design',score:p.drive.invention*.65+p.drive.creation*.2+.12},
    {name:'work',score:p.drive.creation*.8+p.drive.cooperation*.15+((city?.projects||[]).some(x=>x.status==='active')?.34:0)},
    {name:'teach',score:p.drive.cooperation*.85+.1},
@@ -307,6 +321,7 @@ function create(random){
    switch(action){
     case 'study':study(a,c,city,w);break;
     case 'explore':exploration(a,c,city,w);break;
+    case 'harvest':harvesting(a,c,city,w);break;
     case 'design':brainstorm(a,c,city,w);break;
     case 'work':if(city)labor(a,c,city,w);break;
     case 'teach':teach(a,c,city,w);break;
