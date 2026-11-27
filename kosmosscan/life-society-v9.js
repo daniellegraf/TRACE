@@ -110,6 +110,31 @@ function create(random){
   const before=c.tech[k];c.tech[k]=clamp(before+effort,0,1);
   p.skill[k]=clamp(p.skill[k]+.003+quality*.004,0,1);
   p.experience+=.02;personalKnowledge++;
+  // Composite knowledge can continue beyond the fixed introductory subjects.
+  // Each new idea carries inherited source domains and alters future output.
+  if(city&&c.tech[k]>.28&&R()<.0045+p.drive.invention*.0035){
+    if(!c.researchTree)c.researchTree=[];
+    if(!c.researchKeys)c.researchKeys=new Set();
+    const target=choose(DOMAINS.map((_,i)=>i).filter(i=>c.tech[i]>.16));
+    const parent=c.researchTree.length&&R()<.65?choose(c.researchTree):null;
+    const source=parent?parent.id:'grundforskning';
+    const key=k+':'+target+':'+source;
+    if(!c.researchKeys.has(key)){
+     const knowledge={id:c.researchTree.length+1,step:w.step,author:a.id,
+      authorName:p.name,key,parents:[k,target],parentIdea:parent?.id||null,
+      name:DOMAINS[k].toLowerCase()+'-'+DOMAINS[target].toLowerCase()+' '+NAMES[(a.id+w.step)%NAMES.length],
+      effect:choose(['information','produktion','samordning','energi','hållbarhet','transport','lärande']),
+      strength:+(.08+R()*.15).toFixed(3)};
+     c.researchTree.push(knowledge);c.researchKeys.add(key);
+     c.resources.ideas+=knowledge.strength*1.3;
+     if(knowledge.effect==='produktion')c.resources.material+=knowledge.strength;
+     if(knowledge.effect==='lärande')c.research+=knowledge.strength;
+     if(knowledge.effect==='energi')c.resources.power+=knowledge.strength;
+     ideas++;p.discoveries++;
+     log(w,'breakthrough',a,city,p.name+' kombinerade '+DOMAINS[k]+' och '+DOMAINS[target]+
+       ' till '+knowledge.name+'.',{knowledge});
+    }
+   }
   if(before<.16&&c.tech[k]>=.16){
    researchSuccesses++;p.discoveries++;
    const knowledge=DOMAINS[k].toLowerCase();
@@ -156,11 +181,13 @@ function create(random){
   if(current&&R()<.9)return;
   const costs=concept.cost*(.8+R()*.4);
   const effort=concept.labor*(.7+R()*.55);
+  const novel=c.researchTree?.length&&R()<.26?choose(c.researchTree):null;
   const project={id:++totalProjects,city:city.id,kind:concept.kind,
-   title:concept.label+' '+p.name.slice(0,4)+'-'+totalProjects,
+   title:(novel?'Experiment '+novel.name:concept.label+' '+p.name.slice(0,4)+'-'+totalProjects),
+   sourceIdea:novel?.id||null,sourceEffect:novel?.effect||null,
    founder:a.id,founderName:p.name,tech:concept.tech,
    need:concept.needs,created:w.step,
-   status:'active',work:0,required:+effort.toFixed(2),
+   status:'active',work:0,spent:0,required:+effort.toFixed(2),
    materialCost:+costs.toFixed(2),workers:[],contributions:[],stages:['idé','samordning','bygge'],
    outcome:null};
   city.projects.push(project);ideas++;p.ownIdeas.push(project.id);p.lastProject=project.id;
@@ -173,16 +200,17 @@ function create(random){
   active.sort((x,y)=>(x.work/x.required)-(y.work/y.required));
   const project=R()<.35?choose(active):active[active.length-1];
   if(!project)return;
-  const minMaterial=project.materialCost*.055;
-  if(c.resources.material<minMaterial){
-   c.resources.material+=.07; // collective salvage, not free completion
-   return;
-  }
+  const minMaterial=Math.max(.01,(project.materialCost-(project.spent||0))/Math.max(1,project.required-project.work)*.3);
+  if(c.resources.material<minMaterial)return;
   const perk=(p.drive.creation*.8+p.drive.cooperation*.25+p.skill[project.tech]*.7);
   const invested=.21+perk*.52+Math.min(1.2,a.g.brain.length*.018);
-  const materialUse=Math.min(c.resources.material,.025+invested*.055);
+  const materialUse=Math.min(c.resources.material,
+    project.materialCost*(Math.min(invested,project.required-project.work)/project.required));
+  const fraction=materialUse/Math.max(.01,project.materialCost);
   c.resources.material-=materialUse;
-  project.work+=invested;
+  project.spent=(project.spent||0)+materialUse;
+  project.work+=Math.min(invested,project.required*fraction);
+  a.energy=Math.max(.01,(a.energy||.8)-.0003*invested);
   p.skill[project.tech]=clamp(p.skill[project.tech]+.003,0,1);
   p.contributions++;p.experience+=.03;
   p.lastProject=project.id;
@@ -192,14 +220,16 @@ function create(random){
   else if(project.contributions.length<48)project.contributions.push({id:a.id,name:p.name,work:invested});
   if(R()<.012)log(w,'work',a,city,p.name+' arbetar med '+project.title+'.',
    {project:project.id,progress:project.work/project.required});
-  if(project.work>=project.required){
+  if(project.work>=project.required-.001){
    project.status='complete';project.finished=w.step;project.work=project.required;
    const concept=CONCEPTS.find(x=>x.kind===project.kind);
    const output=concept?.output||'structures';
    if(city[output]===undefined)city[output]=0;
    city[output]++;city.structures++;
+   const assetIndex=(city.assets?.length||0),ang=assetIndex*2.39996;
+   const radial=Math.min(.92,Math.sqrt(assetIndex+1)*.078);
    const asset={id:project.id,kind:project.kind,title:project.title,
-    x:(R()-.5)*2,y:(R()-.5)*2,
+    x:Math.cos(ang)*radial,y:Math.sin(ang)*radial,
     author:project.founder,workers:project.workers.length,
     value:1+Math.log2(1+project.contributions.length),created:w.step,
     function:project.need};
@@ -353,7 +383,7 @@ function exploration(a,c,city,w){
    active:active.slice(0,8),recent:(city.activity||[]).slice(0,24),
    citizens:agents,homes:city.homes||0,farms:city.farms||0,
    workshops:city.workshops||0,library:city.library||0,power:city.power||0,
-   observatories:city.observatories||0,artifacts:c.inventions.length};
+   observatories:city.observatories||0,artifacts:c.inventions.length,researchIdeas:(c.researchTree||[]).slice(-12).reverse()};
  }
  function summary(){
   return{actions,discoveries,constructed,researchSuccesses,cooperations,
