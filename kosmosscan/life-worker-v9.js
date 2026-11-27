@@ -32,7 +32,7 @@ let nextAgent=new Int32Array(512);
 let birthCredit=0,cycle=null,step=0,last=0,lastFrame=0,lastStats=0,clock=0,paused=true,live=false,rate=0,rateBorn=0,lastRateAt=0;
 let teaching=0,skillsFound=0,transmissions=0,sentences=0,innovations=0,buildings=0,roadCount=0;
 let maxCells=1,maxBrain=3,maxGen=0,underlyingTicks=0,individualUpdates=0,updateWindow=0,updatesPerSecond=0;
-let socialSpeed=1, extraPlanetary=0;
+let socialSpeed=1,socialEffort=1,extraPlanetary=0;
 function rand(){let x=rng|0;x^=x<<13;x^=x>>>17;x^=x<<5;rng=x|0;return(x>>>0)/4294967296;}
 function between(a,b){return a+(b-a)*rand();}
 function pick(a){return a[(rand()*a.length)|0];}
@@ -589,7 +589,7 @@ function societalAction(){
 function metrics(){
  return{count:agents.length,rate,gen:maxGen,brain:maxBrain,cells:maxCells,ticks:step,
   updates:updatesPerSecond,progress:cycle?cycle.index:agents.length,progressTotal:cycle?cycle.total:agents.length,
-  cities:cities.length,buildings,inventions:inventions.length,messages:sentences,teaching,transmissions,socialSpeed,spaceDiscoveries:extraPlanetary,
+  cities:cities.length,buildings,inventions:inventions.length,messages:sentences,teaching,transmissions,socialSpeed,socialEffort,spaceDiscoveries:extraPlanetary,
   launchCount:flights.length,achievements:skillsFound,cultures:clans.filter(c=>c.knowledge).length,
  totalClans:clans.length,culturesFounded,architectureEvents,bodyEvents,
  totalHomes:cities.reduce((x,c)=>x+(c.homes||0),0),
@@ -828,7 +828,12 @@ function heartbeat(){
   for(let i=0;i<biologyFactor;i++)stepIndividuals();
   if(clock-lastStats>190){
    // Fast-forward cultural deliberation without duplicating biological individuals.
-   if(cultureEnabled)for(let i=0;i<socialSpeed;i++)societalAction();
+   // More simultaneous individuals imply more independent social activity.
+    // This only schedules genuine agent decisions, research, gathering and
+    // labor; it never completes a building without material and contributors.
+    socialEffort=cultureEnabled?Math.min(8,
+      socialSpeed*Math.min(4,1+Math.floor(agents.length/420))):0;
+    for(let i=0;i<socialEffort;i++)societalAction();
    lastStats=clock;
   }
   if(clock-lastFrame>280){render();lastFrame=clock;}
