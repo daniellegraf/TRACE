@@ -12,6 +12,7 @@ const human=n=>Math.round(Number(n)||0).toLocaleString('sv-SE');
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
 const send=m=>window.KosmosV7Bridge?.send?.(m);
 let state=null,frame=null,watchCity=0,drawn=[],selectedPerson=0,lastData=0,lastCityOpts='',lastFrameTime=0;
+let sceneZoom=1,sceneDX=0,sceneDY=0,sceneDrag=null;
 const palette={dwelling:'#e7cba3',farm:'#85d6a0',workshop:'#b7b7ba',academy:'#a2e4e1',
  power:'#f7d89e',observatory:'#b5bfff',exchange:'#f4bc9c',archive:'#b9f5dc',
  clinic:'#faf2dc',council:'#c0e5ef',transport:'#9ad8c4',factory:'#edbba8',
@@ -49,49 +50,101 @@ function geometry(){
  ctx.setTransform(ratio,0,0,ratio,0,0);return{w,h};
 }
 function assetPoint(asset,w,h){
- return{x:w*.5+(asset.x||0)*w*.40,y:h*.45+(asset.y||0)*h*.33};
+ return{x:w*.5+(asset.x||0)*w*.40*sceneZoom+sceneDX,
+  y:h*.45+(asset.y||0)*h*.33*sceneZoom+sceneDY};
 }
 function drawBuilding(asset,p,size){
- const {x,y}=p,scale=Math.min(1.4,1+(asset.workers||1)*.012);
- const w=size*scale,h=size*.75*scale,color=palette[asset.kind]||'#a8d6cc';
+ const {x,y}=p,w=size*clamp(1+(asset.workers||1)*.004,.9,1.24),h=w*.79;
+ if(x< -60||x>canvas.clientWidth+60||y< -60||y>canvas.clientHeight+60)return;
+ const kind=asset.kind||'dwelling',color=palette[kind]||'#a8d6cc';
+ const variant=asset.id%7,lit=(state?.power||0)>0;
  ctx.save();
- ctx.shadowColor='rgba(0,0,0,.48)';ctx.shadowBlur=7;ctx.shadowOffsetY=3;
- const ground=y+h*.45;
- if(asset.kind==='farm'||asset.kind==='commons'){
-  box(x-w*.7,y-h*.42,w*1.4,h*.85,'#245947');
-  for(let i=0;i<4;i++){
-   line(x-w*.54+i*w*.31,y-h*.32,x-w*.54+i*w*.31,y+h*.33,color,1.9);
+ // Each architecturally different object represents one completed real
+ // construction. Roads and natural terrain below are schematic illustration.
+ ctx.fillStyle='rgba(0,5,13,.34)';ctx.beginPath();
+ ctx.ellipse(x+3,y+h*.58,w*.95,h*.36,-.12,0,Math.PI*2);ctx.fill();
+ ctx.shadowColor='rgba(0,0,0,.39)';ctx.shadowBlur=7;ctx.shadowOffsetY=3;
+ if(kind==='farm'||kind==='commons'){
+  polygon([[x-w*.86,y-h*.26],[x+w*.65,y-h*.45],[x+w*.97,y+h*.48],[x-w*.62,y+h*.62]],'#224e42');
+  ctx.shadowBlur=0;
+  for(let i=0;i<6;i++){
+   const sx=x-w*.59+i*w*.23;
+   line(sx,y-h*.18,sx+w*.17,y+h*.38,i%2?'#77b991':'#a0d88e',Math.max(1,w*.085));
   }
-  circle(x,y-h*.32,w*.13,'#a6ffc4');
- }else if(asset.kind==='observatory'){
-  box(x-w*.5,y-h*.05,w,h*.55,color);
-  circle(x,y-h*.08,w*.48,color);
-  circle(x+w*.1,y-h*.35,w*.08,'#102b3b');
- }else if(asset.kind==='communication'||asset.kind==='power'){
-  polygon([[x-w*.3,ground],[x,ground-h*1.9],[x+w*.3,ground]],color);
-  for(let j=0;j<3;j++)line(x-w*.4,ground-j*h*.42,x+w*.4,ground-j*h*.42,'#244b53');
-  circle(x,ground-h*1.95,w*.11,'#f5ecb5');
- }else if(asset.kind==='factory'||asset.kind==='workshop'){
-  box(x-w*.55,y-h*.2,w*1.1,h*.75,color);
-  polygon([[x-w*.6,y-h*.2],[x-w*.15,y-h*.6],[x+w*.58,y-h*.2]],'#335766');
-  box(x+w*.20,y-h*.9,w*.17,h*.72,'#83959e');
-  box(x-w*.28,y+h*.15,w*.2,h*.24,'#123440');
- }else if(asset.kind==='archive'||asset.kind==='academy'||asset.kind==='council'){
-  box(x-w*.55,y-h*.23,w*1.1,h*.68,color);
-  polygon([[x-w*.67,y-h*.25],[x,y-h*.77],[x+w*.67,y-h*.25]],'#7baaaa');
-  for(let j=-1;j<=1;j++)box(x+j*w*.28-w*.075,y-h*.1,w*.15,h*.46,'#2c6171');
- }else if(asset.kind==='transport'){
-  line(x-w*.8,y+h*.4,x+w*.8,y-h*.4,'#c0d8b5',w*.23);
-  line(x-w*.8,y+h*.4,x+w*.8,y-h*.4,'#314f56',1.1);
- }else if(asset.kind==='shipyard'){
-  box(x-w*.48,y-h*.1,w,h*.55,color);
-  line(x-w*.6,y-h*.6,x+w*.5,y-h*.6,'#f3dfae',2);
-  line(x-w*.15,y-h*.6,x-w*.15,y+h*.4,'#f3dfae',2);
-  polygon([[x,y-h],[x+w*.6,y-h*.55],[x,y-h*.55]],'#89b3bb');
+  for(let i=0;i<3;i++)circle(x-w*.44+i*w*.43,y-h*.40-h*.08*((variant+i)%3),w*.16,'#5caa7e');
+  circle(x,y-h*.54,w*.14,'#a2e4b0');
+ }else if(kind==='observatory'){
+  box(x-w*.57,y-h*.13,w*1.14,h*.72,'#8294b6');
+  polygon([[x-w*.57,y+h*.59],[x+w*.57,y+h*.59],[x+w*.70,y+h*.37],[x-w*.70,y+h*.37]],'#405f79');
+  circle(x,y-h*.18,w*.49,'#aabcf4');
+  ctx.shadowBlur=0;
+  line(x-w*.45,y-h*.18,x+w*.44,y-h*.18,'#557e9c',2.2);
+  line(x,y-h*.65,x+w*.35,y-h*.86,'#c9e9fa',2);
+  circle(x+w*.37,y-h*.85,w*.1,'#d6edff');
+ }else if(kind==='power'||kind==='communication'){
+  polygon([[x-w*.64,y+h*.44],[x,y-h*1.75],[x+w*.64,y+h*.44]],'#829bb0');
+  ctx.shadowBlur=0;
+  for(let i=0;i<4;i++){
+   const yy=y+h*.30-i*h*.41;
+   line(x-w*.42+i*w*.1,yy,x+w*.42-i*w*.1,yy,'#1c4c59',1.7);
+  }
+  line(x,y-h*1.77,x,y-h*2,'#c1eade',1.2);
+  circle(x,y-h*2,w*.13,lit?'#fff2b1':'#8de9ce');
+  if(lit){ctx.shadowColor='#b5ffda';ctx.shadowBlur=9;
+   circle(x,y-h*2,w*.07,'#ffffff');ctx.shadowBlur=0;}
+ }else if(kind==='transport'){
+  polygon([[x-w*1.23,y+h*.36],[x+w*.50,y-h*.68],[x+w*1.26,y-h*.38],[x-w*.51,y+h*.65]],'#6b888f');
+  ctx.shadowBlur=0;
+  line(x-w*.86,y+h*.34,x+w*.89,y-h*.47,'#d8e9d5',1.2);
+  line(x-w*.62,y+h*.47,x+w*1.05,y-h*.31,'#d8e9d5',1.2);
+  for(let i=0;i<4;i++){
+   const tx=x-w*.65+i*w*.43,ty=y+h*.31-i*h*.18;
+   line(tx,ty,tx+w*.18,ty+h*.13,'#234552',1);
+  }
+ }else if(kind==='shipyard'){
+  box(x-w*.67,y-h*.19,w*1.34,h*.82,'#668b9a');
+  polygon([[x-w*.73,y-h*.25],[x-w*.4,y-h*.68],[x+w*.71,y-h*.45],[x+w*.71,y-h*.25]],'#b5b9a8');
+  ctx.shadowBlur=0;
+  polygon([[x-w*.15,y-h*.23],[x+w*.04,y-h*1.75],[x+w*.25,y-h*.23]],'#e8dbc1');
+  polygon([[x-w*.15,y-h*.23],[x-w*.35,y+h*.17],[x-w*.06,y+h*.05]],'#a2d3ca');
+  circle(x+w*.04,y-h*.95,w*.1,'#1d5c74');
+  line(x-w*.56,y+h*.35,x+w*.6,y+h*.35,'#dcf7e0',1.5);
  }else{
-  box(x-w*.48,y-h*.15,w*.96,h*.62,color);
-  polygon([[x-w*.61,y-h*.12],[x,y-h*.75],[x+w*.61,y-h*.12]],'#60879a');
-  box(x-w*.12,y+h*.18,w*.22,h*.28,'#12323c');
+  // Extruded walls + distinct roof silhouettes: dwellings, factories,
+  // libraries, clinics, markets and other actually constructed project kinds.
+  const tall=kind==='factory'||kind==='academy'||kind==='archive'||kind==='council';
+  const height=h*(tall?1.2:.86),roofY=y-height*.57;
+  polygon([[x-w*.59,y-height*.35],[x+w*.36,y-height*.35],
+   [x+w*.61,y-height*.14],[x-w*.35,y-height*.12]],'#345469');
+  box(x-w*.59,y-height*.38,w*.95,height*.84,color);
+  polygon([[x+w*.36,y-height*.38],[x+w*.59,y-height*.59],
+   [x+w*.59,y+height*.24],[x+w*.36,y+height*.47]],'#52717a');
+  polygon([[x-w*.68,roofY],[x-w*.10,roofY-height*.51],
+   [x+w*.60,roofY-height*.18],[x+w*.36,roofY+.05*height]],tall?'#48768b':'#5e8a9a');
+  ctx.shadowBlur=0;
+  for(let row=0;row<(tall?3:2);row++){
+   for(let col=0;col<3;col++){
+    const px=x-w*.45+col*w*.27,py=y-height*.23+row*height*.23;
+    box(px,py,w*.12,height*.13,lit?'#ffe2a3':'#1a5060');
+    box(px+w*.02,py,w*.018,height*.13,'#315869');
+   }
+  }
+  if(kind==='factory'||kind==='workshop'){
+   box(x+w*.22,roofY-height*.57,w*.16,height*.56,'#9ea8a3');
+   box(x+w*.19,roofY-height*.6,w*.23,height*.1,'#d0dfcf');
+  }else if(kind==='exchange'){
+   polygon([[x-w*.72,y+height*.1],[x+w*.64,y+height*.1],
+    [x+w*.57,y+height*.44],[x-w*.64,y+height*.44]],'#f2b98c');
+  }else if(kind==='clinic'){
+   box(x-w*.18,y-height*.19,w*.27,height*.08,'#fff3e7');
+   box(x-w*.1,y-height*.28,w*.09,height*.27,'#fff3e7');
+  }else if(kind==='academy'||kind==='archive'||kind==='council'){
+   for(let i=0;i<3;i++)line(x-w*.36+i*w*.31,y+height*.2,
+    x-w*.36+i*w*.31,y-height*.27,'#f1f2dd',Math.max(1,w*.12));
+  }
+  if(kind==='dwelling'){
+   box(x-w*.12,y+height*.16,w*.22,height*.27,'#26516a');
+  }
  }
  ctx.restore();
 }
