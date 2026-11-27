@@ -194,7 +194,22 @@ function worldScene(){
   label('Biologiska förutsättningar för samarbete: '+readiness+'%',w*.5,h*.93,'#b6ffda','11px ui-monospace,monospace');
   return;
  }
- const cx=w*.5,cy=h*.43;
+ const cx=w*.5+sceneDX,cy=h*.43+sceneDY;
+  // Terrain and contour lines are an illustrative ground plane.
+  // Buildings and transport symbols derive solely from completed projects.
+  const land=ctx.createRadialGradient(cx,cy,10,cx,cy,Math.max(w,h)*.72);
+  land.addColorStop(0,'rgba(37,86,76,.43)');
+  land.addColorStop(.55,'rgba(22,57,61,.25)');
+  land.addColorStop(1,'rgba(2,16,32,.08)');
+  ctx.fillStyle=land;ctx.fillRect(0,0,w,h);
+  ctx.save();ctx.strokeStyle='rgba(107,164,151,.07)';ctx.lineWidth=.8;
+  for(let k=0;k<11;k++){ctx.beginPath();
+    ctx.ellipse(cx,cy,18+k*22*sceneZoom,12+k*14*sceneZoom,-.12,0,Math.PI*2);ctx.stroke();}
+  ctx.restore();
+  ctx.font='bold 11px ui-monospace,monospace';ctx.textAlign='left';ctx.fillStyle='#c0f7e1';
+  ctx.fillText('◈ '+(city.era||'TIDIG KULTUR').toUpperCase()+' · '+(city.assetsTotal||0)+' BYGGNADER',15,23);
+  ctx.font='10px ui-monospace,monospace';ctx.fillStyle='#82bcaf';
+  ctx.fillText('1 byggnad = 1 slutfört projekt · dra för att utforska',15,39);
  circle(cx,cy,Math.min(w,h)*.38,'rgba(49,102,84,.12)','rgba(82,157,123,.18)');
  // Cultural center; arcs evoke connected infrastructure without fake extra buildings.
  ctx.lineWidth=1.2;
@@ -203,13 +218,14 @@ function worldScene(){
   line(cx,cy,cx+Math.cos(a)*w*.44,cy+Math.sin(a)*h*.31,'rgba(165,215,188,.2)',2);
  }
  const assets=city.assets||[];
- const prepared=assets.map(asset=>({asset,p:assetPoint(asset,w,h)}));
+ const prepared=assets.map(asset=>({asset,p:assetPoint(asset,w,h)})).sort((a,b)=>a.p.y-b.p.y);
  for(const {asset,p} of prepared){
   const dx=p.x-cx,dy=p.y-cy;
-  line(cx,cy,p.x,p.y,'rgba(136,197,177,.11)',1);
+  if(prepared.length<75||asset.kind==='transport'||asset.id%5===0)
+    line(cx,cy,p.x,p.y,asset.kind==='transport'?'rgba(136,220,191,.32)':'rgba(136,197,177,.10)',asset.kind==='transport'?2.4:1);
  }
  for(const {asset,p} of prepared){
-  const s=clamp(Math.min(w/39,18),9,17);
+  const s=clamp(Math.min(w/43,18)*Math.pow(sceneZoom,.75),6.5,32);
   drawBuilding(asset,p,s);
   drawn.push({kind:'asset',data:asset,x:p.x,y:p.y});
  }
@@ -362,7 +378,23 @@ $('v9-society-next').addEventListener('click',()=>{
  watchCity=ordered[index].id;selectedPerson=0;
  $('v9-society-select').value=String(watchCity);send({type:'watchCity',id:watchCity});
 });
+canvas.style.touchAction='none';
 canvas.addEventListener('pointerdown',event=>{
+ sceneDrag={x:event.clientX,y:event.clientY,baseX:sceneDX,baseY:sceneDY,moved:false};
+ try{canvas.setPointerCapture(event.pointerId);}catch(_error){}
+});
+canvas.addEventListener('pointermove',event=>{
+ if(!sceneDrag)return;
+ const dx=event.clientX-sceneDrag.x,dy=event.clientY-sceneDrag.y;
+ if(Math.abs(dx)+Math.abs(dy)>7)sceneDrag.moved=true;
+ if(sceneDrag.moved){
+  sceneDX=clamp(sceneDrag.baseX+dx,-canvas.clientWidth*sceneZoom*.8,canvas.clientWidth*sceneZoom*.8);
+  sceneDY=clamp(sceneDrag.baseY+dy,-canvas.clientHeight*sceneZoom*.8,canvas.clientHeight*sceneZoom*.8);
+  worldScene();
+ }
+});
+canvas.addEventListener('pointerup',event=>{
+ const moved=sceneDrag?.moved;sceneDrag=null;if(moved)return;
  const r=canvas.getBoundingClientRect(),x=event.clientX-r.left,y=event.clientY-r.top;
  let found=null,best=850;
  for(const hit of drawn){
@@ -393,6 +425,13 @@ window.addEventListener('kosmosv7:message',event=>{
  }
  else if(msg.type==='citizenDetail')profile(msg.person);
 });
+const zoomIn=$('v10-city-zoom-in'),zoomOut=$('v10-city-zoom-out'),reset=$('v10-city-reset');
+if(zoomIn)zoomIn.addEventListener('click',()=>{sceneZoom=clamp(sceneZoom*1.38,1,5);worldScene();});
+if(zoomOut)zoomOut.addEventListener('click',()=>{sceneZoom=clamp(sceneZoom/1.38,1,5);worldScene();});
+if(reset)reset.addEventListener('click',()=>{sceneZoom=1;sceneDX=0;sceneDY=0;worldScene();});
+canvas.addEventListener('wheel',event=>{event.preventDefault();
+ sceneZoom=clamp(sceneZoom*(event.deltaY<0?1.18:1/1.18),1,5);worldScene();
+},{passive:false});
 window.addEventListener('resize',worldScene,{passive:true});
 worldScene();
 })();
