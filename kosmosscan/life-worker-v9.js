@@ -620,32 +620,52 @@ function details(id){
  society:liveSociety(city)};
 }
 function render(){
- // FULL population is processed by the worker. The camera receives only
- // organisms currently inside its region, as real developmental morphologies.
- const visible=[],cap=128,viewW=W/camera.zoom,viewH=H/camera.zoom;
+ // Every organism remains simulated. Sampling must be stable and must
+ // NEVER consume evolutionary RNG (the former random reservoir caused popping).
+ const densityX=36,densityY=24,density=new Uint32Array(densityX*densityY);
+ const viewW=W/camera.zoom,viewH=H/camera.zoom;
  const left=camera.x-viewW*.5,right=camera.x+viewW*.5;
  const top=camera.y-viewH*.5,bottom=camera.y+viewH*.5;
- let inView=0,newestVisible=null;
- for(let i=0;i<agents.length;i++){
-  const a=agents[i];
-  if(a.x<left||a.x>right||a.y<top||a.y>bottom)continue;
-  inView++;
-  if(i===agents.length-1)newestVisible=a;
-  if(visible.length<cap)visible.push(a);
-  else{
-   const replacementIndex=Math.floor(rand()*inView);
-   if(replacementIndex<cap)visible[replacementIndex]=a;
+ const cap=camera.zoom<1.45
+  ?(agents.length<650?110:Math.max(0,Math.round(80*(1-(agents.length-650)/650))))
+  :camera.zoom<2.5?105:camera.zoom<5?132:164;
+ let inView=0;
+ const heap=[];
+ const rank=id=>{let h=id>>>0;h=Math.imul(h^(h>>>16),0x7feb352d);
+   h=Math.imul(h^(h>>>15),0x846ca68b);return(h^(h>>>16))>>>0;};
+ const keep=(a,score)=>{
+  if(!cap)return;
+  if(heap.length<cap){
+   let i=heap.length;heap.push({a,score});
+   while(i>0){const parent=(i-1)>>1;if(heap[parent].score>=score)break;
+    heap[i]=heap[parent];i=parent;}
+   heap[i]={a,score};return;
   }
+  if(score>=heap[0].score)return;
+  heap[0]={a,score};let i=0;
+  while(true){
+   let child=i*2+1;if(child>=heap.length)break;
+   if(child+1<heap.length&&heap[child+1].score>heap[child].score)child++;
+   if(heap[child].score<=score)break;
+   heap[i]=heap[child];i=child;
+  }
+  heap[i]={a,score};
+ };
+ for(let i=0;i<agents.length;i++){
+  const a=agents[i],gx=clamp(Math.floor(a.x/W*densityX),0,densityX-1);
+  const gy=clamp(Math.floor(a.y/H*densityY),0,densityY-1);
+  density[gx+gy*densityX]++;
+  if(a.x<left||a.x>right||a.y<top||a.y>bottom)continue;
+  inView++;keep(a,rank(a.id));
  }
- if(newestVisible&&!visible.includes(newestVisible)&&visible.length)visible[visible.length-1]=newestVisible;
+ const visible=heap.map(o=>o.a).sort((a,b)=>a.id-b.id);
  const creatures=visible.map(a=>{
-  const morph=G7.phenotype(a.g.bio,a.maturity);
-  const personality=S9.agent(a);
+  const morph=G7.phenotype(a.g.bio,a.maturity),personality=S9.agent(a);
   return{id:a.id,x:a.x,y:a.y,heading:a.angle,gen:a.gen,clan:a.clan,
    name:personality.name,goal:personality.goal,temperament:personality.temperament,
    color:morph.color,segments:morph.segments,eyes:morph.eyes,
    limbs:morph.appendages,energy:a.energy,geneticParts:morph.geneticComplexity,
-   maturity:a.maturity,nodes:morph.nodes.slice(0,60)};
+   maturity:a.maturity,nodes:morph.nodes.slice(0,camera.zoom<2?28:60)};
  });
  const sampleCount=Math.min(agents.length,640),sample=new Uint8Array(sampleCount*4);
  for(let k=0;k<sampleCount;k++){
@@ -711,14 +731,14 @@ function render(){
  birthMarks=birthMarks.filter(b=>clock-b.at<4200);
  postMessage({type:'frame',metrics:{...metrics(),inView,displayed:creatures.length,
    births:sexualBirths+clonalBirths},camera:{...camera},
-  creatures,births:birthMarks.slice(-25),sample,sites:summaries,districts,paths,craft,
+  creatures,births:birthMarks.slice(-25),density,densitySize:[densityX,densityY],sample,sites:summaries,districts,paths,craft,
   spotlight:liveSociety(selectedSociety?cities[selectedSociety-1]:
    (cities.length?cities.reduce((best,c)=>((c.assets?.length||0)>(best.assets?.length||0)?c:best)):null)),
   messages:messages.slice(0,35),discoveries:inventions.slice(-28).reverse(),specimens,
   events:milestones.slice(0,14),clans:clans.map(c=>({id:c.id,name:c.name,hue:c.hue,
    people:c.members,knowledge:bits(c.knowledge),inventions:c.inventions.length,
    cities:c.cities.length,languageAge:c.languageAge,parentCulture:c.parentCulture}))},
-  [sample.buffer]);
+  [sample.buffer,density.buffer]);
 }
 function saveSnapshot(){
  return {
