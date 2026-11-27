@@ -155,7 +155,7 @@ function drawMap(){
  }
  const ranked=[...sites].sort((a,b)=>(b.level*10+b.homes*.03)-(a.level*10+a.homes*.03));
  let renderSites=sites;
- if(mode==='society'&&sites.length>68){
+ if((mode==='society'||lifeCam.zoom<2)&&sites.length>68){
   // EVERY real city contributes to a territorial district; only strongest
   // city glyphs are drawn individually to keep the map legible.
   const districts=new Map(),gridX=12,gridY=8;
@@ -171,7 +171,8 @@ function drawMap(){
    }
   }
   for(const d of districts.values()){
-   const cx=(d.x+.5)*w/gridX,cy=(d.y+.5)*h/gridY;
+   const point=coords((d.x+.5)*WW/gridX,(d.y+.5)*WH/gridY,w,h);
+   const cx=point.x,cy=point.y;
    const rx=Math.min(w/gridX*.48,4+Math.sqrt(d.homes)*1.35);
    const ry=Math.min(h/gridY*.48,4+Math.sqrt(d.homes)*.85);
    ctx.save();ctx.fillStyle='hsla('+d.hue+',55%,55%,.15)';
@@ -182,7 +183,10 @@ function drawMap(){
     ctx.fillText(d.cities+' BYAR',cx,cy+3);
    }
   }
-  renderSites=ranked.slice(0,w<600?24:55);
+  renderSites=(mode==='life'
+    ?ranked.filter(city=>{const p=coords(city.x,city.y,w,h);
+       return p.x> -40&&p.x<w+40&&p.y> -40&&p.y<h+40;})
+    :ranked).slice(0,w<600?24:55);
   if(selected&&!renderSites.some(c=>c.id===selected)){
    const chosen=sites.find(c=>c.id===selected);if(chosen)renderSites.push(chosen);
   }
