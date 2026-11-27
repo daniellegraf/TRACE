@@ -548,6 +548,18 @@ function culturalFission(){
  addEvent('culture',group.name+' bröt sig ut ur '+parent.name+' med '+migrated+' individer.',group.id);
  return true;
 }
+function liveSociety(city){
+ const data=S9.view(city,societyWorld());if(!data)return null;
+ data.citizens=data.citizens.slice(0,22).map(person=>{
+  const organism=agents[person.id-1];
+  if(!organism)return person;
+  const morph=G7.phenotype(organism.g.bio,organism.maturity);
+  return{...person,anatomy:morph.nodes.slice(0,24),color:morph.color,
+    x:organism.x,y:organism.y,eyes:morph.eyes,segments:morph.segments,
+    memory:person.memory.slice(0,5)};
+ });
+ return data;
+}
 function societyWorld(){
  return{agents,clans,cities,step,seed,nutrition,water,terrain,
   pos,foundCity,invent,addEvent,
@@ -597,7 +609,7 @@ function details(id){
   messages:messages.filter(m=>m.clan===city.clan).slice(0,16),
   resources:{...c.resources},languageWords:c.language.slice(0,15),
   history:milestones.filter(m=>m.clan===c.id).slice(0,12),
- society:S9.view(city,societyWorld())};
+ society:liveSociety(city)};
 }
 function render(){
  // FULL population is processed by the worker. The camera receives only
@@ -692,8 +704,8 @@ function render(){
  postMessage({type:'frame',metrics:{...metrics(),inView,displayed:creatures.length,
    births:sexualBirths+clonalBirths},camera:{...camera},
   creatures,births:birthMarks.slice(-25),sample,sites:summaries,districts,paths,craft,
-  spotlight:(selectedSociety?S9.view(cities[selectedSociety-1],societyWorld()):
-    (cities.length?S9.view(cities.at(-1),societyWorld()):null)),
+  spotlight:liveSociety(selectedSociety?cities[selectedSociety-1]:
+   (cities.length?cities.reduce((best,c)=>((c.assets?.length||0)>(best.assets?.length||0)?c:best)):null)),
   messages:messages.slice(0,35),discoveries:inventions.slice(-28).reverse(),specimens,
   events:milestones.slice(0,14),clans:clans.map(c=>({id:c.id,name:c.name,hue:c.hue,
    people:c.members,knowledge:bits(c.knowledge),inventions:c.inventions.length,
@@ -838,11 +850,16 @@ onmessage=event=>{
   render();
  }else if(m.type==='watchCity'){
   selectedSociety=+m.id||0;
-  const data=selectedSociety?S9.view(cities[selectedSociety-1],societyWorld()):null;
+  const data=selectedSociety?liveSociety(cities[selectedSociety-1]):null;
   postMessage({type:'societyDetail',data});
  }else if(m.type==='inspectCitizen'){
   const a=agents[(+m.id||1)-1];
-  postMessage({type:'citizenDetail',person:a?S9.citizen(a):null});
+  postMessage({type:'citizenDetail',person:a?{
+   ...S9.citizen(a),
+   parents:a.parents,genomeGenes:a.g.bio?.development?.length||0,
+   brainSize:a.g.brain.length,fitness:a.fitness,
+   body:G7.phenotype(a.g.bio,a.maturity).functions
+  }:null});
  }else if(m.type==='inspectOrganism'){
   const a=agents[(+m.id||1)-1];
   postMessage({type:'organismDetail',id:m.id,agent:a?
