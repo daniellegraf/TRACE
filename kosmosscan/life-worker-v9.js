@@ -846,8 +846,8 @@ onmessage=event=>{
  const m=event.data||{};
  if(m.type==='start'){
   if(timer!==null)clearTimeout(timer);const supplied=m.seed||((Math.random()*4294967295)>>>0);
-  setup(supplied);live=true;paused=false;last=0;clock=0;render();
-  postMessage({type:'ready',seed,baseline:125});heartbeat();
+  setup(supplied);live=true;paused=false;last=0;clock=0;
+  postMessage({type:'ready',seed,baseline:125});render();heartbeat();
  }else if(m.type==='pause'){
   paused=true;if(timer!==null){clearTimeout(timer);timer=null;}postMessage({type:'paused'});
  }else if(m.type==='resume'){
@@ -871,9 +871,9 @@ onmessage=event=>{
   try{
    if(timer!==null)clearTimeout(timer);
    restoreSnapshot(m.data);
-   live=true;paused=false;last=0;render();
+   live=true;paused=false;last=0;
    postMessage({type:'ready',seed,baseline:agents.length,restored:true});
-   heartbeat();
+   render();heartbeat();
   }catch(e){postMessage({type:'error',message:'Återställning misslyckades: '+e.message});}
  }else if(m.type==='integrity'){
   postMessage({type:'integrity',result:integrity()});
