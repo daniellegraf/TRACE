@@ -509,11 +509,11 @@ function advanceFlight(){
   f.y=mod(f.y+Math.sin(f.angle)*.28,H);
  }
 }
-function culturalFission(){
+function culturalFission(preferred=null,leader=null){
  // A new identity can form from an existing community. Individuals remain alive.
  const candidates=clans.filter(c=>c.members>=55&&c.cities.length>=1&&c.bioReadiness>4);
  if(!candidates.length)return false;
- const parent=pick(candidates),index=clans.length;
+ const parent=preferred&&candidates.some(c=>c.id===preferred.id)?preferred:pick(candidates),index=clans.length;
  const group=createClan(index);group.parentCulture=parent.id;
  group.name=lexeme().slice(0,1).toUpperCase()+lexeme()+'-'+index;
  group.hue=mod(parent.hue+between(22,110),360);
@@ -529,6 +529,7 @@ function culturalFission(){
   ideas:parent.resources.ideas*.1};
  const desired=Math.min(65,Math.max(15,Math.floor(parent.members*.1)));
  let migrated=0;const moved=[];
+ if(leader&&leader.clan===parent.id){moved.push(leader);leader.clan=index;migrated++;}
  const start=(index*137)%agents.length;
  for(let k=0;k<agents.length&&migrated<desired;k++){
   const a=agents[(start+k)%agents.length];
@@ -545,7 +546,8 @@ function culturalFission(){
  parent.resources.material=Math.max(0,parent.resources.material-group.resources.material);
  parent.resources.food=Math.max(0,parent.resources.food-group.resources.food);
  culturesFounded++;
- addEvent('culture',group.name+' bröt sig ut ur '+parent.name+' med '+migrated+' individer.',group.id);
+ addEvent('culture',(leader?S9.agent(leader).name+' ledde ett nytt samhälle: ':'Ny kultur: ')+
+ group.name+' bröt sig ut ur '+parent.name+' med '+migrated+' individer.',group.id);
  return true;
 }
 function liveSociety(city){
@@ -563,6 +565,7 @@ function liveSociety(city){
 function societyWorld(){
  return{agents,clans,cities,step,seed,nutrition,water,terrain,
   pos,foundCity,invent,addEvent,
+  fission:(c,leader)=>culturalFission(c,leader),
   buildings:()=>{buildings++;architectureEvents++;}};
 }
 function societalAction(){
@@ -570,12 +573,10 @@ function societalAction(){
  // complete buildings and culture/technology projects.
  const w=societyWorld();
  S9.step(w,Math.min(55,26+Math.floor(Math.sqrt(agents.length)/8)));
- // Rare branching from a culture with actual population, shared skills and towns.
- if(rand()<.002)culturalFission();
  // Experimental interstellar construction still requires independently
  // developed components, energy, navigation and a functioning shipyard.
  for(const c of clans){
-  if(c.cities.length&&c.tech[15]>=.31&&rand()<.016)attemptSpace(c);
+  if(c.cities.some(i=>(cities[i-1]?.shipyards||0)>0)&&c.tech[15]>=.31&&rand()<.016)attemptSpace(c);
  }
 }
 function metrics(){
